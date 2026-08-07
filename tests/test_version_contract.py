@@ -19,8 +19,8 @@ from personal_diet_pantry.data_import import _canonical_json, _validate_bundle
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = "0.9.1"
-PRODUCT_VERSION = "0.7.5.0"
+EXPECTED = "0.9.2"
+PRODUCT_VERSION = "0.7.5.2"
 PREVIOUS_EXPECTED = "0.8.28"
 PREVIOUS_PRODUCT_VERSION = "0.7.4.28"
 
@@ -91,14 +91,14 @@ def test_all_version_sources_use_the_dual_0745_contract() -> None:
     assert Version(EXPECTED)
     assert (ROOT / "RELEASE.zh-CN.md").read_text(
         encoding="utf-8"
-    ).startswith("# 食序管家（Personal Diet Pantry）v0.7.5.0\n")
+    ).startswith("# 食序管家（Personal Diet Pantry）v0.7.5.2\n")
     installation = (ROOT / "docs" / "INSTALLATION.zh-CN.md").read_text(
         encoding="utf-8"
     )
     assert EXPECTED in installation
     assert "personal-diet-pantry-0.6.1-installable.tgz" not in installation
     assert "diet_weight" in installation
-    assert (ROOT / "UPDATE-v0.7.5.0.zh-CN.md").is_file()
+    assert (ROOT / "UPDATE-v0.7.5.2.zh-CN.md").is_file()
 
 
 def test_v0740_update_document_names_core_simplification_boundaries() -> None:
@@ -279,6 +279,8 @@ def test_import_accepts_v071_through_v0746_portability_exports() -> None:
         "0.7.4.24",
         "0.7.4.27",
         "0.7.4.28",
+        "0.7.5.0",
+        "0.7.5.2",
     ):
         manifest = {
             "export_schema_version": EXPORT_SCHEMA_VERSION,
@@ -381,7 +383,7 @@ def test_v0744_core_gate_keeps_the_protected_release_behaviors() -> None:
 
     verify = (ROOT / "ci" / "verify.ps1").read_text(encoding="utf-8")
     assert "$CoreTypeScriptTests" in verify
-    assert "v0.7.5.0 core behavior gate" in verify
+    assert "v0.7.5.2 core behavior gate" in verify
     assert '"node_modules/vitest/vitest.mjs"' in verify
     assert "& node $Vitest run" in verify
     assert "& npm test -- --reporter=json" not in verify
@@ -436,7 +438,7 @@ def test_v075_rollback_restores_the_pre_migration_cold_backup() -> None:
     assert "实例停止时取得一致 SQLite 冷备份" in text
     assert "在线 `diet_system backup` 仅用于同版本恢复" in text
     assert "不能替代升级前冷备份" in text
-    assert "v0.7.5.0 新增 migration 022" in text
+    assert "v0.7.5.2 不新增 migration" in text
     assert "回退到 v0.7.4.28 时必须先恢复该备份" in text
     assert "0.7.4.6" not in text
     assert "升级前一致的 SQLite 数据库备份即可满足版本回滚条件" not in text
@@ -478,8 +480,8 @@ def test_troubleshooting_reinstalls_v075_and_names_all_seven_tools() -> None:
         encoding="utf-8"
     )
 
-    assert "适用版本：Personal Diet Pantry（食序管家）v0.7.5.0" in text
-    assert "personal-diet-pantry-0.7.5.0-installable.tgz" in text
+    assert "适用版本：Personal Diet Pantry（食序管家）v0.7.5.2" in text
+    assert "personal-diet-pantry-0.7.5.2-installable.tgz" in text
     assert "保留当前专用 `dataDir`" in text
     assert "[成套回滚流程](INSTALLATION.zh-CN.md#7-成套回滚)" in text
     assert "七类工具" in text
@@ -490,6 +492,7 @@ def test_troubleshooting_reinstalls_v075_and_names_all_seven_tools() -> None:
 
 def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
     documents = (
+        ROOT / "UPDATE-v0.7.5.2.zh-CN.md",
         ROOT / "UPDATE-v0.7.5.0.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.28.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.27.zh-CN.md",
@@ -515,6 +518,7 @@ def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
     )
 
     current_documents = {
+        "UPDATE-v0.7.5.2.zh-CN.md",
         "UPDATE-v0.7.5.0.zh-CN.md",
         "RELEASE.zh-CN.md",
         "README.md",
