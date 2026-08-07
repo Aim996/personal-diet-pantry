@@ -12,6 +12,7 @@
 - 安装流程补齐 Python 锁定依赖、外部专用 `dataDir`、插件启用、重启/重新加载、`--runtime --json` 检查、七类工具、初始化授权、`self_check` 和零业务写入验收。
 - 三套 AI 提示词可分别执行全新安装、安全更新和只读验收，并在缺少证据时停止而不是冒充成功。
 - Node.js 兼容范围与锁定 OpenClaw 依赖对齐为 `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`，不再把 Node 23 或 24.0–24.14 误标为支持。
+- 源码归档根目录从已提交 `package.json.name` 取得，因此仓库克隆成任意本地目录名都能产生相同成员路径并通过发布验证。
 
 正式资产名为 `personal-diet-pantry-0.7.4.28-installable.tgz`、`personal-diet-pantry-0.7.4.28-source.tar.gz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.4.28.zh-CN.md` 和 `SHA256SUMS`；构建目录额外保留 `GitHub文档/` 审阅树，但它不作为第六个远端资产上传。
 

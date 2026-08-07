@@ -7,8 +7,10 @@ import argparse
 from dataclasses import dataclass
 import gzip
 import io
+import json
 import os
 from pathlib import Path, PurePosixPath
+import re
 import stat
 import subprocess
 import sys
@@ -30,6 +32,7 @@ _WINDOWS_DEVICE_NAMES = frozenset(
     | {f"lpt{number}" for number in ("¹", "²", "³")}
 )
 _WINDOWS_FORBIDDEN_CHARACTERS = frozenset('?*|<>"')
+_PORTABLE_PACKAGE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 
 
 class ArchiveError(RuntimeError):
@@ -208,6 +211,11 @@ def _head_files(
     head = os.fsdecode(
         _git(package_root, "rev-parse", "--verify", "HEAD^{commit}")
     ).strip()
+    archive_root_name = _committed_package_name(
+        package_root,
+        head,
+        package_prefix,
+    )
     tree_arguments = ["ls-tree", "-r", "-z", "--full-tree", head]
     if package_prefix:
         tree_arguments.extend(("--", f":(top){package_prefix}"))
@@ -242,7 +250,7 @@ def _head_files(
         parts = _validate_member_name(name, prefix_parts)
         _reject_sensitive_tracked_member(name, parts)
         relative_parts = parts[len(prefix_parts) :]
-        archive_parts = (package_root.name, *relative_parts)
+        archive_parts = (archive_root_name, *relative_parts)
         archive_name = "/".join(archive_parts)
         if archive_name in seen:
             raise ArchiveError(
@@ -257,6 +265,34 @@ def _head_files(
         raise ArchiveError("No committed package sources were found in Git HEAD")
     tracked.sort(key=lambda item: item[0])
     return head, tracked
+
+
+def _committed_package_name(
+    package_root: Path,
+    head: str,
+    package_prefix: str,
+) -> str:
+    manifest_name = f"{package_prefix}package.json"
+    try:
+        object_id = os.fsdecode(
+            _git(
+                package_root,
+                "rev-parse",
+                "--verify",
+                f"{head}:{manifest_name}",
+            )
+        ).strip()
+        payload = json.loads(_blob(package_root, object_id).decode("utf-8-sig"))
+    except (ArchiveError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ArchiveError(
+            "Committed package.json is missing or invalid"
+        ) from error
+    name = payload.get("name") if isinstance(payload, dict) else None
+    if not isinstance(name, str) or _PORTABLE_PACKAGE_NAME.fullmatch(name) is None:
+        raise ArchiveError(
+            "Committed package.json name is missing or unsafe for an archive root"
+        )
+    return name
 
 
 def _blob(package_root: Path, object_id: str) -> bytes:
