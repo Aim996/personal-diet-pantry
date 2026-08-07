@@ -126,7 +126,7 @@ checksum 的规范值是迁移内容经 LF 换行归一化后的 SHA-256；为�
 
 ## 关联源码
 
-- 初始 schema 与迁移：`migrations/001_initial.sql` 至 `migrations/021_package_semantics_and_product_operations.sql`。
+- 初始 schema 与迁移：`migrations/001_initial.sql` 至 `migrations/022_pantry_default_provenance.sql`。
 - 连接、校验与 checksum：`python/personal_diet_pantry/database.py`。
 - 事务快照、撤销和重做：`python/personal_diet_pantry/transactions.py`。
 - 库存定向匹配与句柄复用：`python/personal_diet_pantry/inventory_matching.py`、`service.py`。

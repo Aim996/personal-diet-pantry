@@ -5,7 +5,6 @@ description: Use when a user speaks naturally about their own meals, nutritious 
 
 # Personal Diet Pantry
 
-This is the complete runtime contract; read it once when the Skill activates.
 Runtime reference reads are exactly 0: do not open `references/`, source, tests,
 schemas, databases, logs, reports, or packages. The seven typed tools and their
 results are the only business authority.
@@ -40,19 +39,19 @@ that segment with the current time. Never invent `context.now`.
 
 ## Preferred capability routes
 
-This is the preferred capability route table. Use exactly one primary route unless the table explicitly shows a two-call route.
+Use exactly one primary route.
 
 | Intent | Route |
 | --- | --- |
 | completed food or nutritious drink | `diet_meal record` |
 | uncertain but estimable food amount | `diet_meal preview_record`; later `commit_record` after pure confirmation |
-| correct a recorded meal | `diet_meal update`; later `commit_record` after preview confirmation |
+| correct a uniquely identified recorded meal | `diet_meal update` directly; ask only when the target is ambiguous |
 | cooking with eaten and stored portions | `diet_meal record_cooking` |
 | prepared leftover eaten | `diet_pantry search` → `prepared_food_handle` → `diet_meal record_prepared` |
 | plain water | `diet_water record` |
 | explicit body weight | `diet_weight record` |
 | complete pantry intake or packaged pantry intake | `diet_pantry add` |
-| pantry add completed by a supplemental fact | `diet_pantry preview_add`; later `commit_add` after pure confirmation |
+| pantry add completed by a supplemental fact | merge the fact and call `diet_pantry add` directly when the item and quantity are now clear |
 | completed pantry food or nutritious drink consumption | `diet_pantry search` → `inventory_match_handle` → `diet_meal record` |
 | non-intake product use or discard | `diet_pantry search` → `diet_pantry deduct` or `discard` |
 | inventory, expiry, or product nutrition lookup | one `diet_pantry` read |
@@ -65,11 +64,9 @@ This is the preferred capability route table. Use exactly one primary route unle
 
 Use `search` with the user's wording. Use `query` with `normalized_name` only when the canonical name is already known.
 To locate the user's original wording, use `search` with `search_text`.
-Prefer `expiry_date` for a calendar expiry date. Let the tool convert package display units.
+When the user supplies a calendar expiry date, prefer `expiry_date`. Dates are optional for ordinary pantry intake. Let the tool convert package display units.
 
 ## One-pass decision workflow
-
-Use this control flow:
 
 `event status -> requested scope -> sufficient facts -> one route -> one terminal result -> one reply`
 
@@ -83,9 +80,11 @@ Rules:
 6. A preview and its commit occur across user turns; each turn gets one call. Reuse its handle only in the same turn or live pending workflow.
 7. Stop immediately on `write_committed`, `preview_ready`, `no_op`, or `failed`.
 8. Supplemental facts are not confirmation: merge them and reassess write readiness.
-   For pantry intake, the exact safe route is `pantry supplement -> preview_add -> pure confirmation -> commit_add`.
-   If a required expiry fact was missing, ask once; after the user supplies it, send one complete
-   `preview_add` with the original package facts plus the new expiry. A confirmation such as ‘确认记上’ must call commit_add with that live handle, never a fresh `add`.
+   For pantry intake, once the food, quantity, and unit are clear, call `add` directly.
+   Production date, expiry, and storage location are optional defaults, not reasons to preview
+   or ask a follow-up. Use `preview_add` only when the food, quantity, unit, or target itself
+   remains genuinely ambiguous. A pure confirmation of that unchanged live preview may call
+   `commit_add` with the live handle, never a fresh `add`.
 9. Only a pure affirmation of the unchanged live preview may call `commit_record`.
 10. A pure query or status check authorizes reads only. “刚才记上了吗” never
     auto-fills a missing record unless the same message explicitly says to补记.
@@ -157,19 +156,12 @@ handle, query only meal candidates once and delete only a selected `meal_handle`
 never guess the latest record. If an updated record is deleted, delete its current
 meal handle rather than traversing or retrying older transaction operations.
 
-When a zero-write meal preview is waiting for confirmation, keep its workflow scoped
-to the visible current conversation:
-
-- A pure affirmation such as “确认”, “就按这个记吧”, or “记上吧” consumes the
-  unchanged live handle with exactly one `commit_record`; never turn it into a new
-  direct `record` call and never ask for a second equivalent confirmation.
-- A supplemental fact without final write authorization is not confirmation. Merge it with the
-  visible event: if still incomplete, make one replacement `preview_record` and ask once; if it
-  supplies a usable final value and says “就按…记” or “直接记录”, call direct `record` once.
-  Never commit a stale preview, repeat the question, or ask for the original sentence again.
-- A cancellation, denial, contradiction, expired handle, missing visible preview, or
-  session change cannot commit the old proposal. Keep zero writes and either stop or
-  ask the single fact needed to form a new proposal.
+Scope a zero-write meal preview to the visible conversation. A pure affirmation
+consumes its unchanged live handle with one `commit_record`; never create a fresh
+`record` or ask twice. A supplemental fact is not confirmation: merge it, replace
+the preview once if still incomplete, or record directly when it supplies a usable
+final value and explicit write authorization. Cancellation, denial, contradiction,
+expiry, missing context, or session change invalidates the preview with zero writes.
 
 Every item with nutrition uses exactly one `nutrition_basis`: `per_100g`,
 `per_100ml`, `per_serving`, or `consumed_total`. Scale exactly once. Do not put a
@@ -203,6 +195,9 @@ one numbered row per returned meal; identical-looking records remain separate.
 Never re-query or call them duplicates unless asked.
 
 ## Pantry evidence and food safety
+
+Production date and expiry are optional for ordinary pantry intake.
+When a location or expiry is absent, infer storage location from the food category, estimate expiry from the intake date, and mark both inferred facts as estimates; explicit user facts always override those defaults. Never invent or ask for a production date.
 
 An exact inventory selection is quantity evidence. Preserve the user's raw product
 wording while using the returned opaque handle. Multiple physical batches of one product are not product ambiguity; distinct products are. If distinct products
@@ -282,8 +277,9 @@ calls for that run. Do not insert a read call merely to reset the breaker.
 
 ## Body weight
 
-Body-weight writes require explicit body-weight wording or a clear weight unit in
-measurement context. A bare number without explicit body-weight wording must not create a body-weight record; make zero tool calls and ask for the unit or intent.
+Body-weight writes require explicit wording or a clear weight unit.
+A bare number without explicit body-weight wording must not create a body-weight record; ask its unit or intent with zero tool calls.
+Explicit weighing wording plus a plausible number defaults to kilograms: record it directly without asking for the unit. This covers “刚称了下106.8”, not an unexplained number.
 
 Example: `diet_weight(action="record", weight=104.6, unit="kg", status_note="空腹")`.
 测量时间由工具读取系统当前时间；`measured_at` 不是公共参数，不要根据用户文字补传时间。
@@ -301,6 +297,6 @@ with the returned `commit_handle`. Never delete from a guessed, stale, or merely
 
 Use concise Chinese. Never show tool names. Never expose those diagnostics. A public reply contains no internal identifier, path, credential, stack trace, source filename, database or transaction ID, or workflow handle. 不要显示工具名、数据库 ID、事务 ID 或工作流句柄。
 
-The only public business tools are `diet_meal`, `diet_water`, `diet_weight`, `diet_pantry`, `diet_transaction`, `diet_report`, and `diet_system`.
+Tools: `diet_meal`, `diet_water`, `diet_weight`, `diet_pantry`, `diet_transaction`, `diet_report`, `diet_system`.
 
 `references/` is development-only; runtime agents must not read or route through it.

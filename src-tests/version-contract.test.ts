@@ -8,9 +8,9 @@ describe("release version contract", () => {
   it("publishes a SemVer package version and a four-part product version", () => {
     const pkg = readJson("package.json");
     const plugin = readJson("openclaw.plugin.json");
-    expect(pkg.version).toBe("0.8.28");
-    expect(pkg.productVersion).toBe("0.7.4.28");
-    expect(plugin.version).toBe("0.8.28");
+    expect(pkg.version).toBe("0.9.0");
+    expect(pkg.productVersion).toBe("0.7.5");
+    expect(plugin.version).toBe("0.9.0");
     expect(pkg.engines.node).toBe(
       ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0",
     );

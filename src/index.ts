@@ -24,6 +24,10 @@ import {
   type DietDomain,
   type TurnIntent,
 } from "./turn-guard.js";
+import {
+  classifyDirectWrite,
+  directWriteInstruction,
+} from "./direct-write-policy.js";
 
 const domainTools = [
   {
@@ -46,7 +50,7 @@ const domainTools = [
     name: TOOL_NAMES.weight,
     label: "Diet Weight",
     description:
-      "Record body weight at trusted system time, query recent measurements and seven-day trend, or correct/delete a selected record.",
+      "Record body weight at trusted system time, query recent measurements and seven-day trend, or correct/delete a selected record. Explicit weighing wording plus a plausible unitless number defaults to kg.",
     parameters: WeightParametersSchema,
   },
   {
@@ -54,7 +58,7 @@ const domainTools = [
     name: TOOL_NAMES.pantry,
     label: "Diet Pantry",
     description:
-      "Add, query, enrich with weights or nutrition, adjust, or deduct pantry inventory. Use preview_add for a complete add assembled from supplemental facts, then commit_add only after pure confirmation.",
+      "Add, query, enrich, adjust, or deduct pantry inventory. For a clear item and quantity, add directly: production and expiry dates are optional, and omitted storage/expiry use marked backend estimates. Preview only a genuinely ambiguous item or quantity.",
     parameters: PantryParametersSchema,
   },
   {
@@ -1765,19 +1769,24 @@ export function normalizeToolPayload(
         ),
       };
     }
-    const expiryError = expiryChoiceError(normalized);
-    if (expiryError !== undefined) {
-      return {
-        payload: normalized,
-        error: invalidExpiryInputError(
-          expiryError.field,
-          expiryError.reason,
-        ),
-      };
+    if ("expires_at" in normalized || "expiry_date" in normalized) {
+      const expiryError = expiryChoiceError(normalized);
+      if (expiryError !== undefined) {
+        return {
+          payload: normalized,
+          error: invalidExpiryInputError(
+            expiryError.field,
+            expiryError.reason,
+          ),
+        };
+      }
     }
     legacyPackageFields.forEach((field) => delete normalized[field]);
     if (normalized.added_at === undefined) {
-      normalized.added_at = new Date().toISOString();
+      normalized.added_at =
+        typeof requestContext.now === "string"
+          ? requestContext.now
+          : new Date().toISOString();
     }
     if (normalized.source_text === undefined) {
       normalized.source_text = `OpenClaw pantry add: ${normalized.food_name} ${normalized.quantity} ${normalized.unit}`;
@@ -2296,6 +2305,14 @@ function registerTurnGuardHooks(api: OpenClawPluginApi): void {
         appendContext:
           "[Private diet routing] This is a pure confirmation of the unchanged live preview. Use only that visible live preview and its existing commit handle, then call the matching commit action exactly once: diet_meal commit_record or diet_pantry commit_add. Do not call record or add to create a new write, do not rebuild the preview, and do not ask for another equivalent confirmation. If no unchanged live preview and handle are visible in this conversation, make zero writes and ask for the minimum missing fact.",
       };
+    }
+    const directWriteDecision = classifyDirectWrite(event.prompt);
+    const directWriteRouting = directWriteInstruction(directWriteDecision);
+    if (
+      directWriteRouting !== undefined &&
+      (intent.directWrite === true || directWriteDecision.kind === "clarify")
+    ) {
+      return { appendContext: directWriteRouting };
     }
     if (intent.finalizedSupplementalWrite === true) {
       return {

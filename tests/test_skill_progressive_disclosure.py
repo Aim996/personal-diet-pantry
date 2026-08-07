@@ -73,7 +73,7 @@ def test_progressive_split_preserves_critical_behavior_contracts() -> None:
         "do not preflight",
         "reuse the returned handle",
         "one aggregate report call",
-        "preferred capability route",
+        "Preferred capability routes",
         "verified equivalent capability",
         "normalized arguments",
         "diet_pantry search",
@@ -86,8 +86,8 @@ def test_progressive_split_preserves_critical_behavior_contracts() -> None:
         "validated handle and exact amount bind the meal write and pantry deduction",
         "Missing label nutrients remain unknown",
         "Never add a model estimate only to make a write pass",
-        "pantry supplement -> preview_add -> pure confirmation -> commit_add",
-        "confirmation such as ‘确认记上’ must call commit_add",
+        "Production date and expiry are optional for ordinary pantry intake",
+        "explicit user facts always override those defaults",
     ):
         assert phrase in bundle
 

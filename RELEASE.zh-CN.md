@@ -1,50 +1,38 @@
-# 食序管家（Personal Diet Pantry）v0.7.4.28
+# 食序管家（Personal Diet Pantry）v0.7.5
 
-食序管家是一套面向单个 OpenClaw 用户、本地优先的饮食、营养、饮水、体重与家庭食材管理 Skill。本版产品版本为 `0.7.4.28`，npm/OpenClaw/Python 技术包版本为 `0.8.28`。
+食序管家是一套面向单个 OpenClaw 用户、本地优先的饮食、饮水、体重与家庭食材管理 Skill。产品版本为 `0.7.5`，npm/OpenClaw/Python 技术包版本为 `0.9.0`。
 
-## 发布状态
+## 当前状态
 
-这是公开正式版 Release Notes。标签为 `v0.7.4.28`，固定页面为 <https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28>。发布只提供代码与制品，不会部署、安装、启用、配置或重启任何用户实例。
+这是本地开发候选说明，不代表 Git Tag、GitHub Release、路由器安装或真实数据验收已经完成。只有完整测试、敏感信息扫描、可复现构建和人工批准全部通过后，才可创建 `v0.7.5` Release；发布也不会自动部署到任何 OpenClaw 实例。
 
-## 本版变化
+## 核心变化
 
-- 把公开仓库、README、安装手册、升级/回滚说明、AI 操作提示词与正式 GitHub Release 对齐。
-- 普通用户和其他智能体可以从固定 Release 下载可安装包和 SHA256SUMS，校验后通过 OpenClaw `npm-pack:` 安装。
-- 安装流程补齐插件启用、外部 `dataDir`、运行时七类工具检查、用户明确授权初始化、`self_check`、零业务写入验收和失败回滚。
-- Release 同时提供可安装包、源码快照、manifest、测试摘要和 SHA-256 清单。
+- 明确发生且数量可执行的餐食、纯水、体重和普通入库直接执行一个对应写动作，不再进入确认死循环。
+- “一点、一些、几口、几粒、一小把”等开放份量仍保持零写入预览；没有可信范围时只问一个具体问题。
+- 玉米等有不可食部分的自然单位保留 `1个`，营养依据明确写为可食部估算；唯一同会话餐食的明确修正直接原子更新。
+- 明确称重语境中的无单位合理数值默认 kg；孤立数字不写体重。
+- 普通入库不再强制生产日期或保质期；后端按食品类别推断冷藏、冷冻或常温，并按入库日估算到期日。
+- 新增来源字段，明确区分用户提供、系统推断和无法追溯的旧记录。
 
-本版没有运行时业务行为变化。七类业务工具、明确摄入直接写入、开放模糊量预览、纯饮水短回执、六项两行餐食进度、库存事务、时间范围、过期推荐硬过滤和所有跨版本保护项均保持 0.7.4.27 行为。
+纯水短回执、普通餐食六项双行回执、SQLite 事实源、库存联动事务、跨时间范围查询、过期食品推荐硬过滤、查询零写入和跨域部分提交阻断保持不变。
 
 ## 发布制品
 
-正式 Release 只上传以下五个文件；`GitHub文档/` 仅保留在本地候选目录作为审阅树：
+正式 Release 只上传以下五个文件；`GitHub文档/` 仅保留在本地候选目录：
 
 | 文件 | 用途 |
 | --- | --- |
-| `personal-diet-pantry-0.7.4.28-installable.tgz` | OpenClaw npm-pack 可安装包。 |
-| `personal-diet-pantry-0.7.4.28-source.tar.gz` | 干净提交的可复核源码快照，不可交给插件安装器。 |
+| `personal-diet-pantry-0.7.5-installable.tgz` | OpenClaw npm-pack 可安装包。 |
+| `personal-diet-pantry-0.7.5-source.tar.gz` | 干净提交的源码快照，不可交给插件安装器。 |
 | `release-manifest.json` | 提交、环境、测试、可复现性和制品哈希证据。 |
-| `TEST-SUMMARY-v0.7.4.28.zh-CN.md` | 当次构建生成的测试总计、通过、跳过和失败数。 |
+| `TEST-SUMMARY-v0.7.5.zh-CN.md` | 当次构建生成的测试总计、通过、跳过和失败数。 |
 | `SHA256SUMS` | 覆盖前四个文件的 SHA-256。 |
 
-安装前必须校验 SHA-256，并且只安装可安装包：
+## 数据迁移与回退
 
-```text
-openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.4.28-installable.tgz
-openclaw plugins enable personal-diet-pantry
-openclaw gateway restart
-openclaw plugins inspect personal-diet-pantry --runtime --json
-```
+本版新增 migration 022。它给库存批次增加位置来源和到期来源，不修改旧记录已有的数量、位置或日期；旧行的新来源字段标记为 `legacy_unknown`。
 
-初始化全新账本前必须获得用户明确授权；安装验收保持零业务写入。完整步骤见 [docs/INSTALL.md](docs/INSTALL.md)。
+从 v0.7.4.28 更新前必须停止实例并创建、校验位于 `dataDir` 外的 SQLite 冷备份。回退时必须停止实例、恢复这份升级前冷备份，再安装 v0.7.4.28；不能只换回旧代码后继续使用已应用 migration 022 的数据库。在线 `diet_system backup` 仅用于同版本恢复，不能替代升级前冷备份。
 
-## 兼容、数据与回滚
-
-- 运行要求：OpenClaw `>=2026.5.17`、Node.js `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`、Python `>=3.11,<4`。
-- 本版没有新增 migration，继续使用 migrations 001–021，schema 与 v0.7.4.19 相同。
-- 安装和验收必须保留外部 `dataDir`；源码构建、CI 和候选制品不会修改用户数据。
-- 更新前停止目标实例，按[详细安装手册](docs/INSTALLATION.zh-CN.md#5-备份用途与降级冷备份)创建并校验包含已提交 WAL 数据的**升级前冷备份**。
-- 更新后独立确认七类工具，再执行 `self_check` 和只读记录数量核对。
-- 失败时停止实例并重新安装 `personal-diet-pantry-0.7.4.19-installable.tgz` 恢复技术运行状态；v0.7.4.19 已记录为真实 UAT 失败版本，不能作为产品验收通过的依据。在线 `diet_system backup` 只用于同版本恢复，不能替代升级前冷备份；数据或环境损坏时使用已校验的冷备份恢复。
-
-完整用户变化见 [v0.7.4.28 更新说明](UPDATE-v0.7.4.28.zh-CN.md)，安装和升级入口分别见 [docs/INSTALL.md](docs/INSTALL.md) 与 [docs/UPGRADING.md](docs/UPGRADING.md)。
+完整变化见 [v0.7.5 更新说明](UPDATE-v0.7.5.zh-CN.md)，安装和升级入口分别见 [docs/INSTALL.md](docs/INSTALL.md) 与 [docs/UPGRADING.md](docs/UPGRADING.md)。

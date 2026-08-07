@@ -951,7 +951,7 @@ export const PantryParametersSchema = boundedActionUnion([
     ...PantryAddSchema.properties,
     nutrition_profile: Type.Optional(NutritionProfileDraftSchema),
   }, {
-    ...ExpiryChoiceOptions,
+    not: { required: ["expiry_date", "expires_at"] },
     dependentRequired: {
       price_minor: ["currency"],
       currency: ["price_minor"],
@@ -959,7 +959,7 @@ export const PantryParametersSchema = boundedActionUnion([
     },
   }),
   actionBranch("preview_add", PantryAddSchema.properties, {
-    ...ExpiryChoiceOptions,
+    not: { required: ["expiry_date", "expires_at"] },
     dependentRequired: {
       price_minor: ["currency"],
       currency: ["price_minor"],

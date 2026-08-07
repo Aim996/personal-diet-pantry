@@ -108,6 +108,52 @@ describe("full plugin turn guard wiring", () => {
     });
   });
 
+  it.each([
+    ["刚啃了根玉米", /diet_meal record exactly once.*do not.*preview.*confirmation/is],
+    ["刚称了下106.8", /default.*kg.*diet_weight record exactly once/is],
+    ["刚买了俩苹果，放冰箱了", /diet_pantry add exactly once.*do not ask.*production.*expiry/is],
+    ["刚喝了137毫升水", /diet_water record exactly once.*water-only receipt/is],
+  ])("injects one deterministic action for an ordinary fact: %s", async (
+    prompt,
+    expected,
+  ) => {
+    const host = fakePluginApi();
+    plugin.register(host.api as never);
+    const beforeRun = host.hooks.get("before_prompt_build")!;
+
+    const result = await beforeRun(
+      { prompt, messages: [] },
+      { runId: `run-direct-${prompt}`, sessionKey: `session-direct-${prompt}` },
+    );
+
+    expect(result).toMatchObject({ appendContext: expected });
+  });
+
+  it("blocks preview when the current sentence authorizes a direct meal record", async () => {
+    const host = fakePluginApi();
+    plugin.register(host.api as never);
+    const beforeRun = host.hooks.get("before_prompt_build")!;
+    const beforeTool = host.hooks.get("before_tool_call")!;
+    const context = {
+      runId: "run-direct-corn",
+      sessionKey: "session-direct-corn",
+    };
+
+    await beforeRun({ prompt: "刚啃了根玉米", messages: [] }, context);
+
+    expect(await beforeTool(
+      {
+        toolName: "diet_meal",
+        params: { action: "preview_record", items: [] },
+        runId: context.runId,
+      },
+      { ...context, toolName: "diet_meal" },
+    )).toMatchObject({
+      block: true,
+      blockReason: expect.stringMatching(/没有授权|not authorized/i),
+    });
+  });
+
   it("routes an exact fact after a live meal preview to one replacement preview", async () => {
     const host = fakePluginApi();
     plugin.register(host.api as never);
@@ -1395,10 +1441,15 @@ describe("full plugin turn guard wiring", () => {
     const before = host.hooks.get("before_tool_call")!;
     const after = host.hooks.get("after_tool_call")!;
 
-    await beforeRun(
+    const route = await beforeRun(
       { prompt: "刚喝了一盒库存里的UAT18原味燕麦奶。" },
       { runId: "run-inventory-meal", sessionKey: "session:inventory-meal" },
     );
+    expect(route).toMatchObject({
+      appendContext: expect.stringMatching(
+        /diet_pantry search exactly once.*diet_meal record exactly once.*do not.*confirmation/is,
+      ),
+    });
     expect(await before(
       {
         toolName: "diet_pantry",

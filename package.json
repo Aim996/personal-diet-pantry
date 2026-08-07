@@ -1,7 +1,7 @@
 {
   "name": "personal-diet-pantry",
-  "version": "0.8.28",
-  "productVersion": "0.7.4.28",
+  "version": "0.9.0",
+  "productVersion": "0.7.5",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -21,7 +21,7 @@
     "pyproject.toml",
     "python/personal_diet_pantry/*.py",
     "README.md",
-    "UPDATE-v0.7.4.28.zh-CN.md",
+    "UPDATE-v0.7.5.zh-CN.md",
     "requirements.lock",
     "rules/*.yaml",
     "skills/personal-diet-pantry",

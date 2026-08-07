@@ -2,20 +2,20 @@
 
 # Personal Diet Pantry
 
-Personal Diet Pantry `v0.7.4.28` is a local-first OpenClaw skill for one person's meals, nutrition, hydration, body weight, pantry, cooking, leftovers, corrections, and reports. The technical package version is `0.8.28`. SQLite in an external `dataDir` is the formal source of truth.
+Personal Diet Pantry `v0.7.5` is a local-first OpenClaw skill for one person's meals, nutrition, hydration, body weight, pantry, cooking, leftovers, corrections, and reports. The technical package version is `0.9.0`. SQLite in an external `dataDir` is the formal source of truth.
 
 ## Current status
 
-This is a public stable release. Download the pinned assets from [GitHub Release v0.7.4.28](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28). Publishing the repository and Release does not auto-install, enable, restart, or configure any OpenClaw instance.
+This tree is a local v0.7.5 development candidate. It has not yet created a Git tag, GitHub Release, or OpenClaw deployment; build and publication do not auto-install, enable, restart, or configure any instance.
 
-This version adds no migration and keeps migrations 001–021. A pure recent-operation question such as “did that just get recorded?” now has one bounded route: one recent transaction read, with Meal, Pantry, Report, repeat Diet reads, and write replay blocked for that run. Agent-facing read text prefers the tool's local timestamps and omits a competing UTC companion when both exist, while the original structured details and UTC database values remain unchanged. Explicit conditional backfill, package/serving nutrition, corn edible-weight behavior, deterministic six-metric meal receipts, compact plain-water receipts, expired-stock filtering, the seven public tool families, forty public actions, and database transactions remain unchanged.
+This version adds migration 022 for pantry storage/expiry provenance. Clear single-domain completed facts write directly; vague portions preview once; ordinary pantry intake no longer requires production or expiry dates and receives marked backend defaults. Corn edible-weight behavior, deterministic six-metric meal receipts, compact plain-water receipts, expired-stock filtering, read-only query safety, the seven public tool families, and database transactions remain protected.
 
 ## Install boundary
 
-Verify `SHA256SUMS` and install only `personal-diet-pantry-0.7.4.28-installable.tgz` through OpenClaw's npm-pack path. The source archive is for review and reproduction, not plugin installation.
+After a formal release exists, verify `SHA256SUMS` and install only `personal-diet-pantry-0.7.5-installable.tgz` through OpenClaw's npm-pack path. The source archive is for review and reproduction, not plugin installation.
 
 ```text
-openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.4.28-installable.tgz
+openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.5-installable.tgz
 openclaw plugins enable personal-diet-pantry
 openclaw gateway restart
 openclaw plugins inspect personal-diet-pantry --runtime --json
@@ -27,7 +27,7 @@ Requirements: OpenClaw `>=2026.5.17`, Node.js `>=22.22.3 <23 || >=24.15.0 <25 ||
 
 Never point tests at an existing OpenClaw state or personal data directory. Databases, backups, exports, reports, credentials, host information, addresses, and real meal or body-weight data must not enter Git or release artifacts.
 
-Before upgrading, stop the target instance and create a verified **pre-upgrade cold backup** with the source-shipped helper. Version 0.7.4.28 keeps the v0.7.4.19 schema, so a technical code rollback can reinstall v0.7.4.19 against the preserved `dataDir`; the cold backup remains the recovery boundary for data or environment damage. Version 0.7.4.19 is a documented real-UAT failure and is not a product acceptance baseline. An online `diet_system backup` is only for same-version recovery and does not replace the pre-upgrade cold backup. See [the upgrade entry](docs/UPGRADING.md).
+Before upgrading from v0.7.4.28, stop the target instance and create a verified **pre-upgrade cold backup**. Version 0.7.5 applies migration 022; rollback requires restoring that backup before reinstalling v0.7.4.28. An online `diet_system backup` is only for same-version recovery. See [the upgrade entry](docs/UPGRADING.md).
 
 ## Development
 
@@ -42,7 +42,7 @@ python scripts/release_audit.py .
 npm pack --dry-run --json
 ```
 
-The formal builder creates an immutable directory containing `personal-diet-pantry-0.7.4.28-source.tar.gz`, `personal-diet-pantry-0.7.4.28-installable.tgz`, `release-manifest.json`, `TEST-SUMMARY-v0.7.4.28.zh-CN.md`, `SHA256SUMS`, and a local `GitHub文档/` audit tree. It refuses an existing destination and does not publish remotely. Maintainer steps are documented in [docs/RELEASING.md](docs/RELEASING.md).
+The formal builder creates an immutable directory containing `personal-diet-pantry-0.7.5-source.tar.gz`, `personal-diet-pantry-0.7.5-installable.tgz`, `release-manifest.json`, `TEST-SUMMARY-v0.7.5.zh-CN.md`, `SHA256SUMS`, and a local `GitHub文档/` audit tree. It refuses an existing destination and does not publish remotely. Maintainer steps are documented in [docs/RELEASING.md](docs/RELEASING.md).
 
 ## License
 

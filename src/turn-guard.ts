@@ -1,4 +1,5 @@
 import { TOOL_NAMES } from "./generated/tool-contracts.js";
+import { classifyDirectWrite } from "./direct-write-policy.js";
 
 export type DietDomain = keyof typeof TOOL_NAMES;
 
@@ -20,6 +21,8 @@ export type TurnIntent = {
   requiresExplicitOccurredAt?: true;
   operationStatusQuery?: true;
   finalizedSupplementalWrite?: true;
+  directWrite?: true;
+  directWriteDefaults?: Record<string, string>;
 };
 
 export type TurnAuthorization =
@@ -325,6 +328,46 @@ export function classifyTurnIntent(rawText: string): TurnIntent {
   }
   if (NO_WRITE_PATTERN.test(text)) {
     return { mode: "read_only", domains: [] };
+  }
+  if (domains.length > 1) {
+    return { mode: "multi_domain_write", domains, writeScope: "domain" };
+  }
+  const directWrite = ATOMIC_COOKING_LEFTOVER_PATTERN.test(text)
+    ? { kind: "unhandled" as const }
+    : classifyDirectWrite(text);
+  if (directWrite.kind === "compound") {
+    return {
+      mode: "multi_domain_write",
+      domains: directWrite.domains,
+      writeScope: "domain",
+    };
+  }
+  if (directWrite.kind === "direct") {
+    return {
+      mode: "single_domain_write",
+      domains: [directWrite.domain],
+      writeScope: "domain",
+      allowedActions: [directWrite.action],
+      directWrite: true,
+      ...(directWrite.defaults === undefined
+        ? {}
+        : { directWriteDefaults: directWrite.defaults }),
+      ...(directWrite.domain === "meal"
+        ? { completedConsumption: true as const }
+        : {}),
+      ...(directWrite.domain === "water" &&
+          COARSE_HISTORICAL_TIME_PATTERN.test(text)
+        ? { requiresExplicitOccurredAt: true as const }
+        : {}),
+    };
+  }
+  if (directWrite.kind === "clarify") {
+    return {
+      mode: "single_domain_write",
+      domains: [directWrite.domain],
+      writeScope: "domain",
+      allowedActions: [directWrite.action],
+    };
   }
   if (!explicitCommand && !completedFact && domains.length === 0) {
     return { mode: "ambiguous", domains: [] };

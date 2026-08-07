@@ -36,6 +36,7 @@ from . import (
     nutrition_resolution,
     nutrition_profiles,
     pantry,
+    pantry_defaults,
     policies,
     portion_evidence,
     prepared_foods,
@@ -6294,12 +6295,19 @@ def _pantry_add_arguments(
     pantry._sqlite_real(quantity, "quantity")
     unit = _required_text(value, "unit")
     added_at = _required_datetime(value, "added_at")
-    expires_at = _required_expiry_datetime(
+    supplied_expiry = _optional_expiry_datetime(
         value,
         timezone_name=timezone_name,
     )
-    if expires_at <= added_at:
-        raise ValueError("expires_at must be later than added_at")
+    defaults = pantry_defaults.resolve_pantry_defaults(
+        food_name=food_name,
+        source_text=_required_text(value, "source_text"),
+        added_at=added_at,
+        storage_location=_optional_text(
+            value.get("storage_location"), "storage_location"
+        ),
+        expires_at=supplied_expiry,
+    )
     return {
         "food_name": food_name,
         "normalized_name": normalized_name,
@@ -6308,13 +6316,13 @@ def _pantry_add_arguments(
         "added_at": added_at,
         "source_text": _required_text(value, "source_text"),
         "batch_code": _optional_text(value.get("batch_code"), "batch_code"),
-        "storage_location": _optional_text(
-            value.get("storage_location"), "storage_location"
-        ),
+        "storage_location": defaults.storage_location,
+        "storage_location_source": defaults.storage_location_source,
         "purchase_date": _optional_text(
             value.get("purchase_date"), "purchase_date"
         ),
-        "expires_at": expires_at,
+        "expires_at": defaults.expires_at,
+        "expiry_source": defaults.expiry_source,
         "price": _optional_decimal(value.get("price"), "price"),
         "price_minor": (
             _nonnegative_integer(value.get("price_minor"), "price_minor")
@@ -6459,7 +6467,10 @@ def _pantry_compact(
         "remaining_display_quantity": batch.remaining_display_quantity,
         "display_unit": batch.display_unit,
         "status": batch.status,
+        "storage_location": batch.storage_location,
+        "storage_location_source": batch.storage_location_source,
         "expires_at": batch.expires_at,
+        "expiry_source": batch.expiry_source,
         "expiry_date": (
             local_calendar_date(batch.expires_at, timezone_name)
             if batch.expires_at is not None
@@ -7818,6 +7829,18 @@ def _required_expiry_datetime(
             timezone_name,
         )
     return _required_datetime(values, "expires_at")
+
+
+def _optional_expiry_datetime(
+    values: Mapping[str, Any],
+    *,
+    timezone_name: str,
+) -> datetime | None:
+    has_timestamp = values.get("expires_at") is not None
+    has_calendar_date = values.get("expiry_date") is not None
+    if not has_timestamp and not has_calendar_date:
+        return None
+    return _required_expiry_datetime(values, timezone_name=timezone_name)
 
 
 def _datetime_value(value: Any, field: str) -> datetime:

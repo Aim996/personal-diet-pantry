@@ -224,7 +224,7 @@ def test_meal_correction_receipt_reports_net_inventory_change(
             "unit": "g",
             "remaining_quantity": "95",
             "cleared": False,
-            "storage_location": "pantry",
+            "storage_location": "常温",
             "prepared": False,
         }
     ]

@@ -236,7 +236,7 @@ def test_v073_recovery_and_inventory_rules_are_explicit() -> None:
     for phrase in (
         "Multiple physical batches of one product are not product ambiguity",
         "Let the tool convert package display units",
-        "Prefer `expiry_date`",
+        "prefer `expiry_date`",
         "Never repeat an unchanged failure fingerprint",
     ):
         assert phrase in skill

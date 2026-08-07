@@ -377,7 +377,7 @@ describe("trusted turn write guard", () => {
     expect(intent).toMatchObject({
       mode: "single_domain_write",
       domains: ["meal"],
-      allowedActions: ["record", "preview_record"],
+      allowedActions: ["record"],
       completedConsumption: true,
     });
     expect(authorizeTurnTool(intent, "diet_pantry", {
@@ -698,7 +698,7 @@ describe("trusted turn write guard", () => {
     expect(intent).toMatchObject({
       mode: "single_domain_write",
       domains: ["meal"],
-      allowedActions: ["record", "preview_record"],
+      allowedActions: ["record"],
     });
   });
 
