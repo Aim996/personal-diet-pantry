@@ -144,7 +144,7 @@ def test_failed_012_rolls_back_both_columns(
     assert "confirmed_at" not in columns
 
 
-def test_current_schema_records_twenty_one_migrations(
+def test_current_schema_records_twenty_two_migrations(
     tmp_path: Path,
 ) -> None:
     connection = database.connect_database(tmp_path / "current.sqlite")
@@ -156,4 +156,4 @@ def test_current_schema_records_twenty_one_migrations(
     finally:
         connection.close()
 
-    assert count == 21
+    assert count == 22

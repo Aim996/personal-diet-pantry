@@ -36,11 +36,13 @@ def test_main_workflow_contains_generalized_time_estimation_and_budget_contracts
         SKILL_ROOT / "references" / "tool-budget-and-recovery.md"
     ).read_text(encoding="utf-8")
 
-    assert "event status -> requested scope -> sufficient facts -> one route" in main
-    assert "negative, planned, hypothetical, or cancelled" in main
-    assert "examples are tests, not a closed runtime keyword list" in main
+    assert "先判断这些事实" in main
+    assert "否定、没发生、未来计划和他人行为优先于" in main
+    assert "示例只是帮助理解，不是封闭短语表" in main
+    assert "普通正向输入由智能体" in main
+    assert "Use exactly one primary route" not in main
     assert "Runtime reference reads are exactly 0" in main
-    assert "Never use Exec, Shell, SQL, Memory Search, file traversal" in main
+    assert "不得使用 Exec、Shell、SQL、Memory Search、文件遍历" in main
     assert "all intake domains carried by `diet_meal` in that interval" in time_scope
     assert "Asia/Shanghai" in time_scope
     assert "one combined preview" in estimation

@@ -88,6 +88,8 @@ class PantryBatch:
     weight_basis: str | None
     weight_source: str | None
     weight_confidence: str | None
+    storage_location_source: str
+    expiry_source: str
     version: int
 
     @property
@@ -157,6 +159,8 @@ def add_batch(
     base_quantity_per_display_unit: Decimal | None = None,
     package_hierarchy: Sequence[Mapping[str, Any]] | None = None,
     aliases: Mapping[str, str] | None = None,
+    storage_location_source: str = "user",
+    expiry_source: str = "user",
 ) -> PantryBatch:
     """Add one positive batch and its matching ``add`` movement atomically."""
 
@@ -190,6 +194,8 @@ def add_batch(
             base_quantity_per_display_unit=base_quantity_per_display_unit,
             package_hierarchy=package_hierarchy,
             aliases=aliases,
+            storage_location_source=storage_location_source,
+            expiry_source=expiry_source,
         ),
     )
     return result.value
@@ -232,6 +238,8 @@ def _add_batch_record_in_context(
     base_quantity_per_display_unit: Decimal | None = None,
     package_hierarchy: Sequence[Mapping[str, Any]] | None = None,
     aliases: Mapping[str, str] | None = None,
+    storage_location_source: str = "user",
+    expiry_source: str = "user",
 ) -> tuple[int, PantryBatch]:
     """Validate and add one batch, retaining its identity inside the domain layer."""
 
@@ -335,6 +343,16 @@ def _add_batch_record_in_context(
             if normalized_package is not None
             and normalized_package.package_hierarchy
             else None
+        ),
+        storage_location_source=_provenance(
+            storage_location_source,
+            "storage_location_source",
+            {"user", "inferred", "legacy_unknown"},
+        ),
+        expiry_source=_provenance(
+            expiry_source,
+            "expiry_source",
+            {"user", "estimated", "legacy_unknown"},
         ),
     )
     return int(row["id"]), _batch(row)
@@ -946,7 +964,7 @@ def _selected_rows(
     else:
         clauses.append("status IN ('active', 'opened', 'thawed')")
         if selector == BatchSelector.COLD_STORAGE:
-            clauses.append("lower(COALESCE(storage_location, '')) IN ('fridge', 'refrigerator', 'refrigerated', 'cold storage')")
+            clauses.append("lower(COALESCE(storage_location, '')) IN ('fridge', 'refrigerator', 'refrigerated', 'cold storage', '冷藏', '冰箱', '保鲜')")
         elif selector == BatchSelector.NEWEST:
             order = "added_at DESC, id DESC"
     if expected_unit is not None:
@@ -1091,8 +1109,17 @@ def _batch(row: sqlite3.Row) -> PantryBatch:
         row["weight_basis"],
         row["weight_source"],
         row["weight_confidence"],
+        row["storage_location_source"],
+        row["expiry_source"],
         row["version"],
     )
+
+
+def _provenance(value: str, field: str, allowed: set[str]) -> str:
+    normalized = _required_text(value, field)
+    if normalized not in allowed:
+        raise PantryValidationError(f"{field} is invalid")
+    return normalized
 
 
 def _weight_metadata(

@@ -47,9 +47,8 @@ describe("trusted turn write guard", () => {
     );
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
+      mode: "agent_directed",
       domains: [],
-      writeScope: "create",
     });
     expect(authorizeTurnTool(intent, "diet_meal", {
       action: "record",
@@ -77,19 +76,18 @@ describe("trusted turn write guard", () => {
     }
   });
 
-  it("allows one explicit single-domain write", () => {
+  it("lets the agent choose a safe create and still blocks destructive actions", () => {
     const intent = classifyTurnIntent("我吃了一个玉米。");
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
-      domains: ["meal"],
+      mode: "agent_directed",
+      domains: [],
     });
     expect(authorizeTurnTool(intent, "diet_meal", { action: "record" })).toEqual({
       allowed: true,
     });
-    expect(authorizeTurnTool(intent, "diet_water", { action: "record" })).toMatchObject({
-      allowed: false,
-      code: "DOMAIN_NOT_AUTHORIZED",
+    expect(authorizeTurnTool(intent, "diet_water", { action: "record" })).toEqual({
+      allowed: true,
     });
     expect(authorizeTurnTool(intent, "diet_meal", {
       action: "delete",
@@ -100,22 +98,19 @@ describe("trusted turn write guard", () => {
     });
   });
 
-  it("binds the real-world shorthand '记一个玉米' to meal only", () => {
+  it("does not bind the real-world shorthand '记一个玉米' to a plugin-selected domain", () => {
     const intent = classifyTurnIntent("记一个玉米。");
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
-      domains: ["meal"],
+      mode: "agent_directed",
+      domains: [],
     });
     expect(authorizeTurnTool(intent, "diet_meal", {
       action: "record",
     })).toEqual({ allowed: true });
     expect(authorizeTurnTool(intent, "diet_pantry", {
       action: "add",
-    })).toMatchObject({
-      allowed: false,
-      code: "DOMAIN_NOT_AUTHORIZED",
-    });
+    })).toEqual({ allowed: true });
   });
 
   it("limits bare confirmation to a handle-bound commit", () => {
@@ -239,15 +234,28 @@ describe("trusted turn write guard", () => {
   });
 
   it.each([
-    ["两盒燕麦奶，每盒250ml，放冰箱。", "pantry", "diet_pantry", "add"],
-    ["刚喝了500ml水。", "water", "diet_water", "record"],
-    ["今早体重107.1公斤。", "weight", "diet_weight", "record"],
-    ["吃个玉米。", "meal", "diet_meal", "record"],
+    ["两盒燕麦奶，每盒250ml，放冰箱。", "diet_pantry", "add"],
+    ["刚喝了500ml水。", "diet_water", "record"],
+    ["今早体重107.1公斤。", "diet_weight", "record"],
+    ["吃个玉米。", "diet_meal", "record"],
+  ])("leaves a normal %s create agent-directed", (text, toolName, action) => {
+    const intent = classifyTurnIntent(text);
+
+    expect(intent).toMatchObject({
+      mode: "agent_directed",
+      domains: [],
+    });
+    expect(authorizeTurnTool(intent, toolName, { action })).toEqual({
+      allowed: true,
+    });
+  });
+
+  it.each([
     ["把目标改成1900千卡。", "system", "diet_system", "update_goals"],
     ["这盒奶开封了。", "pantry", "diet_pantry", "open"],
     ["冰箱那盒坏豆花我丢了。", "pantry", "diet_pantry", "discard"],
     ["每日热量目标设为1900。", "system", "diet_system", "update_goals"],
-  ])("keeps a normal %s write usable", (text, domain, toolName, action) => {
+  ])("keeps a protected %s write on its safety contract", (text, domain, toolName, action) => {
     const intent = classifyTurnIntent(text);
 
     expect(intent).toMatchObject({
@@ -375,9 +383,8 @@ describe("trusted turn write guard", () => {
     const intent = classifyTurnIntent("刚喝了一盒库存里的酸奶。");
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
-      domains: ["meal"],
-      allowedActions: ["record", "preview_record"],
+      mode: "agent_directed",
+      domains: [],
       completedConsumption: true,
     });
     expect(authorizeTurnTool(intent, "diet_pantry", {
@@ -393,7 +400,7 @@ describe("trusted turn write guard", () => {
       inventory_match_handle: "wfh_abcdefghijklmnopqrstuv",
     })).toMatchObject({
       allowed: false,
-      code: "DOMAIN_NOT_AUTHORIZED",
+      code: "WRITE_NOT_AUTHORIZED",
     });
   });
 
@@ -486,22 +493,22 @@ describe("trusted turn write guard", () => {
     },
   );
 
-  it("does not guess an unnamed 250ml drink as a meal or current-time water write", () => {
+  it("leaves an unnamed 250ml drink for agent clarification rather than plugin routing", () => {
     const intent = classifyTurnIntent("早上喝了250ml。");
 
-    expect(intent).toEqual({ mode: "ambiguous", domains: [] });
+    expect(intent).toEqual({ mode: "agent_directed", domains: [] });
     expect(authorizeTurnTool(intent, "diet_water", { action: "record" }))
-      .toMatchObject({ allowed: false, code: "WRITE_NOT_AUTHORIZED" });
+      .toEqual({ allowed: true });
     expect(authorizeTurnTool(intent, "diet_meal", { action: "record" }))
-      .toMatchObject({ allowed: false, code: "WRITE_NOT_AUTHORIZED" });
+      .toEqual({ allowed: true });
   });
 
   it("requires a resolved point in time for a named coarse historical water fact", () => {
     const intent = classifyTurnIntent("早上喝了250ml水，帮我记一下。");
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
-      domains: ["water"],
+      mode: "agent_directed",
+      domains: [],
       requiresExplicitOccurredAt: true,
     });
     expect(authorizeTurnTool(intent, "diet_water", {
@@ -536,16 +543,16 @@ describe("trusted turn write guard", () => {
       .not.toHaveProperty("completedConsumption", true);
   });
 
-  it("allows a zero-business-write preview for a vague continuation", () => {
+  it("lets the agent choose a zero-business-write preview for a vague continuation", () => {
     const intent = classifyTurnIntent("就十来粒吧。");
 
-    expect(intent.mode).toBe("ambiguous");
+    expect(intent.mode).toBe("agent_directed");
     expect(authorizeTurnTool(intent, "diet_meal", {
       action: "preview_record",
     })).toEqual({ allowed: true });
     expect(authorizeTurnTool(intent, "diet_meal", {
-      action: "record",
-      inventory_match_handle: "wfh_abcdefghijklmnopqrstuv",
+      action: "delete",
+      meal_handle: "wfh_abcdefghijklmnopqrstuv",
     })).toMatchObject({ allowed: false });
   });
 
@@ -588,9 +595,8 @@ describe("trusted turn write guard", () => {
     const intent = classifyTurnIntent("如果刚才没记上，就帮我补记。");
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
+      mode: "agent_directed",
       domains: [],
-      writeScope: "create",
     });
     expect(authorizeTurnTool(intent, "diet_meal", {
       action: "record",
@@ -657,9 +663,8 @@ describe("trusted turn write guard", () => {
     const intent = classifyTurnIntent("刚称了106.66公斤。");
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
-      domains: ["weight"],
-      allowedActions: ["record"],
+      mode: "agent_directed",
+      domains: [],
     });
     expect(authorizeTurnTool(intent, "diet_weight", {
       action: "record",
@@ -674,9 +679,8 @@ describe("trusted turn write guard", () => {
     );
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
-      domains: ["water"],
-      allowedActions: ["record"],
+      mode: "agent_directed",
+      domains: [],
     });
     expect(authorizeTurnTool(intent, "diet_water", {
       action: "record",
@@ -696,9 +700,8 @@ describe("trusted turn write guard", () => {
     );
 
     expect(intent).toMatchObject({
-      mode: "single_domain_write",
-      domains: ["meal"],
-      allowedActions: ["record", "preview_record"],
+      mode: "agent_directed",
+      domains: [],
     });
   });
 

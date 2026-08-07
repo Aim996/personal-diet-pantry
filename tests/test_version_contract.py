@@ -19,10 +19,10 @@ from personal_diet_pantry.data_import import _canonical_json, _validate_bundle
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = "0.8.28"
-PRODUCT_VERSION = "0.7.4.28"
-PREVIOUS_EXPECTED = "0.8.27"
-PREVIOUS_PRODUCT_VERSION = "0.7.4.27"
+EXPECTED = "0.9.1"
+PRODUCT_VERSION = "0.7.5.0"
+PREVIOUS_EXPECTED = "0.8.28"
+PREVIOUS_PRODUCT_VERSION = "0.7.4.28"
 
 
 def test_each_iteration_reads_constraints_and_registers_preserved_features() -> None:
@@ -91,14 +91,14 @@ def test_all_version_sources_use_the_dual_0745_contract() -> None:
     assert Version(EXPECTED)
     assert (ROOT / "RELEASE.zh-CN.md").read_text(
         encoding="utf-8"
-    ).startswith("# 食序管家（Personal Diet Pantry）v0.7.4.28\n")
+    ).startswith("# 食序管家（Personal Diet Pantry）v0.7.5.0\n")
     installation = (ROOT / "docs" / "INSTALLATION.zh-CN.md").read_text(
         encoding="utf-8"
     )
     assert EXPECTED in installation
     assert "personal-diet-pantry-0.6.1-installable.tgz" not in installation
     assert "diet_weight" in installation
-    assert (ROOT / "UPDATE-v0.7.4.28.zh-CN.md").is_file()
+    assert (ROOT / "UPDATE-v0.7.5.0.zh-CN.md").is_file()
 
 
 def test_v0740_update_document_names_core_simplification_boundaries() -> None:
@@ -135,8 +135,8 @@ def test_v0736_update_document_names_stabilization_and_release_boundaries() -> N
 
     migrations = sorted((ROOT / "migrations").glob("*.sql"))
     assert migrations
-    assert migrations[-1].name.startswith("021_")
-    assert not any(int(path.name.split("_", 1)[0]) > 21 for path in migrations)
+    assert migrations[-1].name.startswith("022_")
+    assert not any(int(path.name.split("_", 1)[0]) > 22 for path in migrations)
 
 
 def test_v0735_update_document_names_preservation_registration_rules() -> None:
@@ -381,7 +381,7 @@ def test_v0744_core_gate_keeps_the_protected_release_behaviors() -> None:
 
     verify = (ROOT / "ci" / "verify.ps1").read_text(encoding="utf-8")
     assert "$CoreTypeScriptTests" in verify
-    assert "v0.7.4.28 core behavior gate" in verify
+    assert "v0.7.5.0 core behavior gate" in verify
     assert '"node_modules/vitest/vitest.mjs"' in verify
     assert "& node $Vitest run" in verify
     assert "& npm test -- --reporter=json" not in verify
@@ -426,18 +426,18 @@ def test_overridable_test_dependencies_pin_audited_safe_versions() -> None:
     assert "GHSA-j3f2-48v5-ccww" not in accepted_ids
 
 
-def test_v07418_rollback_reuses_the_v07417_schema_and_keeps_a_cold_backup() -> None:
+def test_v075_rollback_restores_the_pre_migration_cold_backup() -> None:
     text = (ROOT / "docs" / "INSTALLATION.zh-CN.md").read_text(
         encoding="utf-8"
     )
 
     assert "PYTHON_BIN" not in text
     assert r".\.venv\Scripts\python.exe scripts/build_release.py" in text
-    assert "实例已停止时取得的一致 SQLite 冷备份" in text
+    assert "实例停止时取得一致 SQLite 冷备份" in text
     assert "在线 `diet_system backup` 仅用于同版本恢复" in text
     assert "不能替代升级前冷备份" in text
-    assert "v0.7.4.28 没有新增 migration" in text
-    assert "schema 与 v0.7.4.19 相同" in text
+    assert "v0.7.5.0 新增 migration 022" in text
+    assert "回退到 v0.7.4.28 时必须先恢复该备份" in text
     assert "0.7.4.6" not in text
     assert "升级前一致的 SQLite 数据库备份即可满足版本回滚条件" not in text
     assert "在线 SQLite 快照" not in text
@@ -446,9 +446,9 @@ def test_v07418_rollback_reuses_the_v07417_schema_and_keeps_a_cold_backup() -> N
     backup = text.index("scripts/cold_backup.py backup")
     verify = text.index("校验冷备份")
     rollback = text.index("## 7. 成套回滚")
-    install = text.index("personal-diet-pantry-0.7.4.19-installable.tgz", rollback)
+    install = text.index("personal-diet-pantry-0.7.4.28-installable.tgz", rollback)
     restore = text.index("scripts/cold_backup.py restore", rollback)
-    assert stop < backup < verify < rollback < install < restore
+    assert stop < backup < verify < rollback < restore < install
 
 
 def test_cold_backup_docs_use_the_fail_closed_helper() -> None:
@@ -473,13 +473,13 @@ def test_cold_backup_docs_use_the_fail_closed_helper() -> None:
         assert unsafe_fragment not in installation
 
 
-def test_troubleshooting_reinstalls_v07417_and_names_all_seven_tools() -> None:
+def test_troubleshooting_reinstalls_v075_and_names_all_seven_tools() -> None:
     text = (ROOT / "docs" / "TROUBLESHOOTING.zh-CN.md").read_text(
         encoding="utf-8"
     )
 
-    assert "适用版本：Personal Diet Pantry（食序管家）v0.7.4.28" in text
-    assert "personal-diet-pantry-0.7.4.28-installable.tgz" in text
+    assert "适用版本：Personal Diet Pantry（食序管家）v0.7.5.0" in text
+    assert "personal-diet-pantry-0.7.5.0-installable.tgz" in text
     assert "保留当前专用 `dataDir`" in text
     assert "[成套回滚流程](INSTALLATION.zh-CN.md#7-成套回滚)" in text
     assert "七类工具" in text
@@ -490,6 +490,7 @@ def test_troubleshooting_reinstalls_v07417_and_names_all_seven_tools() -> None:
 
 def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
     documents = (
+        ROOT / "UPDATE-v0.7.5.0.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.28.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.27.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.7.zh-CN.md",
@@ -514,7 +515,7 @@ def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
     )
 
     current_documents = {
-        "UPDATE-v0.7.4.28.zh-CN.md",
+        "UPDATE-v0.7.5.0.zh-CN.md",
         "RELEASE.zh-CN.md",
         "README.md",
         "README.en.md",
@@ -523,7 +524,7 @@ def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
     for path in documents:
         text = path.read_text(encoding="utf-8")
         if path.name in current_documents:
-            assert "v0.7.4.19" in text, path
+            assert "v0.7.4.28" in text, path
         elif path.name == "UPDATE-v0.7.4.7.zh-CN.md":
             assert "v0.7.4.6" in text, path
         elif path.name == "UPDATE-v0.7.4.6.zh-CN.md":
@@ -538,7 +539,10 @@ def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
             assert "v0.7.4.1" in text, path
         elif path.name == "UPDATE-v0.7.4.1.zh-CN.md":
             assert "v0.7.4.0" in text, path
-        elif path.name == "UPDATE-v0.7.4.27.zh-CN.md":
+        elif path.name in {
+            "UPDATE-v0.7.4.28.zh-CN.md",
+            "UPDATE-v0.7.4.27.zh-CN.md",
+        }:
             assert "v0.7.4.19" in text, path
         else:
             assert "v0.7.3" in text, path

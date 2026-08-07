@@ -66,6 +66,8 @@ _APPROVED_SCHEMA_BASELINES: dict[tuple[str, str], Any] = {
     ("pantry_batches", "remaining_cost_minor"): None,
     ("pantry_movements", "waste_category"): None,
     ("pantry_batches", "source_meal_id"): None,
+    ("pantry_batches", "storage_location_source"): "legacy_unknown",
+    ("pantry_batches", "expiry_source"): "legacy_unknown",
     ("meals", "total_hydration_ml"): None,
     ("meal_items", "hydration_ml"): None,
     ("meals", "source_session_key"): None,

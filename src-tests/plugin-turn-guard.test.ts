@@ -108,6 +108,50 @@ describe("full plugin turn guard wiring", () => {
     });
   });
 
+  it.each([
+    "吃了个玉米",
+    "刚喝了137毫升水",
+    "刚称了下106.8",
+    "买了两盒酸奶",
+  ])("does not prescribe a tool route for an ordinary positive fact: %s", async (prompt) => {
+    const host = fakePluginApi();
+    plugin.register(host.api as never);
+    const beforeRun = host.hooks.get("before_prompt_build")!;
+
+    const result = await beforeRun(
+      { prompt, messages: [] },
+      { runId: `run-agent-directed-${prompt}`, sessionKey: `session-agent-directed-${prompt}` },
+    );
+
+    expect(result).toBeUndefined();
+  });
+
+  it("allows the agent to choose record or preview for an ordinary meal fact", async () => {
+    const host = fakePluginApi();
+    plugin.register(host.api as never);
+    const beforeRun = host.hooks.get("before_prompt_build")!;
+    const beforeTool = host.hooks.get("before_tool_call")!;
+    const context = {
+      runId: "run-direct-corn",
+      sessionKey: "session-direct-corn",
+    };
+
+    await beforeRun({ prompt: "刚啃了根玉米", messages: [] }, context);
+
+    expect(await beforeTool(
+      {
+        toolName: "diet_meal",
+        params: { action: "preview_record", items: [] },
+        runId: context.runId,
+      },
+      { ...context, toolName: "diet_meal" },
+    )).toMatchObject({
+      params: expect.objectContaining({
+        action: "preview_record",
+      }),
+    });
+  });
+
   it("routes an exact fact after a live meal preview to one replacement preview", async () => {
     const host = fakePluginApi();
     plugin.register(host.api as never);
@@ -1395,10 +1439,11 @@ describe("full plugin turn guard wiring", () => {
     const before = host.hooks.get("before_tool_call")!;
     const after = host.hooks.get("after_tool_call")!;
 
-    await beforeRun(
+    const route = await beforeRun(
       { prompt: "刚喝了一盒库存里的UAT18原味燕麦奶。" },
       { runId: "run-inventory-meal", sessionKey: "session:inventory-meal" },
     );
+    expect(route).toBeUndefined();
     expect(await before(
       {
         toolName: "diet_pantry",

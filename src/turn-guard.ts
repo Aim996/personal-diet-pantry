@@ -7,6 +7,7 @@ export type TurnIntentMode =
   | "single_domain_write"
   | "multi_domain_write"
   | "workflow_confirmation"
+  | "agent_directed"
   | "ambiguous";
 
 export type TurnIntent = {
@@ -326,8 +327,8 @@ export function classifyTurnIntent(rawText: string): TurnIntent {
   if (NO_WRITE_PATTERN.test(text)) {
     return { mode: "read_only", domains: [] };
   }
-  if (!explicitCommand && !completedFact && domains.length === 0) {
-    return { mode: "ambiguous", domains: [] };
+  if (domains.length > 1) {
+    return { mode: "multi_domain_write", domains, writeScope: "domain" };
   }
   if (domains.length === 0) {
     if (explicitCommand) {
@@ -335,28 +336,47 @@ export function classifyTurnIntent(rawText: string): TurnIntent {
       const contextualTarget = trustedSessionTargetRequired ||
         (RECENT_CONTEXT_TARGET_PATTERN.test(text) &&
           !TARGET_DELETE_PATTERN.test(text));
-      return {
-        mode: "single_domain_write",
-        domains,
-        writeScope: TARGETED_WRITE_PATTERN.test(text) ||
-            contextualDeleteCommand ||
-            CONTEXTUAL_CORRECTION_PATTERN.test(text)
-          ? "targeted"
-          : CREATE_WRITE_PATTERN.test(text)
-          ? "create"
-          : "domain",
-        allowedActions: contextualTargetActions(text),
-        ...(contextualTarget ? { contextualTarget: true as const } : {}),
-        ...(trustedSessionTargetRequired
-          ? { requiresTrustedSessionTarget: true as const }
-          : {}),
-      };
+      if (
+        TARGETED_WRITE_PATTERN.test(text) ||
+        contextualDeleteCommand ||
+        CONTEXTUAL_CORRECTION_PATTERN.test(text)
+      ) {
+        return {
+          mode: "single_domain_write",
+          domains,
+          writeScope: "targeted",
+          allowedActions: contextualTargetActions(text),
+          ...(contextualTarget ? { contextualTarget: true as const } : {}),
+          ...(trustedSessionTargetRequired
+            ? { requiresTrustedSessionTarget: true as const }
+            : {}),
+        };
+      }
     }
-    return { mode: "ambiguous", domains };
+    return { mode: "agent_directed", domains: [] };
   }
   if (domains.length === 1) {
     const domain = domains[0];
     const allowedActions = allowedActionsFor(text, domain);
+    const protectedPositiveRoute = ATOMIC_COOKING_LEFTOVER_PATTERN.test(text) ||
+      domain === "system" ||
+      domain === "transaction" ||
+      TARGET_DELETE_PATTERN.test(text) ||
+      TARGET_UPDATE_PATTERN.test(text) ||
+      (domain === "pantry" &&
+        !allowedActions.some((action) => ["add", "preview_add"].includes(action)));
+    if (!protectedPositiveRoute) {
+      return {
+        mode: "agent_directed",
+        domains: [],
+        ...(COMPLETED_CONSUMPTION_PATTERN.test(text)
+          ? { completedConsumption: true as const }
+          : {}),
+        ...(COARSE_HISTORICAL_TIME_PATTERN.test(text)
+          ? { requiresExplicitOccurredAt: true as const }
+          : {}),
+      };
+    }
     const contextualTarget = allowedActions.includes("update") &&
       (CONTEXTUAL_CORRECTION_PATTERN.test(text) ||
         RECENT_CONTEXT_TARGET_PATTERN.test(text));
@@ -546,6 +566,14 @@ export function authorizeTurnTool(
   }
   if (intent.mode === "ambiguous" && isPreviewAction(action)) {
     return { allowed: true };
+  }
+  if (intent.mode === "agent_directed") {
+    return isContextualCreate(domain, action)
+      ? { allowed: true }
+      : denied(
+        "WRITE_NOT_AUTHORIZED",
+        "普通正向消息由智能体选择新增或预览能力；破坏性、系统或维护写入仍需明确目标和专用授权。",
+      );
   }
   if (intent.mode !== "single_domain_write") {
     return denied(

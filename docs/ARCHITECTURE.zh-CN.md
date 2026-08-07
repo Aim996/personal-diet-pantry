@@ -148,4 +148,4 @@ v0.7.3.5 构建与源码操作不会自动部署。升级前应停止目标实�
 - 原子事务及撤销/重做：`python/personal_diet_pantry/transactions.py`。
 - 剩菜成品快照：`python/personal_diet_pantry/prepared_foods.py`。
 - 定向库存搜索：`python/personal_diet_pantry/inventory_matching.py`、`nutrition_profiles.py`。
-- 数据库连接和迁移：`python/personal_diet_pantry/database.py`、`migrations/021_package_semantics_and_product_operations.sql`。
+- 数据库连接和迁移：`python/personal_diet_pantry/database.py`、`migrations/022_pantry_default_provenance.sql`。

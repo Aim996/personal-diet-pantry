@@ -1,8 +1,8 @@
 # 安装、初始化与升级手册
 
-适用产品版本：Personal Diet Pantry（食序管家）v0.7.4.28。
+适用产品版本：Personal Diet Pantry（食序管家）v0.7.5.0。
 
-包管理器、Python 包和 OpenClaw 插件元数据使用合法 SemVer 技术版本 `0.8.28`；发布文件名、导出 manifest 和用户文档使用产品版本 `0.7.4.28`。
+包管理器、Python 包和 OpenClaw 插件元数据使用合法 SemVer 技术版本 `0.9.1`；发布文件名、导出 manifest 和用户文档使用产品版本 `0.7.5.0`。
 
 本手册只说明当前源码和发布构件已经支持的本地安装流程；它不会部署、重启或配置任何既有 OpenClaw 实例。食序管家的正式事实来源是 SQLite，Markdown 报告、导出和健康报告均可由 SQLite 重新生成。
 
@@ -40,12 +40,12 @@ python -c "import yaml, tzdata; print('Python runtime dependencies available')"
 
 | 归档 | 用途 | 能否交给插件安装器 |
 | --- | --- | --- |
-| `personal-diet-pantry-0.7.4.28-installable.tgz` | 含编译后的插件、Python 运行包、锁定依赖、配置、迁移（含 021）、模板和 Skill 的 npm-compatible 安装包 | 可以，且只能使用它安装 |
-| `personal-diet-pantry-0.7.4.28-source.tar.gz` | 与发布输入对应的源码快照，用于审阅、留档和源码复现 | 不可以 |
+| `personal-diet-pantry-0.7.5.0-installable.tgz` | 含编译后的插件、Python 运行包、锁定依赖、配置、迁移（含 022）、模板和 Skill 的 npm-compatible 安装包 | 可以，且只能使用它安装 |
+| `personal-diet-pantry-0.7.5.0-source.tar.gz` | 与发布输入对应的源码快照，用于审阅、留档和源码复现 | 不可以 |
 
 `source.tar.gz` 不含编译后的 `dist/`，不能替代安装包。两种归档均不应包含 SQLite、报告、缓存、`.env`、密钥或个人数据；若发现这些内容，应停止使用该归档并重新从受控源码构建或取得发布包。
 
-正式发布目录顶层恰好包含 `personal-diet-pantry-0.7.4.28-source.tar.gz`、`personal-diet-pantry-0.7.4.28-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.4.28.zh-CN.md`、覆盖这四个文件的 `SHA256SUMS`，以及 `GitHub文档/` 文档树。该目录必须位于 Git 工作树和项目根目录之外；不要使用旧名校验文件，也不要把其他文件混入顶层。
+正式发布目录顶层恰好包含 `personal-diet-pantry-0.7.5.0-source.tar.gz`、`personal-diet-pantry-0.7.5.0-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.5.0.zh-CN.md`、覆盖这四个文件的 `SHA256SUMS`，以及 `GitHub文档/` 文档树。该目录必须位于 Git 工作树和项目根目录之外；不要使用旧名校验文件，也不要把其他文件混入顶层。
 
 从干净 Git 提交生成正式制品时，发布脚本先执行完整门禁，再各生成两次源码包和可安装包并比较哈希与成员清单。它不会安装、启用、配置或重启生产 OpenClaw：
 
@@ -81,10 +81,10 @@ openclaw config set plugins.entries.personal-diet-pantry.config.dataDir "/absolu
 
 ## 4. 安装、初始化与首次验证
 
-1. 取得 `personal-diet-pantry-0.7.4.28-installable.tgz`，并将命令中的绝对路径替换为该文件的真实位置。
+1. 取得 `personal-diet-pantry-0.7.5.0-installable.tgz`，并将命令中的绝对路径替换为该文件的真实位置。
 
    ```bash
-   openclaw plugins install npm-pack:/absolute/path/personal-diet-pantry-0.7.4.28-installable.tgz
+   openclaw plugins install npm-pack:/absolute/path/personal-diet-pantry-0.7.5.0-installable.tgz
    openclaw plugins enable personal-diet-pantry
    ```
 
@@ -102,75 +102,44 @@ openclaw config set plugins.entries.personal-diet-pantry.config.dataDir "/absolu
 
 ## 5. 备份用途与降级冷备份
 
-v0.7.4.28 没有新增 migration，与 v0.7.4.19 共用 migration 001–021，因此直接代码回退只需保留 v0.7.4.19 可安装包并在实例停止时替换版本。0.7.4.19 是技术回退包，不是产品 UAT 通过基线。仍应保留**实例已停止时取得的一致 SQLite 冷备份**，用于安装损坏、磁盘故障或数据库异常，而不是为了逆转 schema。
+v0.7.5.0 新增 migration 022。更新前必须在实例停止时取得一致 SQLite 冷备份；回退到 v0.7.4.28 时必须先恢复该备份，不能让旧代码继续使用已迁移数据库。在线 `diet_system backup` 仅用于同版本恢复，不能替代升级前冷备份。
 
-在线 `diet_system backup` 仅用于同版本恢复，不能替代升级前冷备份。在线快照仍适合 v0.7.4.28 日常恢复；调用 restore 后应运行 `self_check`。v0.7.4.28 schema 与 v0.7.4.19 相同，但冷备份仍是数据受损时的独立恢复证据。
-
-### 5.1 创建并校验升级前冷备份
-
-先按目标实例已有的运维流程**停止目标实例**，并由操作者确认插件进程已经退出；本项目不虚构宿主专属的停止命令，也不尝试检测进程状态。使用受信 v0.7.4.28 源码包中的 `scripts/cold_backup.py`，通过 Python 标准库 `sqlite3` backup API 把 `diet.sqlite` 备份到 `dataDir` 外、权限受控且尚不存在的路径。该 API 会把尚未 checkpoint 的已提交 WAL 数据纳入一致快照，而不是直接复制单个主数据库文件。
-
-Windows PowerShell 示例（把解释器、helper、源库和目标路径替换为本机实际绝对路径；目标目录必须存在，目标文件必须尚不存在）：
+先停止目标实例并确认没有进程继续写入。使用受信 v0.7.5.0 源码中的 `scripts/cold_backup.py`，把 `diet.sqlite` 备份到 `dataDir` 外、权限受控且尚不存在的路径。helper 使用 Python 标准库 `sqlite3` backup API，会包含尚未 checkpoint 的已提交 WAL 数据，拒绝覆盖目标，并在成功前执行完整性检查。若操作系统阻止清理，错误会明确提示“未完成目标可能保留”，此时必须换新路径，不得覆盖重试。
 
 ```powershell
-& 'C:\actual\python.exe' 'C:\trusted-v0.7.4.28-source\scripts\cold_backup.py' backup --source 'C:\actual\personal-diet-pantry-data\diet.sqlite' --destination 'D:\controlled-backups\diet.sqlite.pre-v0.7.4.28'
+& 'C:\actual\python.exe' 'C:\trusted-v0.7.5.0-source\scripts\cold_backup.py' backup --source 'C:\actual\personal-diet-pantry-data\diet.sqlite' --destination 'D:\controlled-backups\diet.sqlite.pre-v0.7.5.0'
 ```
-
-POSIX 示例（同样替换为实际绝对路径，并使用实例真实的 Python 3 解释器）：
 
 ```bash
-/actual/python3 /trusted-v0.7.4.28-source/scripts/cold_backup.py backup --source /actual/personal-diet-pantry-data/diet.sqlite --destination /controlled-backups/diet.sqlite.pre-v0.7.4.28
+/actual/python3 /trusted-v0.7.5.0-source/scripts/cold_backup.py backup --source /actual/personal-diet-pantry-data/diet.sqlite --destination /controlled-backups/diet.sqlite.pre-v0.7.5.0
 ```
 
-helper 以独占创建方式拒绝覆盖已有目标及其 SQLite sidecar，并在成功前对生成的数据库执行 `PRAGMA quick_check`；任一前置条件、SQLite 复制或完整性检查失败都会以非零状态停止。helper 会清理本次创建的未完成文件；若 Windows 文件锁等操作系统错误阻止清理，错误会明确指出**未完成目标可能保留**，此时不得覆盖或直接重试该路径。只有命令输出已验证的 SHA-256 时，才算完成校验冷备份。记录备份路径与 SHA-256，但不要把路径、哈希或数据内容公开到 issue、日志或文档中。
+只有 helper 输出已验证 SHA-256 才算完成校验冷备份。记录路径和哈希，但不要把它们或数据内容公开到 issue、日志或文档中。
 
 ## 6. 升级到目标版本
 
-升级必须把软件包和数据视为一套状态。v0.7.4.28 不会自动部署、停止或重启实例。升级到产品版本 v0.7.4.28 时按以下顺序执行：
+1. 停止实例，创建并校验升级前冷备份。
+2. 保留原外部 `dataDir`，通过 npm-pack 安装 `personal-diet-pantry-0.7.5.0-installable.tgz`。
+3. 启动或重新加载插件；服务应应用并记录 migration 022。
+4. 独立核验七类工具，运行 `self_check`，再做目标、进度和定向库存的只读核对。
+5. 确认旧记录数量不变，旧库存已有位置和到期时间不变，新增来源字段为 `legacy_unknown`。
 
-1. 确认直接回退所需的 `personal-diet-pantry-0.7.4.19-installable.tgz` 可读且来自受信发布位置。
-2. 按第 5 节停止实例，创建并校验升级前冷备份；在线 `diet_system backup` 不能代替这一步。
-3. 保持实例停止，使用目标版本的 `personal-diet-pantry-0.7.4.28-installable.tgz` 通过 npm-pack 安装路径安装，不要把 `source.tar.gz` 交给安装器。
-4. 保留原有 `dataDir` 映射。不要为了“清理安装”切换到新数据目录，否则会看到空数据库而非原有记录。
-5. 按实例既有流程启动或重新加载插件；普通本机网关可使用 `openclaw gateway restart`。本版没有新增 migration，服务只会确认既有 migration 001–021。
-6. 执行 `openclaw plugins inspect personal-diet-pantry --runtime --json` 核验七类工具，再调用 `diet_system` 的 `self_check`，确认所有必需检查通过。
-7. 仅做只读验证：调用定向 `diet_pantry search` 检查候选上限、`nutrition_mode` 和 `inventory_match_handle`，调用 `diet_system query_goals` 检查 `goal_source` 与 `confirmed_at`，再调用 `diet_report progress` 检查进度。需要更深的数据库验证时，调用 `diet_system` 的 `validate_database`。
-
-本版保留并验证迁移 001–021，没有新增 migration。迁移 020 增加定向库存搜索索引和 `pantry_product_reference`；沿用 v0.7.3 已有的迁移 021，为库存批次加入包装展示数量、展示单位、单包装基础数量和包装层级，并加入熟食精确引用所需的 `prepared_food_reference`。营养档案与批次快照仍规范化保存在同一个 `diet.sqlite`，不会把营养复制进库存批次。已有餐食、饮水、体重、库存、目标和预览保持原值；升级不会自动创建库存、导入或删除数据、补录历史营养、调用模型、擅自改写历史估算或替用户确认目标。
+Migration 022 只增加 `storage_location_source` 和 `expiry_source`。新记录可标记用户事实或系统默认，升级不会自动创建库存、重算到期日、补录营养或改写旧值。
 
 ## 7. 成套回滚
 
-若升级后的自检或只读验证失败，先停止实例。直接代码回滚需要：
+v0.7.4.28 不认识 migration 022，禁止仅替换程序包后继续使用已升级数据库。
 
-1. 安装 `personal-diet-pantry-0.7.4.19-installable.tgz`；
-2. 保留现有 `dataDir`，因为 v0.7.4.28 没有新增 migration，schema 与 v0.7.4.19 相同；
-3. 启动后运行 `self_check` 和只读查询确认状态。
-
-只有数据库本身异常、安装过程破坏文件或需要恢复升级前数据状态时，才使用第 5 节 helper 创建并校验的升级前一致 SQLite 冷备份。
-
-保持实例停止，使用同一 helper 恢复。恢复命令不会检测进程状态，必须由操作者先确认实例已经停止。它会先验证冷备份，并在活动目录中创建、校验临时恢复候选；随后以拒绝覆盖的方式把当前 `diet.sqlite`、`diet.sqlite-wal`、`diet.sqlite-shm` 和 `diet.sqlite-journal`（若存在）分别移到指定隔离基名及其 `-wal`/`-shm`/`-journal` 文件，最后才替换活动数据库。任一前置、完整性或目标已存在检查失败都会在替换前停止；隔离中途失败会尝试把已经移动的文件原路恢复，若操作系统也阻止回滚则会明确报错并保持实例停止。不要删除隔离副本或覆盖唯一备份。
-
-PowerShell 数据库恢复示例：
+1. 停止实例并隔离当前已迁移的 `dataDir`。
+2. 使用同一 helper 执行 `scripts/cold_backup.py restore`，验证并恢复升级前冷备份；恢复命令不会检测进程状态，必须由操作者确认实例已停止。它会成套隔离 `diet.sqlite`、`diet.sqlite-wal`、`diet.sqlite-shm` 和 `diet.sqlite-journal`，并拒绝覆盖隔离目标。
+3. 安装已校验的 `personal-diet-pantry-0.7.4.28-installable.tgz`。
+4. 启动后核对七类工具、`self_check`、migration 最大版本 021 和关键记录数量。
 
 ```powershell
-& 'C:\actual\python.exe' 'C:\trusted-v0.7.4.28-source\scripts\cold_backup.py' restore --backup 'D:\controlled-backups\diet.sqlite.pre-v0.7.4.28' --active 'C:\actual\personal-diet-pantry-data\diet.sqlite' --quarantine 'C:\actual\personal-diet-pantry-data\diet.sqlite.v0.7.4.28-quarantine'
+& 'C:\actual\python.exe' 'C:\trusted-v0.7.5.0-source\scripts\cold_backup.py' restore --backup 'D:\controlled-backups\diet.sqlite.pre-v0.7.5.0' --active 'C:\actual\personal-diet-pantry-data\diet.sqlite' --quarantine 'C:\actual\personal-diet-pantry-data\diet.sqlite.v0.7.5.0-quarantine'
 ```
 
-POSIX 数据库恢复示例：
-
-```bash
-/actual/python3 /trusted-v0.7.4.28-source/scripts/cold_backup.py restore --backup /controlled-backups/diet.sqlite.pre-v0.7.4.28 --active /actual/personal-diet-pantry-data/diet.sqlite --quarantine /actual/personal-diet-pantry-data/diet.sqlite.v0.7.4.28-quarantine
-```
-
-恢复数据并校验一致后，再安装 v0.7.4.19 可安装包恢复技术运行状态：
-
-```bash
-openclaw plugins install npm-pack:/absolute/path/personal-diet-pantry-0.7.4.19-installable.tgz
-```
-
-随后按实例既有运维流程启动 v0.7.4.19，调用 `diet_system self_check`，并用 `diet_pantry query` 和 `diet_report progress` 做只读确认。不得在实例仍运行时覆盖插件或数据库。该回退只用于恢复运行和保护数据，不能覆盖 v0.7.4.19 已有的真实 UAT 失败结论。
-
-绝不能通过删除迁移文件、修改迁移 SQL、直接编辑 SQLite 或手工更改 `schema_migrations` 来“降级”。发生 migration checksum 不匹配时，请停止写入并按[故障排除](TROUBLESHOOTING.zh-CN.md#迁移校验和不匹配)恢复成套的已验证版本与数据。
+没有可验证的升级前冷备份时，不得宣称已安全回退。绝不能通过删除 migration、修改 SQL、直接编辑 SQLite 或手改 `schema_migrations` 来“降级”。
 
 ## 8. 安全边界
 
