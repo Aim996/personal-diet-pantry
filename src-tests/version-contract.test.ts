@@ -11,6 +11,8 @@ describe("release version contract", () => {
     expect(pkg.version).toBe("0.8.28");
     expect(pkg.productVersion).toBe("0.7.4.28");
     expect(plugin.version).toBe("0.8.28");
-    expect(pkg.engines.node).toBe(">=22.22.3");
+    expect(pkg.engines.node).toBe(
+      ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0",
+    );
   });
 });

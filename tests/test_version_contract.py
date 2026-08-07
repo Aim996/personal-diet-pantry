@@ -391,7 +391,9 @@ def test_supported_runtime_ranges_are_explicit() -> None:
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
-    assert package["engines"]["node"] == ">=22.22.3"
+    assert package["engines"]["node"] == (
+        ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0"
+    )
     assert package["peerDependencies"]["openclaw"] == ">=2026.5.17"
     assert package["devDependencies"]["openclaw"] == "2026.7.1-2"
     assert project["project"]["requires-python"] == ">=3.11,<4"

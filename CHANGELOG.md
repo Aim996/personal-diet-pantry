@@ -8,6 +8,7 @@
 
 - 把公开仓库的 README、安装/更新/排障文档和 AI 操作提示词统一到正式 GitHub Release 的固定版本下载、SHA-256 校验、npm-pack 安装与零业务写入验收流程。
 - Release 提供可安装包、源码快照、manifest、测试摘要和 SHA256SUMS 五项资产，明确源码包不可交给插件安装器。
+- Node.js 支持范围与锁定 OpenClaw 2026.7.1-2 对齐，避免把 Node 23 或 24.0–24.14 误标为支持环境。
 
 ### Security
 

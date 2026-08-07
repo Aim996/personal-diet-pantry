@@ -21,7 +21,7 @@ openclaw gateway restart
 openclaw plugins inspect personal-diet-pantry --runtime --json
 ```
 
-Requirements: OpenClaw `>=2026.5.17`, Node.js `>=22.22.3`, Python `>=3.11,<4`, and a dedicated persistent `dataDir` outside the source checkout. After installation, independently confirm all seven tools. Initialize a new ledger only with explicit user authorization, then run self-check and a zero-business-write acceptance. See [the concise install guide](docs/INSTALL.md) and [the detailed Chinese installation manual](docs/INSTALLATION.zh-CN.md).
+Requirements: OpenClaw `>=2026.5.17`, Node.js `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`, Python `>=3.11,<4`, and a dedicated persistent `dataDir` outside the source checkout. After installation, independently confirm all seven tools. Initialize a new ledger only with explicit user authorization, then run self-check and a zero-business-write acceptance. See [the concise install guide](docs/INSTALL.md) and [the detailed Chinese installation manual](docs/INSTALLATION.zh-CN.md).
 
 ## Data safety and upgrades
 

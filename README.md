@@ -72,7 +72,7 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 ## 系统要求
 
 - OpenClaw `>=2026.5.17`
-- Node.js `>=22.22.3`
+- Node.js `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`（与锁定 OpenClaw 运行范围一致）
 - Python `>=3.11,<4`
 - 位于源码目录之外、可持久化且权限受控的专用 `dataDir`
 

@@ -100,6 +100,7 @@ def test_install_upgrade_and_release_entries_are_exact() -> None:
     install = text("docs/INSTALL.md")
     upgrade = text("docs/UPGRADING.md")
     releasing = text("docs/RELEASING.md")
+    assert ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0" in install
     assert "personal-diet-pantry-0.7.4.28-installable.tgz" in install
     assert "SHA256SUMS" in install
     assert "openclaw plugins install npm-pack:" in install

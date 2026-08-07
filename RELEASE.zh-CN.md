@@ -40,6 +40,7 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 
 ## 兼容、数据与回滚
 
+- 运行要求：OpenClaw `>=2026.5.17`、Node.js `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`、Python `>=3.11,<4`。
 - 本版没有新增 migration，继续使用 migrations 001–021，schema 与 v0.7.4.19 相同。
 - 安装和验收必须保留外部 `dataDir`；源码构建、CI 和候选制品不会修改用户数据。
 - 更新前停止目标实例，按[详细安装手册](docs/INSTALLATION.zh-CN.md#5-备份用途与降级冷备份)创建并校验包含已提交 WAL 数据的**升级前冷备份**。

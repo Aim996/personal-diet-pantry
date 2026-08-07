@@ -7,7 +7,7 @@
 ```text
 请为一套全新的隔离 OpenClaw 状态安装 GitHub 仓库 Aim996/personal-diet-pantry 的产品版本 0.7.4.28，技术包版本 0.8.28。
 
-只允许使用 https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28 中的 personal-diet-pantry-0.7.4.28-installable.tgz，并下载 SHA256SUMS 独立核对同名文件哈希；source.tar.gz 只用于审阅，绝不能交给插件安装器，也不要从聊天附件或镜像下载。确认运行环境满足 OpenClaw >=2026.5.17、Node.js >=22.22.3、Python >=3.11,<4。
+只允许使用 https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28 中的 personal-diet-pantry-0.7.4.28-installable.tgz，并下载 SHA256SUMS 独立核对同名文件哈希；source.tar.gz 只用于审阅，绝不能交给插件安装器，也不要从聊天附件或镜像下载。确认运行环境满足 OpenClaw >=2026.5.17、Node.js `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`、Python >=3.11,<4。
 
 先定位目标 OpenClaw 的真实配置方式，创建一个位于源码、下载目录和其他实例之外的专用持久 dataDir。不得扫描、读取、复制、修改或删除任何已有个人饮食、体重、库存、数据库、备份、导出、报告或凭据。通过 `openclaw plugins install npm-pack:/绝对路径/personal-diet-pantry-0.7.4.28-installable.tgz` 安装，执行 `openclaw plugins enable personal-diet-pantry`，把 dataDir 写入 `plugins.entries.personal-diet-pantry.config.dataDir`。确认 OpenClaw 进程选择的 Python 已安装 requirements.lock 中依赖；Python 由进程环境变量 PYTHON 选择，不要伪造 pythonExecutable 插件配置。然后按目标实例既有方式重启；普通本机网关可用 `openclaw gateway restart`，容器或远程实例不能盲目照抄。
 
