@@ -8,6 +8,8 @@ Personal Diet Pantry `v0.7.4.28` is a local-first OpenClaw skill for one person'
 
 This is a public stable release. Download the pinned assets from [GitHub Release v0.7.4.28](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28). Publishing the repository and Release does not auto-install, enable, restart, or configure any OpenClaw instance.
 
+After publication, all five GitHub assets were downloaded again and hash-matched against the immutable local candidate. The tagged commit, local gate results, asset evidence, and the GitHub Actions infrastructure limitation are recorded in the [v0.7.4.28 public release record](docs/releases/v0.7.4.28.zh-CN.md) (Chinese).
+
 This version adds no migration and keeps migrations 001–021. A pure recent-operation question such as “did that just get recorded?” now has one bounded route: one recent transaction read, with Meal, Pantry, Report, repeat Diet reads, and write replay blocked for that run. Agent-facing read text prefers the tool's local timestamps and omits a competing UTC companion when both exist, while the original structured details and UTC database values remain unchanged. Explicit conditional backfill, package/serving nutrition, corn edible-weight behavior, deterministic six-metric meal receipts, compact plain-water receipts, expired-stock filtering, the seven public tool families, forty public actions, and database transactions remain unchanged.
 
 ## Install boundary

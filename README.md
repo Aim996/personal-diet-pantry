@@ -11,6 +11,7 @@
 - 产品版本 `0.7.4.28`；技术包版本 `0.8.28`。
 - 当前是**公开正式版**；固定版本页面是 [GitHub Release v0.7.4.28](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28)。
 - Release 提供经过本项目完整本地门禁生成的可安装包、源码快照、manifest、测试摘要和 SHA-256 清单；仓库公开不表示已自动安装到任何 OpenClaw 实例。
+- 发布后已从 GitHub 回下载五个资产并逐文件与本地候选完成哈希比对；提交、测试和 Actions 外部阻塞见 [v0.7.4.28 公开发布实录](docs/releases/v0.7.4.28.zh-CN.md)。
 - 本版没有新增 migration，继续使用 migrations 001–021；不会修改用户数据，也不会自动部署。
 
 ## 它适合谁
@@ -107,6 +108,7 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 - [用户指南](docs/USER-GUIDE.zh-CN.md) / [完整安装手册](docs/INSTALLATION.zh-CN.md) / [故障排除](docs/TROUBLESHOOTING.zh-CN.md)
 - [工具参考](docs/TOOLS-REFERENCE.zh-CN.md) / [数据模型](docs/DATA-MODEL.zh-CN.md) / [架构](docs/ARCHITECTURE.zh-CN.md)
 - [AI 安装、更新与验收提示词](docs/AI-PROMPTS.zh-CN.md)
+- [v0.7.4.28 公开发布实录](docs/releases/v0.7.4.28.zh-CN.md)
 - [v0.7.4.28 更新说明](UPDATE-v0.7.4.28.zh-CN.md) / [变更记录](CHANGELOG.md)
 - [跨版本产品行为约束](docs/PRODUCT-BEHAVIOR-INVARIANTS.zh-CN.md)
 

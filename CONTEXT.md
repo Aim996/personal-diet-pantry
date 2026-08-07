@@ -1,6 +1,16 @@
-# 食序管家 v0.7.3.5 领域语言
+# 食序管家 v0.7.4.28 项目上下文
 
 食序管家记录个人饮食、营养、体重和家庭食品库存。以下术语用于区分物理库存事实、可复用营养资料与历史计算证据。
+
+## 当前正式发布
+
+- 产品版本：`0.7.4.28`；npm / OpenClaw / Python 技术包版本：`0.8.28`。
+- 正式页面：[GitHub Release v0.7.4.28](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28)。
+- annotated tag `v0.7.4.28` 解引用提交：`b649fd1b38f1b7a6f6eef31117ad855ddb35a641`。
+- 数据库继续使用 migrations `001–021`，本版没有新增 migration。
+- Release 固定包含可安装包、源码包、manifest、测试摘要和 `SHA256SUMS` 五个资产；本地 `GitHub文档/` 审阅树不上传。
+- 完整发布证据、哈希、测试统计和 GitHub Actions 外部阻塞见 [`docs/releases/v0.7.4.28.zh-CN.md`](docs/releases/v0.7.4.28.zh-CN.md)。
+- GitHub Release 只表示代码和制品已公开，不表示已经安装、部署或通过真实 OpenClaw 业务 UAT。
 
 ## Language
 
