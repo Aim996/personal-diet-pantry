@@ -10,6 +10,8 @@ This tree is a local v0.7.5.0 development candidate. It has not yet created a Gi
 
 This version adds migration 022 for pantry storage/expiry provenance. Clear single-domain completed facts write directly; vague portions preview once; ordinary pantry intake no longer requires production or expiry dates and receives marked backend defaults. Corn edible-weight behavior, deterministic six-metric meal receipts, compact plain-water receipts, expired-stock filtering, read-only query safety, the seven public tool families, and database transactions remain protected.
 
+The previous stable release and its downloaded-asset verification remain documented in the [v0.7.4.28 public release record](docs/releases/v0.7.4.28.zh-CN.md) (Chinese). The v0.7.5.0 release must produce its own independent gate and asset evidence.
+
 ## Install boundary
 
 After a formal release exists, verify `SHA256SUMS` and install only `personal-diet-pantry-0.7.5.0-installable.tgz` through OpenClaw's npm-pack path. The source archive is for review and reproduction, not plugin installation.

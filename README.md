@@ -12,6 +12,7 @@
 - 当前是**本地开发候选**，尚未创建 Git Tag、GitHub Release，也未安装到任何 OpenClaw 实例。
 - 本版新增 migration 022，只为库存位置和到期日增加来源留痕；旧库存值原样保留。
 - 候选通过完整门禁后才可生成可安装包、源码快照、manifest、测试摘要和 SHA-256 清单；构建不会自动部署。
+- 上一正式版 `v0.7.4.28` 的发布与回下载验证证据继续保留在 [v0.7.4.28 公开发布实录](docs/releases/v0.7.4.28.zh-CN.md)；v0.7.5.0 必须重新生成自己的门禁与资产证据，不得沿用旧结论。
 
 ## 它适合谁
 
@@ -109,6 +110,7 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 - [工具参考](docs/TOOLS-REFERENCE.zh-CN.md) / [数据模型](docs/DATA-MODEL.zh-CN.md) / [架构](docs/ARCHITECTURE.zh-CN.md)
 - [AI 安装、更新与验收提示词](docs/AI-PROMPTS.zh-CN.md)
 - [v0.7.5.0 更新说明](UPDATE-v0.7.5.0.zh-CN.md) / [变更记录](CHANGELOG.md)
+- [v0.7.4.28 公开发布实录](docs/releases/v0.7.4.28.zh-CN.md)
 - [跨版本产品行为约束](docs/PRODUCT-BEHAVIOR-INVARIANTS.zh-CN.md)
 
 ## 开发者入口
