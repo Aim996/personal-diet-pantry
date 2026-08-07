@@ -1,7 +1,7 @@
 FROM node:24-bookworm
 
 ARG OPENCLAW_VERSION=2026.7.1-2
-ARG PLUGIN_ARCHIVE=personal-diet-pantry-0.8.27.tgz
+ARG PLUGIN_ARCHIVE=personal-diet-pantry-0.8.28.tgz
 
 ENV DEBIAN_FRONTEND=noninteractive
 

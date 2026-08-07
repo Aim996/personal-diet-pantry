@@ -76,7 +76,7 @@ describe("installable package contents", () => {
         "templates/zh-CN/weekly-report.md",
         "templates/zh-CN/monthly-report.md",
         "LICENSE",
-        "UPDATE-v0.7.4.27.zh-CN.md",
+        "UPDATE-v0.7.4.28.zh-CN.md",
       ]),
     );
     expect(files).toEqual(

@@ -19,10 +19,10 @@ from personal_diet_pantry.data_import import _canonical_json, _validate_bundle
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED = "0.8.27"
-PRODUCT_VERSION = "0.7.4.27"
-PREVIOUS_EXPECTED = "0.8.20"
-PREVIOUS_PRODUCT_VERSION = "0.7.4.20"
+EXPECTED = "0.8.28"
+PRODUCT_VERSION = "0.7.4.28"
+PREVIOUS_EXPECTED = "0.8.27"
+PREVIOUS_PRODUCT_VERSION = "0.7.4.27"
 
 
 def test_each_iteration_reads_constraints_and_registers_preserved_features() -> None:
@@ -91,14 +91,14 @@ def test_all_version_sources_use_the_dual_0745_contract() -> None:
     assert Version(EXPECTED)
     assert (ROOT / "RELEASE.zh-CN.md").read_text(
         encoding="utf-8"
-    ).startswith("# 食序管家（Personal Diet Pantry）v0.7.4.27\n")
+    ).startswith("# 食序管家（Personal Diet Pantry）v0.7.4.28\n")
     installation = (ROOT / "docs" / "INSTALLATION.zh-CN.md").read_text(
         encoding="utf-8"
     )
     assert EXPECTED in installation
     assert "personal-diet-pantry-0.6.1-installable.tgz" not in installation
     assert "diet_weight" in installation
-    assert (ROOT / "UPDATE-v0.7.4.27.zh-CN.md").is_file()
+    assert (ROOT / "UPDATE-v0.7.4.28.zh-CN.md").is_file()
 
 
 def test_v0740_update_document_names_core_simplification_boundaries() -> None:
@@ -278,6 +278,7 @@ def test_import_accepts_v071_through_v0746_portability_exports() -> None:
         "0.7.4.23",
         "0.7.4.24",
         "0.7.4.27",
+        "0.7.4.28",
     ):
         manifest = {
             "export_schema_version": EXPORT_SCHEMA_VERSION,
@@ -380,7 +381,7 @@ def test_v0744_core_gate_keeps_the_protected_release_behaviors() -> None:
 
     verify = (ROOT / "ci" / "verify.ps1").read_text(encoding="utf-8")
     assert "$CoreTypeScriptTests" in verify
-    assert "v0.7.4.27 core behavior gate" in verify
+    assert "v0.7.4.28 core behavior gate" in verify
     assert '"node_modules/vitest/vitest.mjs"' in verify
     assert "& node $Vitest run" in verify
     assert "& npm test -- --reporter=json" not in verify
@@ -433,7 +434,7 @@ def test_v07418_rollback_reuses_the_v07417_schema_and_keeps_a_cold_backup() -> N
     assert "实例已停止时取得的一致 SQLite 冷备份" in text
     assert "在线 `diet_system backup` 仅用于同版本恢复" in text
     assert "不能替代升级前冷备份" in text
-    assert "v0.7.4.27 没有新增 migration" in text
+    assert "v0.7.4.28 没有新增 migration" in text
     assert "schema 与 v0.7.4.19 相同" in text
     assert "0.7.4.6" not in text
     assert "升级前一致的 SQLite 数据库备份即可满足版本回滚条件" not in text
@@ -475,8 +476,8 @@ def test_troubleshooting_reinstalls_v07417_and_names_all_seven_tools() -> None:
         encoding="utf-8"
     )
 
-    assert "适用版本：Personal Diet Pantry（食序管家）v0.7.4.27" in text
-    assert "personal-diet-pantry-0.7.4.27-installable.tgz" in text
+    assert "适用版本：Personal Diet Pantry（食序管家）v0.7.4.28" in text
+    assert "personal-diet-pantry-0.7.4.28-installable.tgz" in text
     assert "保留当前专用 `dataDir`" in text
     assert "[成套回滚流程](INSTALLATION.zh-CN.md#7-成套回滚)" in text
     assert "七类工具" in text
@@ -487,6 +488,7 @@ def test_troubleshooting_reinstalls_v07417_and_names_all_seven_tools() -> None:
 
 def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
     documents = (
+        ROOT / "UPDATE-v0.7.4.28.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.27.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.7.zh-CN.md",
         ROOT / "UPDATE-v0.7.4.6.zh-CN.md",
@@ -510,7 +512,7 @@ def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
     )
 
     current_documents = {
-        "UPDATE-v0.7.4.27.zh-CN.md",
+        "UPDATE-v0.7.4.28.zh-CN.md",
         "RELEASE.zh-CN.md",
         "README.md",
         "README.en.md",
@@ -534,6 +536,8 @@ def test_release_docs_share_the_same_cold_rollback_boundary() -> None:
             assert "v0.7.4.1" in text, path
         elif path.name == "UPDATE-v0.7.4.1.zh-CN.md":
             assert "v0.7.4.0" in text, path
+        elif path.name == "UPDATE-v0.7.4.27.zh-CN.md":
+            assert "v0.7.4.19" in text, path
         else:
             assert "v0.7.3" in text, path
         if path.name == "README.en.md":
