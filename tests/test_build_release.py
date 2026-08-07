@@ -1301,12 +1301,39 @@ def test_source_archive_accepts_project_as_git_root(tmp_path: Path) -> None:
     archive = _load_script("reproducible_archive")
     project = tmp_path / "personal-diet-pantry"
     project.mkdir()
-    (project / "package.json").write_text("{}\n", encoding="utf-8")
+    (project / "package.json").write_text(
+        json.dumps({"name": "personal-diet-pantry"}) + "\n",
+        encoding="utf-8",
+    )
     _git(project, "init")
     _git(project, "config", "user.name", "Release Contract")
     _git(project, "config", "user.email", "release@example.invalid")
     _git(project, "add", ".")
     _git(project, "commit", "-m", "root fixture")
+
+    manifest = archive.create_archive(
+        project,
+        project / "dist-package" / "source.tar.gz",
+    )
+
+    assert manifest.members == ("personal-diet-pantry/package.json",)
+
+
+def test_source_archive_root_comes_from_committed_package_name(
+    tmp_path: Path,
+) -> None:
+    archive = _load_script("reproducible_archive")
+    project = tmp_path / "arbitrary-checkout-directory"
+    project.mkdir()
+    (project / "package.json").write_text(
+        json.dumps({"name": "personal-diet-pantry"}) + "\n",
+        encoding="utf-8",
+    )
+    _git(project, "init")
+    _git(project, "config", "user.name", "Release Contract")
+    _git(project, "config", "user.email", "release@example.invalid")
+    _git(project, "add", ".")
+    _git(project, "commit", "-m", "arbitrary checkout fixture")
 
     manifest = archive.create_archive(
         project,
@@ -1323,7 +1350,10 @@ def test_source_archive_reroots_a_nested_project_to_its_package_name(
     repository = tmp_path / "repository"
     project = repository / "0.7.3.5" / "personal-diet-pantry"
     project.mkdir(parents=True)
-    (project / "package.json").write_text("{}\n", encoding="utf-8")
+    (project / "package.json").write_text(
+        json.dumps({"name": "personal-diet-pantry"}) + "\n",
+        encoding="utf-8",
+    )
     _git(repository, "init")
     _git(repository, "config", "user.name", "Release Contract")
     _git(repository, "config", "user.email", "release@example.invalid")
