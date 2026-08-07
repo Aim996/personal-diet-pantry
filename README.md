@@ -1,6 +1,6 @@
 # 食序管家
 
-**Personal Diet Pantry v0.7.4.27**
+**Personal Diet Pantry v0.7.4.28**
 
 **简体中文** | [English](README.en.md)
 
@@ -8,9 +8,9 @@
 
 ## 当前版本与状态
 
-- 产品版本 `0.7.4.27`；技术包版本 `0.8.27`。
-- 当前处于**发布准备中**：仓库暂时保持 Private，代码和本地候选制品正在审阅。
-- GitHub Release 尚未创建；当前页面不提供一个尚不存在的下载链接，也不表示已自动安装到任何 OpenClaw 实例。
+- 产品版本 `0.7.4.28`；技术包版本 `0.8.28`。
+- 当前是**公开正式版**；固定版本页面是 [GitHub Release v0.7.4.28](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28)。
+- Release 提供经过本项目完整本地门禁生成的可安装包、源码快照、manifest、测试摘要和 SHA-256 清单；仓库公开不表示已自动安装到任何 OpenClaw 实例。
 - 本版没有新增 migration，继续使用 migrations 001–021；不会修改用户数据，也不会自动部署。
 
 ## 它适合谁
@@ -56,20 +56,23 @@
 
 ## 最快开始
 
-v0.7.4.27 的 GitHub Release 资产仍在准备中。请先阅读[简明安装入口](docs/INSTALL.md)了解正式发布后的固定下载、SHA-256 校验、外部 `dataDir`、npm-pack 安装和只读验收步骤；需要完整命令和冷备份细节时使用[详细安装手册](docs/INSTALLATION.zh-CN.md)。
+从 [GitHub Release v0.7.4.28](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28) 下载固定版本资产，再按[简明安装入口](docs/INSTALL.md)完成 SHA-256 校验、外部 `dataDir`、npm-pack 安装和只读验收；需要完整命令和冷备份细节时使用[详细安装手册](docs/INSTALLATION.zh-CN.md)。
 
-正式安装只使用 `personal-diet-pantry-0.7.4.27-installable.tgz`，不要把 `source.tar.gz` 交给插件安装器：
+正式安装只使用 `personal-diet-pantry-0.7.4.28-installable.tgz`，不要把 `source.tar.gz` 交给插件安装器：
 
 ```text
-openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.4.27-installable.tgz
+openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.4.28-installable.tgz
+openclaw plugins enable personal-diet-pantry
+openclaw gateway restart
+openclaw plugins inspect personal-diet-pantry --runtime --json
 ```
 
-安装后先确认 `diet_meal`、`diet_water`、`diet_weight`、`diet_pantry`、`diet_transaction`、`diet_report`、`diet_system` 七类工具均已注册，再运行 `initialize` 和 `self_check`。`self_check` 只证明数据库和配置健康，不能代替七类工具注册检查。
+安装后先确认 `diet_meal`、`diet_water`、`diet_weight`、`diet_pantry`、`diet_transaction`、`diet_report`、`diet_system` 七类工具均已注册。只有全新账本且用户明确授权时才运行 `initialize`；随后运行 `self_check`。`self_check` 只证明数据库和配置健康，不能代替七类工具注册检查。验收保持零业务写入。
 
 ## 系统要求
 
 - OpenClaw `>=2026.5.17`
-- Node.js `>=22.22.3`
+- Node.js `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`（与锁定 OpenClaw 运行范围一致）
 - Python `>=3.11,<4`
 - 位于源码目录之外、可持久化且权限受控的专用 `dataDir`
 
@@ -77,7 +80,7 @@ openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.4.27-install
 
 仓库、安装包和测试不应包含真实数据库、备份、导出、报告、凭据、地址或个人饮食数据。测试只能使用新建的一次性目录；不要把测试指向现有 OpenClaw 状态或个人 `dataDir`。
 
-更新前先停止目标实例，并按[详细安装手册](docs/INSTALLATION.zh-CN.md#5-备份用途与降级冷备份)创建、校验包含已提交 WAL 数据的**升级前冷备份**。安装 v0.7.4.27 时保留外部 `dataDir`，启动后执行七类工具检查、`self_check` 和只读数量核对。本版没有新增 migration，schema 与 v0.7.4.19 相同，也继续沿用 migrations 001–021；失败时可停止实例并重新安装 v0.7.4.19 恢复技术运行状态。0.7.4.19 是真实 UAT 失败候选，只是技术回退点。在线 `diet_system backup` 只用于同版本恢复，不能替代升级前冷备份。简明流程见[更新与回滚入口](docs/UPGRADING.md)。
+更新前先停止目标实例，并按[详细安装手册](docs/INSTALLATION.zh-CN.md#5-备份用途与降级冷备份)创建、校验包含已提交 WAL 数据的**升级前冷备份**。安装 v0.7.4.28 时保留外部 `dataDir`，启动后执行七类工具检查、`self_check` 和只读数量核对。本版没有新增 migration，schema 与 v0.7.4.19 相同，也继续沿用 migrations 001–021；失败时可停止实例并重新安装 v0.7.4.19 恢复技术运行状态。0.7.4.19 是真实 UAT 失败候选，只是技术回退点。在线 `diet_system backup` 只用于同版本恢复，不能替代升级前冷备份。简明流程见[更新与回滚入口](docs/UPGRADING.md)。
 
 ## 常见问题
 
@@ -87,7 +90,7 @@ openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.4.27-install
 
 ### 可以直接安装源码包吗？
 
-不可以。`personal-diet-pantry-0.7.4.27-source.tar.gz` 只用于审阅和复现；OpenClaw 插件安装器只接收 `personal-diet-pantry-0.7.4.27-installable.tgz`。
+不可以。`personal-diet-pantry-0.7.4.28-source.tar.gz` 只用于审阅和复现；OpenClaw 插件安装器只接收 `personal-diet-pantry-0.7.4.28-installable.tgz`。
 
 ### 报告和数据库不一致时以哪个为准？
 
@@ -104,7 +107,7 @@ openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.4.27-install
 - [用户指南](docs/USER-GUIDE.zh-CN.md) / [完整安装手册](docs/INSTALLATION.zh-CN.md) / [故障排除](docs/TROUBLESHOOTING.zh-CN.md)
 - [工具参考](docs/TOOLS-REFERENCE.zh-CN.md) / [数据模型](docs/DATA-MODEL.zh-CN.md) / [架构](docs/ARCHITECTURE.zh-CN.md)
 - [AI 安装、更新与验收提示词](docs/AI-PROMPTS.zh-CN.md)
-- [v0.7.4.27 更新说明](UPDATE-v0.7.4.27.zh-CN.md) / [变更记录](CHANGELOG.md)
+- [v0.7.4.28 更新说明](UPDATE-v0.7.4.28.zh-CN.md) / [变更记录](CHANGELOG.md)
 - [跨版本产品行为约束](docs/PRODUCT-BEHAVIOR-INVARIANTS.zh-CN.md)
 
 ## 开发者入口
@@ -120,7 +123,7 @@ python scripts/scan_sensitive_content.py .
 
 先阅读根目录 [GitHub 更新与发布工作流](GITHUB-WORKFLOW.zh-CN.md)，再按 [docs/RELEASING.md](docs/RELEASING.md) 执行正式发布门禁。历史版本细节留在各 `UPDATE-*.zh-CN.md`，首页不再重复堆叠。
 
-本地候选目录顶层恰好是 `personal-diet-pantry-0.7.4.27-source.tar.gz`、`personal-diet-pantry-0.7.4.27-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.4.27.zh-CN.md`、`SHA256SUMS` 和审阅用 `GitHub文档/`；正式 Release 只上传前五个文件。
+本地候选目录顶层恰好是 `personal-diet-pantry-0.7.4.28-source.tar.gz`、`personal-diet-pantry-0.7.4.28-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.4.28.zh-CN.md`、`SHA256SUMS` 和审阅用 `GitHub文档/`；正式 Release 只上传前五个文件。
 
 ## 许可证
 

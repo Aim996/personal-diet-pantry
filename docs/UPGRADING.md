@@ -1,6 +1,6 @@
 # 安全更新与回滚
 
-本文描述从产品 v0.7.4.19 更新到 v0.7.4.27 的最小安全顺序。两个版本使用同一 migrations 001–021；本版没有新增 migration。0.7.4.19 是技术回退包而不是已通过真实 UAT 的产品基线。完整冷备份与恢复命令只以[详细安装手册](INSTALLATION.zh-CN.md#5-备份用途与降级冷备份)为准，本文不另造一套 SQLite 操作。
+本文描述从产品 v0.7.4.19 更新到 v0.7.4.28 的最小安全顺序。两个版本使用同一 migrations 001–021；本版没有新增 migration。0.7.4.19 是技术回退包而不是已通过真实 UAT 的产品基线。完整冷备份与恢复命令只以[详细安装手册](INSTALLATION.zh-CN.md#5-备份用途与降级冷备份)为准，本文不另造一套 SQLite 操作。
 
 ## 更新前
 
@@ -8,20 +8,20 @@
 2. 使用只读查询记录餐食、饮水、体重、库存批次和目标等关键**记录数量**，不要导出或粘贴个人明细到工单。
 3. 按目标实例既有运维流程停止实例，确认没有插件进程继续写入。
 4. 按详细安装手册，用受信源码中的 `scripts/cold_backup.py` 创建位于 `dataDir` 之外的**升级前冷备份**，再运行 helper 的验证动作。目标备份路径必须是新路径，不得覆盖旧备份。
-5. 从正式 v0.7.4.27 GitHub Release 下载 `personal-diet-pantry-0.7.4.27-installable.tgz` 和 `SHA256SUMS`，按[简明安装文档](INSTALL.md#3-校验-sha-256)核对哈希。
+5. 从正式 v0.7.4.28 GitHub Release 下载 `personal-diet-pantry-0.7.4.28-installable.tgz` 和 `SHA256SUMS`，按[简明安装文档](INSTALL.md#3-校验-sha-256)核对哈希。
 
 ## 安装更新
 
 1. 保持实例停止，只替换插件/Skill 包；保留原外部 `dataDir`，不要复制、重命名或手改 `diet.sqlite`。
-2. 通过 `openclaw plugins install npm-pack:` 路径安装已校验的 v0.7.4.27 可安装包。
+2. 通过 `openclaw plugins install npm-pack:` 路径安装已校验的 v0.7.4.28 可安装包。
 3. 本版 migration 结果应为 **none**：只确认既有 migrations 001–021，不应出现新的 migration 文件或 schema 变更。
-4. 按实例既有方式重新加载或启动 OpenClaw。
+4. 按实例既有方式重新加载或启动 OpenClaw；普通本机网关可使用 `openclaw gateway restart`。
 
 ## 更新后验收
 
-1. 独立确认七类工具全部注册。
+1. 运行 `openclaw plugins inspect personal-diet-pantry --runtime --json`，独立确认七类工具全部注册。
 2. 运行 `diet_system(self_check)`；任何失败都先停止日常写入。
-3. 运行目标、进度和定向库存等只读查询，确认产品版本 `0.7.4.27`、技术包版本 `0.8.27`。
+3. 运行目标、进度和定向库存等只读查询，确认产品版本 `0.7.4.28`、技术包版本 `0.8.28`。
 4. 比较更新前后的关键记录数量。若仅版本更新却出现非预期增删，停止写入并进入回滚或恢复判断。
 5. 最终报告必须列出包哈希、备份路径、migration 结果、七类工具、自检、数量对比和未完成项；不得用“看起来正常”代替证据。
 

@@ -83,8 +83,8 @@ def test_packed_installable_starts_without_source_tree(
     package = json.loads(
         (installed / "package.json").read_text(encoding="utf-8")
     )
-    assert package["version"] == "0.8.27"
-    assert package["productVersion"] == "0.7.4.27"
+    assert package["version"] == "0.8.28"
+    assert package["productVersion"] == "0.7.4.28"
     assert (
         installed / "migrations" / "013_intake_data_correctness.sql"
     ).is_file()
@@ -129,7 +129,7 @@ def test_packed_installable_starts_without_source_tree(
         / "package_semantics.py"
     ).is_file()
     assert (installed / "LICENSE").is_file()
-    assert (installed / "UPDATE-v0.7.4.27.zh-CN.md").is_file()
+    assert (installed / "UPDATE-v0.7.4.28.zh-CN.md").is_file()
     assert (
         installed
         / "python"
@@ -157,7 +157,7 @@ def test_packed_installable_starts_without_source_tree(
         cwd=installed,
         env=environment,
     )
-    assert imported.stdout.strip() == "0.8.27"
+    assert imported.stdout.strip() == "0.8.28"
 
     smoke = run_bridge_probe(
         installed,

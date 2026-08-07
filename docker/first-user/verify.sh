@@ -157,7 +157,7 @@ const expectedTools = [
 
 const summary = {
   status: "pass",
-  product_version: "0.7.4.27",
+  product_version: "0.7.4.28",
   openclaw_version: openclawVersion,
   python_version: pythonVersion,
   runtime_inspection_available: runtime !== null,

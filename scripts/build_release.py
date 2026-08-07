@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify and atomically publish reproducible v0.7.4.27 artifacts."""
+"""Verify and atomically publish reproducible v0.7.4.28 artifacts."""
 
 from __future__ import annotations
 
@@ -21,8 +21,8 @@ from typing import Protocol
 import xml.etree.ElementTree as ET
 
 
-PRODUCT_VERSION = "0.7.4.27"
-VERSION = "0.8.27"
+PRODUCT_VERSION = "0.7.4.28"
+VERSION = "0.8.28"
 SOURCE_NAME = f"personal-diet-pantry-{PRODUCT_VERSION}-source.tar.gz"
 INSTALLABLE_NAME = f"personal-diet-pantry-{PRODUCT_VERSION}-installable.tgz"
 MANIFEST_NAME = "release-manifest.json"
@@ -57,7 +57,7 @@ GITHUB_DOCUMENTS = (
     "UPDATE-v0.7.4.3.zh-CN.md",
     "UPDATE-v0.7.4.4.zh-CN.md",
     "UPDATE-v0.7.4.5.zh-CN.md",
-    "UPDATE-v0.7.4.27.zh-CN.md",
+    "UPDATE-v0.7.4.28.zh-CN.md",
     "CONTEXT.md",
     "migrations/021_package_semantics_and_product_operations.sql",
     "scripts/cold_backup.py",
@@ -92,6 +92,9 @@ GITHUB_DOCUMENTS = (
     "docs/superpowers/plans/2026-08-03-personal-diet-pantry-v0.7.3.1-liquid-schema-compat.md",
     "docs/superpowers/specs/2026-08-04-personal-diet-pantry-v0.7.3.2-trusted-pantry-loop-design.md",
     "docs/superpowers/plans/2026-08-04-personal-diet-pantry-v0.7.3.2.md",
+    "docs/superpowers/specs/2026-08-07-v0.7.4.28-agent-installable-public-release-design.md",
+    "docs/superpowers/plans/2026-08-07-v0.7.4.28-agent-installable-public-release.md",
+    "docs/版本回望档案/0.7.4.28.md",
 )
 
 
@@ -628,7 +631,7 @@ def _validate_installable_members(members: tuple[str, ...]) -> None:
         "package/templates/en/",
         "package/templates/zh-CN/",
         "package/skills/personal-diet-pantry/SKILL.md",
-        "package/UPDATE-v0.7.4.27.zh-CN.md",
+        "package/UPDATE-v0.7.4.28.zh-CN.md",
     )
     if not all(
         any(
