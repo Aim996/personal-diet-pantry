@@ -1,6 +1,6 @@
 # 故障排除与安全恢复
 
-适用版本：Personal Diet Pantry（食序管家）v0.7.5.0。
+适用版本：Personal Diet Pantry（食序管家）v0.7.5.2。
 
 先记住两条规则：SQLite（`dataDir/diet.sqlite`）是正式事实来源；任何工具没有返回成功前，都不能把本次操作说成“已记录”。数据库或迁移出现异常时，优先保护数据并只读诊断，而不是反复重试或手工编辑文件。
 
@@ -51,7 +51,7 @@
 | 是否写入 | 当前迁移/启动未成功时，不得把本次操作视为写入。 |
 | 停止什么 | 停止实例上的所有写入、迁移重试和“修补”动作；不要删除迁移文件、修改迁移 SQL 或直接编辑 `schema_migrations`。 |
 | 只读诊断 | 调用 `diet_system self_check` 和 `diet_system validate_database`，确认失败属于迁移检查还是 SQLite 本体完整性；核对正在使用的软件包版本与升级前备份记录。 |
-| 恢复后验证 | 停止实例后，按[成套回滚流程](INSTALLATION.zh-CN.md#7-成套回滚)处理。v0.7.5.0 新增 migration 022，必须恢复升级前冷备份后再安装 v0.7.4.28；不能只换旧代码并复用已迁移数据库。在线 `diet_system backup` 仍仅用于同版本恢复。启动后运行 `self_check`，再以 `diet_pantry query`、`diet_report progress` 做只读验证。 |
+| 恢复后验证 | 停止实例后，按[成套回滚流程](INSTALLATION.zh-CN.md#7-成套回滚)处理。v0.7.5.2 不新增 migration，但继续使用 v0.7.5.0 已引入的 migration 022；回退到 v0.7.4.28 时必须恢复升级前冷备份，不能只换旧代码并复用已迁移数据库。在线 `diet_system backup` 仍仅用于同版本恢复。启动后运行 `self_check`，再以 `diet_pantry query`、`diet_report progress` 做只读验证。 |
 
 ## 缺少 Python 依赖或解释器不正确
 
@@ -71,13 +71,13 @@
 | 是否写入 | 工具未可用时没有本插件可确认的写入。 |
 | 停止什么 | 停止任何业务写入；不要用未公开的命令、替代工具名或直接 SQLite 编辑绕过注册问题。 |
 | 只读诊断 | 运行 `openclaw plugins inspect personal-diet-pantry --runtime --json`，并在受支持的 OpenClaw 管理界面或日志中核对所选状态、安装包名称和 Python 启动错误。 |
-| 恢复后验证 | 注册故障应使用 `personal-diet-pantry-0.7.5.0-installable.tgz` 的 npm-pack 安装路径重装同版本，并保留当前专用 `dataDir` 映射后重新加载。七类工具出现后调用 `diet_system self_check`。若需要回退，按[成套回滚流程](INSTALLATION.zh-CN.md#7-成套回滚)恢复升级前冷备份，再安装 v0.7.4.28。 |
+| 恢复后验证 | 注册故障应使用 `personal-diet-pantry-0.7.5.2-installable.tgz` 的 npm-pack 安装路径重装同版本，并保留当前专用 `dataDir` 映射后重新加载。七类工具出现后调用 `diet_system self_check`。若需要回退，按[成套回滚流程](INSTALLATION.zh-CN.md#7-成套回滚)恢复升级前冷备份，再安装 v0.7.4.28。 |
 
 ## 营养估算失败
 
 | 项目 | 处置 |
 | --- | --- |
-| 现象 | 饮食记录的部分营养字段为 `null`，并以 `nutrition_data_state` 或 `nutrition_status` 表示不完整。v0.7.5.0 继续允许可靠标签缺失的字段保持未知，不应为通过写入而补造零值或模型估算。 |
+| 现象 | 饮食记录的部分营养字段为 `null`，并以 `nutrition_data_state` 或 `nutrition_status` 表示不完整。v0.7.5.2 继续允许可靠标签缺失的字段保持未知，不应为通过写入而补造零值或模型估算。 |
 | 是否写入 | 营养估算未满足且动作未成功时，不写入饮食，也不扣减库存。 |
 | 停止什么 | 停止第二次以上的同一估算重试；不要改用 `diet_water`、`diet_pantry` 或手工数据库写入来伪造该餐。 |
 | 只读诊断 | 用 `diet_pantry query` 查看是否存在可安全使用的标签快照，或用 `diet_report progress` 查看当前已确认进度；不要把查询结果当作新估算。 |

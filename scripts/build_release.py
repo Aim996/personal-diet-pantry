@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify and atomically publish reproducible v0.7.5.0 artifacts."""
+"""Verify and atomically publish reproducible v0.7.5.2 artifacts."""
 
 from __future__ import annotations
 
@@ -21,8 +21,8 @@ from typing import Protocol
 import xml.etree.ElementTree as ET
 
 
-PRODUCT_VERSION = "0.7.5.0"
-VERSION = "0.9.1"
+PRODUCT_VERSION = "0.7.5.2"
+VERSION = "0.9.2"
 SOURCE_NAME = f"personal-diet-pantry-{PRODUCT_VERSION}-source.tar.gz"
 INSTALLABLE_NAME = f"personal-diet-pantry-{PRODUCT_VERSION}-installable.tgz"
 MANIFEST_NAME = "release-manifest.json"
@@ -59,6 +59,7 @@ GITHUB_DOCUMENTS = (
     "UPDATE-v0.7.4.5.zh-CN.md",
     "UPDATE-v0.7.4.28.zh-CN.md",
     "UPDATE-v0.7.5.0.zh-CN.md",
+    "UPDATE-v0.7.5.2.zh-CN.md",
     "CONTEXT.md",
     "migrations/021_package_semantics_and_product_operations.sql",
     "migrations/022_pantry_default_provenance.sql",
@@ -100,6 +101,7 @@ GITHUB_DOCUMENTS = (
     "docs/superpowers/specs/2026-08-07-personal-diet-pantry-v0.7.5.0-skill-guidance-design.md",
     "docs/superpowers/plans/2026-08-07-personal-diet-pantry-v0.7.5.0-skill-guidance.md",
     "docs/版本回望档案/0.7.5.0.md",
+    "docs/版本回望档案/0.7.5.2.md",
 )
 
 
@@ -637,7 +639,7 @@ def _validate_installable_members(members: tuple[str, ...]) -> None:
         "package/templates/en/",
         "package/templates/zh-CN/",
         "package/skills/personal-diet-pantry/SKILL.md",
-        "package/UPDATE-v0.7.5.0.zh-CN.md",
+        "package/UPDATE-v0.7.5.2.zh-CN.md",
     )
     if not all(
         any(

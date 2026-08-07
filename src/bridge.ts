@@ -62,6 +62,14 @@ const DEFAULT_PACKAGE_ROOT = resolve(
   fileURLToPath(new URL("..", import.meta.url)),
 );
 
+export function selectPythonExecutable(
+  configured: string | undefined,
+  environment: string | undefined,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  return configured ?? environment ?? (platform === "win32" ? "python" : "python3");
+}
+
 export function callPython<T extends JsonObject = JsonObject>(
   request: JsonObject,
   options: CallPythonOptions = {},
@@ -113,7 +121,7 @@ export function callPython<T extends JsonObject = JsonObject>(
 
   return new Promise((resolvePromise, rejectPromise) => {
     const child = spawn(
-      options.pythonExecutable ?? effectiveEnv.PYTHON ?? "python",
+      selectPythonExecutable(options.pythonExecutable, effectiveEnv.PYTHON),
       ["-m", "personal_diet_pantry.cli"],
       {
         cwd: packageRoot,
