@@ -75,22 +75,23 @@ gh repo view Aim996/personal-diet-pantry --json nameWithOwner,visibility,default
 
 ## 3. 当前项目状态与现场核对
 
-以下是 `2026-08-06` 更新本文时的维护快照，只用于帮助接手者定位，不是永久事实：
+以下是 `2026-08-07` 在 v0.7.4.28 正式发布后更新的维护快照，只用于帮助接手者定位，不是永久事实：
 
 | 项目 | 快照 |
 |---|---|
 | GitHub 仓库 | `Aim996/personal-diet-pantry` |
-| 仓库可见性 | Private；仓库内容按未来公开可读的安全标准维护 |
+| 仓库可见性 | Public；公开文档和资产仍须通过敏感信息扫描 |
 | 默认分支 | `main`，必须用 `gh repo view` 复核 |
-| 当前变更分支 | `codex/v0.7.4.16-preserve-correction-object` |
-| 当前产品版本 | `0.7.4.16` |
-| 当前技术包版本 | `0.8.16` |
-| 前一产品/技术版本 | `0.7.4.14 / 0.8.14` |
-| 数据库迁移 | migrations `001–021`，本轮不新增 |
-| 正式 Release | 建立本文时尚未创建 `v0.7.4.16` |
+| 当前文档分支 | `codex/v0.7.4.28-post-release-docs`；合并后以 `main` 为准 |
+| 当前产品版本 | `0.7.4.28` |
+| 当前技术包版本 | `0.8.28` |
+| 前一产品/技术版本 | `0.7.4.27 / 0.8.27` |
+| 数据库迁移 | migrations `001–021`；v0.7.4.28 没有新增 migration |
+| 正式 Tag 提交 | `v0.7.4.28` → `b649fd1b38f1b7a6f6eef31117ad855ddb35a641` |
+| 正式 Release | [v0.7.4.28](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.4.28)，公开、非草稿、非预发布，含五个资产 |
 | 自动部署 | GitHub 工作流不连接用户 OpenClaw，不自动部署 |
 
-后续每次接手都必须运行第 2.2 节命令，并读取 `package.json`、`RELEASE.zh-CN.md`、最新 `UPDATE-*.zh-CN.md` 与 `CHANGELOG.md`。如果快照已经过期，更新本文中的快照属于实质文档变更，必须按新版本处理。
+后续每次接手都必须运行第 2.2 节命令，并读取 `package.json`、`RELEASE.zh-CN.md`、最新 `UPDATE-*.zh-CN.md` 与 `CHANGELOG.md`。快照过期时，可以用独立文档提交纠正已经发生的治理事实，但不得借此改变代码、包元数据、安装制品或用户可见行为；任何此类实质变化仍必须进入新产品版本。已完成版本目录、Tag 和 Release 始终不可变。
 
 ## 4. 单一事实来源
 
@@ -99,6 +100,7 @@ gh repo view Aim996/personal-diet-pantry --json nameWithOwner,visibility,default
 | 受保护产品行为和强制版本规则 | [`docs/PRODUCT-BEHAVIOR-INVARIANTS.zh-CN.md`](docs/PRODUCT-BEHAVIOR-INVARIANTS.zh-CN.md) |
 | 当前用户可见变化 | `UPDATE-v<产品版本>.zh-CN.md` |
 | 当前发布合同和 Release Notes | [`RELEASE.zh-CN.md`](RELEASE.zh-CN.md) |
+| v0.7.4.28 已完成发布证据 | [`docs/releases/v0.7.4.28.zh-CN.md`](docs/releases/v0.7.4.28.zh-CN.md) |
 | 历史版本摘要 | [`CHANGELOG.md`](CHANGELOG.md) |
 | 正式 Tag/Release 顺序 | [`docs/RELEASING.md`](docs/RELEASING.md) |
 | 安装、升级、冷备份和回滚 | [`docs/INSTALLATION.zh-CN.md`](docs/INSTALLATION.zh-CN.md) |
