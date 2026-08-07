@@ -45,9 +45,9 @@ describe("personal-diet-pantry natural-language activation", () => {
 
   test("places the activation contract before readiness", () => {
     const contractIndex = skill.indexOf(
-      "## Natural-language activation",
+      "## 先理解，再行动",
     );
-    const readinessIndex = skill.indexOf("## Readiness");
+    const readinessIndex = skill.indexOf("## 调用原则");
 
     expect(contractIndex).toBeGreaterThan(0);
     expect(readinessIndex).toBeGreaterThan(contractIndex);
@@ -55,20 +55,20 @@ describe("personal-diet-pantry natural-language activation", () => {
 
   test("documents positive and negative oral-language boundaries", () => {
     for (const phrase of [
-      "Chinese colloquial wording",
-      "omitted subjects",
-      "spoken quantities",
-      "clearly completed",
+      "口语、错别字、省略主语、自然单位",
+      "清楚、已发生且信息足够的单一事实",
+      "普通正向输入由智能体",
+      "不是封闭短语表",
     ]) {
       expect(skill).toContain(phrase);
     }
 
     for (const phrase of [
-      "explicit body-weight wording",
-      "A bare number without explicit body-weight wording",
-      "must not create a body-weight record",
-      "zero tool calls",
-      "Non-occurrence always wins over weight",
+      "体重写入需要明确的称重语义或重量单位",
+      "完全孤立的数字不能写体重",
+      "应问单位或含义",
+      "否定、没发生、未来计划和他人行为优先于",
+      "保持零写入",
     ]) {
       expect(skill).toContain(phrase);
     }
@@ -87,53 +87,48 @@ describe("personal-diet-pantry natural-language activation", () => {
       expect(skill).toContain(tool);
     }
 
-    expect(skill).toContain("Never bypass it to call a `diet_*` tool");
+    expect(skill).toContain("渠道变化不能成为绕过 Skill 的理由");
     expect(skill).toContain("Telegram");
     expect(skill).toContain("WebUI");
   });
 
   test("defines self-contained runtime and minimal-call contracts", () => {
     for (const phrase of [
-      "write readiness",
-      "pure affirmation",
-      "Supplemental facts are not confirmation",
-      "one terminal result -> one reply",
-      "same turn",
+      "信息已完整就完成原意",
+      "只有未改变预览的纯确认",
+      "新事实，不等于确认旧预览",
+      "成功或终止后立即停止",
+      "同一轮",
       "Runtime reference reads are exactly 0",
     ]) {
       expect(skill).toContain(phrase);
     }
 
-    expect(skill).toContain("do not open `references/`");
+    expect(skill).toContain("运行时不得打开 `references/`");
     expect(skill).toContain("runtime agents must not read or route through it");
     expect(skill).not.toContain("genuinely cross-domain intent loads at most two");
   });
 
-  test("defines preferred routes and terminal failure boundaries", () => {
+  test("defines an open capability map and terminal failure boundaries", () => {
     for (const phrase of [
-      "## Preferred capability routes",
-      "Use exactly one primary route",
-      "one tool call",
-      "unchanged failure fingerprint",
-      "structured",
+      "## 能力地图",
+      "不规定每句话必须经过哪条固定流水线",
+      "相同失败指纹不能原样重试",
+      "结构化的字段、原因和期望值",
     ]) {
       expect(skill).toContain(phrase);
     }
 
+    expect(skill).not.toContain("Use exactly one primary route");
+    expect(skill).not.toContain("## Preferred capability routes");
     expect(skill).not.toContain("retry the same action once");
     expect(skill).not.toContain("allow at most one correction");
   });
 
   test("binds recent-operation status and displayed time to deterministic evidence", () => {
-    expect(skill).toContain(
-      "recent diet operation status | exactly one `diet_transaction get_recent`",
-    );
-    expect(skill).toContain(
-      "Never display the UTC companion when a `*_at_local` field is present.",
-    );
-    expect(skill).toContain(
-      "Do not scan meal, pantry, report, files, or another business tool",
-    );
+    expect(skill).toContain("只用一次 `diet_transaction get_recent`");
+    expect(skill).toContain("存在 `*_at_local` 时不展示 UTC companion");
+    expect(skill).toContain("不要再扫描 meal、pantry、report、文件或其他业务工具");
   });
 
   test("requires explicit consent before loading full pantry nutrition", () => {

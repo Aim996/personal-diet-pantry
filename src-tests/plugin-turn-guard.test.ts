@@ -109,27 +109,24 @@ describe("full plugin turn guard wiring", () => {
   });
 
   it.each([
-    ["刚啃了根玉米", /diet_meal record exactly once.*do not.*preview.*confirmation/is],
-    ["刚称了下106.8", /default.*kg.*diet_weight record exactly once/is],
-    ["刚买了俩苹果，放冰箱了", /diet_pantry add exactly once.*do not ask.*production.*expiry/is],
-    ["刚喝了137毫升水", /diet_water record exactly once.*water-only receipt/is],
-  ])("injects one deterministic action for an ordinary fact: %s", async (
-    prompt,
-    expected,
-  ) => {
+    "吃了个玉米",
+    "刚喝了137毫升水",
+    "刚称了下106.8",
+    "买了两盒酸奶",
+  ])("does not prescribe a tool route for an ordinary positive fact: %s", async (prompt) => {
     const host = fakePluginApi();
     plugin.register(host.api as never);
     const beforeRun = host.hooks.get("before_prompt_build")!;
 
     const result = await beforeRun(
       { prompt, messages: [] },
-      { runId: `run-direct-${prompt}`, sessionKey: `session-direct-${prompt}` },
+      { runId: `run-agent-directed-${prompt}`, sessionKey: `session-agent-directed-${prompt}` },
     );
 
-    expect(result).toMatchObject({ appendContext: expected });
+    expect(result).toBeUndefined();
   });
 
-  it("blocks preview when the current sentence authorizes a direct meal record", async () => {
+  it("allows the agent to choose record or preview for an ordinary meal fact", async () => {
     const host = fakePluginApi();
     plugin.register(host.api as never);
     const beforeRun = host.hooks.get("before_prompt_build")!;
@@ -149,8 +146,9 @@ describe("full plugin turn guard wiring", () => {
       },
       { ...context, toolName: "diet_meal" },
     )).toMatchObject({
-      block: true,
-      blockReason: expect.stringMatching(/没有授权|not authorized/i),
+      params: expect.objectContaining({
+        action: "preview_record",
+      }),
     });
   });
 
@@ -1445,11 +1443,7 @@ describe("full plugin turn guard wiring", () => {
       { prompt: "刚喝了一盒库存里的UAT18原味燕麦奶。" },
       { runId: "run-inventory-meal", sessionKey: "session:inventory-meal" },
     );
-    expect(route).toMatchObject({
-      appendContext: expect.stringMatching(
-        /diet_pantry search exactly once.*diet_meal record exactly once.*do not.*confirmation/is,
-      ),
-    });
+    expect(route).toBeUndefined();
     expect(await before(
       {
         toolName: "diet_pantry",

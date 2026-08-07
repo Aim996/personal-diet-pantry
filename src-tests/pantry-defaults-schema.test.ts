@@ -14,7 +14,7 @@ const withoutExpiry = {
 };
 
 
-describe("v0.7.5 pantry defaults at the plugin boundary", () => {
+describe("v0.7.5.0 pantry defaults at the plugin boundary", () => {
   it("accepts an ordinary add without production or expiry dates", () => {
     expect(Value.Check(PantryParametersSchema, withoutExpiry)).toBe(true);
   });

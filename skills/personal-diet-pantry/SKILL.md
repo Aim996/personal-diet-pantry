@@ -1,302 +1,146 @@
 ---
 name: personal-diet-pantry
-description: Use when a user speaks naturally about their own meals, nutritious drinks, plain water, cooking or leftovers, pantry stock or expiry, nutrition plans or reports, goals or preferences, undo/redo, explicit body weight, a diet event that ultimately did not happen, events explicitly not done, or any diet_* task—even without naming the Skill; exclude writing/translation, generic knowledge, image requests, and code/examples; MUST read this SKILL.md before any reply or diet_* tool.
+description: Use when the user speaks naturally about their own meals, nutritious drinks, plain water, body weight, cooking or leftovers, pantry stock or expiry, nutrition plans or reports, what they ate, what remains at home, what to eat next, corrections, undo/redo, goals or preferences, events explicitly not done, or any diet_* task—even without naming the Skill. Exclude writing/translation, generic knowledge, image requests, and code/examples. MUST read this SKILL.md before any reply or diet_* tool call.
 ---
 
-# Personal Diet Pantry
+# 食序管家
 
-Runtime reference reads are exactly 0: do not open `references/`, source, tests,
-schemas, databases, logs, reports, or packages. The seven typed tools and their
-results are the only business authority.
+这是一张给智能体使用的业务地图，不是一段替智能体写好的路线。目标只有四个：可靠地记录用户摄入、管理家中食材、回答吃过什么与还剩什么、结合目标和可用库存给出合适建议。
 
-## Natural-language activation
+Runtime reference reads are exactly 0: 运行时不得打开 `references/`、源码、测试、schema、数据库、日志、报告文件或安装包。七个 `diet_*` 工具及其返回值是唯一业务事实来源；`references/` is development-only and runtime agents must not read or route through it.
 
-Interpret the user's complete intent, including Chinese colloquial wording, omitted subjects, spoken quantities, typos, and incomplete grammar; examples are tests, not a closed runtime keyword list.
+## 先理解，再行动
 
-When an event is clearly completed, use the applicable route below. Plans, hypotheticals, denials, and non-occurrence make zero write calls. A negative, planned, hypothetical, or cancelled event short-circuits before time or quantity resolution. Non-occurrence always wins over weight, water, food, and a pending
-confirmation.
+结合整句话和可见上下文理解口语、错别字、省略主语、自然单位和补充说明。示例只是帮助理解，不是封闭短语表；不要因为用户换了一种说法就失去同样的能力。
 
-After activation, the rest of this Skill remains mandatory in Telegram, WebUI, and every other
-channel. Never bypass it to call a `diet_*` tool.
+先判断这些事实：
 
-## Readiness
+- 事情发生了吗：已经发生、计划、假设、否定、取消，还是只在询问。
+- 是谁的事：只有用户本人的摄入、饮水和体重才能写入个人账本。
+- 用户想做什么：新增、查询、纠正、删除、撤销、推荐，还是维护。
+- 关键证据是否够用：对象、数量、目标记录、时间范围及必要的库存匹配。
+- 哪些是用户事实，哪些只是可解释的估算或系统默认值。
 
-Readiness is per required capability. Inspect the visible tool catalog without a
-tool call. A missing unrelated capability does not block the task. If the one
-required capability is unavailable, stop with one short setup instruction.
+否定、没发生、未来计划和他人行为优先于食物、饮水、体重关键词，保持零写入。纯查询只能读，不能顺手补写。普通正向输入由智能体结合上下文选择合适能力，不由插件按固定短语提前决定工具、领域或调用次数。
 
-Do not run a warm-up, self-check, source scan, memory search, or exploratory query.
-Use `diet_system self_check` only when the user asks for a health check or after a
-database-integrity failure.
+这些边界在 WebUI、Telegram 和其他渠道完全一致，渠道变化不能成为绕过 Skill 的理由。
 
-For just-completed `diet_meal record`, `preview_record`, and `record_cooking`, or
-for `diet_water record`, use omitted `occurred_at` when the user gives no earlier
-time so the trusted system clock is used. Send an explicit time only from a
-user-supplied resolvable time. If the user gives only a coarse past segment such as
-“早上” and the write requires a point in time, ask one short question for the
-approximate time; combine it with any other essential missing fact. Never replace
-that segment with the current time. Never invent `context.now`.
+## 能力地图
 
-## Preferred capability routes
+地图说明“有哪些能力和证据要求”，不规定每句话必须经过哪条固定流水线。选择能完成当前意图的最小能力集合；成功或终止后立即停止。
 
-Use exactly one primary route.
+| 领域 | 可用能力 | 关键说明 |
+| --- | --- | --- |
+| 餐食 `diet_meal` | `record`、`preview_record`、`commit_record`、`update`、`delete`、`query`、`record_cooking`、`record_prepared` | 记录食物、营养饮料、烹饪与剩菜；纠正既有餐食；按时间窗查询 |
+| 饮水 `diet_water` | `record`、查询、修改、删除 | 仅用于白水；牛奶、蛋白粉等有营养饮料属于餐食 |
+| 体重 `diet_weight` | `record`、查询、删除确认 | 只记录用户本人明确的称重事实 |
+| 库存 `diet_pantry` | `add`、`preview_add`、`commit_add`、`search`、`query`、移动、开封、扣减、丢弃等 | 管理食品批次、包装、位置、临期、营养证据和加工剩菜 |
+| 事务 `diet_transaction` | `get_recent`、撤销、重做 | 查询或处理已经发生的业务操作，不替代餐食删除 |
+| 报告 `diet_report` | 进度、摘要、库存与临期报告 | 只读；不要为了重建刚写入的回执额外调用 |
+| 系统 `diet_system` | 目标、偏好、自检、维护 | 仅在用户明确要求对应设置或维护时使用 |
 
-| Intent | Route |
-| --- | --- |
-| completed food or nutritious drink | `diet_meal record` |
-| uncertain but estimable food amount | `diet_meal preview_record`; later `commit_record` after pure confirmation |
-| correct a uniquely identified recorded meal | `diet_meal update` directly; ask only when the target is ambiguous |
-| cooking with eaten and stored portions | `diet_meal record_cooking` |
-| prepared leftover eaten | `diet_pantry search` → `prepared_food_handle` → `diet_meal record_prepared` |
-| plain water | `diet_water record` |
-| explicit body weight | `diet_weight record` |
-| complete pantry intake or packaged pantry intake | `diet_pantry add` |
-| pantry add completed by a supplemental fact | merge the fact and call `diet_pantry add` directly when the item and quantity are now clear |
-| completed pantry food or nutritious drink consumption | `diet_pantry search` → `inventory_match_handle` → `diet_meal record` |
-| non-intake product use or discard | `diet_pantry search` → `diet_pantry deduct` or `discard` |
-| inventory, expiry, or product nutrition lookup | one `diet_pantry` read |
-| explicit whole current meal-record deletion | same-session meal handle → `diet_meal delete`; otherwise one meal query → delete |
-| recent diet operation status | exactly one `diet_transaction get_recent` |
-| undo or redo of an operation | `diet_transaction get_recent`; act only when the operation is unambiguous |
-| progress or summary | one `diet_report` read |
-| goals or preferences | one `diet_system` action |
-| maintenance explicitly requested | one `diet_system` action |
+可以先读后写的场景必须由证据需要决定。例如库存食用需要一个真实的 `inventory_match_handle`，加工剩菜食用需要 `prepared_food_handle`，目标不明确的删除需要先找到候选。不要把这些必要证据扩展成所有输入都要走的固定路线。
 
-Use `search` with the user's wording. Use `query` with `normalized_name` only when the canonical name is already known.
-To locate the user's original wording, use `search` with `search_text`.
-When the user supplies a calendar expiry date, prefer `expiry_date`. Dates are optional for ordinary pantry intake. Let the tool convert package display units.
+## 调用原则
 
-## One-pass decision workflow
+Readiness is per required capability. 先观察当前可见工具目录；缺少无关能力不影响任务。只有当前必需能力缺失时，才用一句话说明如何安装或启用。不要预热、自检、Memory Search、源码扫描或探索式查询；只有用户要求健康检查或工具返回 `DATABASE_INTEGRITY_ERROR` 时才用 `diet_system self_check`。
 
-`event status -> requested scope -> sufficient facts -> one route -> one terminal result -> one reply`
+- 清楚、已发生且信息足够的单一事实，直接写入并允许用户随后纠正或撤销；不要为了让用户重复“确认”而制造流程。
+- 可以合理估算的自然单位不是歧义。一个玉米、一根火腿肠、一盒已匹配库存的饮料可以保留自然单位，并明确展示估算依据。
+- 真正模糊且估算会显著改变结果时，展示一次完整估算供用户确认；无法形成可信范围时，只问一个最关键问题。
+- 用户补充数量、标签、位置等新事实，不等于确认旧预览。合并新事实后重新判断：信息已完整就完成原意；仍不完整才继续澄清。
+- 同一轮多领域写入若没有原子事务支持，必须在第一次写入前说明不能保证整体一致，保持零写入并请用户拆开。不得先写容易的部分。
+- 目标修改、删除、丢弃、撤销、重做、维护等高影响动作必须绑定明确目标或受保护的工作流凭证。
+- 插件允许普通正向输入先由智能体选择安全的新增或预览能力；第一次非只读选择后，同一轮会锁定到该领域和动作，防止模型游移到另一个写入。
+- `write_committed`、`preview_ready`、`no_op`、`failed` 都是终止结果。不要在成功后继续探测，也不要在失败后换工具碰碰运气。
+- 不得使用 Exec、Shell、SQL、Memory Search、文件遍历或其他工具族兜底业务操作。
 
-Rules:
+## 时间和范围
 
-1. Resolve occurred versus planned/denied first.
-2. Keep separate events separate; do not merge two meals because their contents match.
-3. Ask at most one short question only when no defensible bounded estimate or target exists.
-4. A clear single-domain read or write gets one tool call.
-5. A targeted lookup followed by an action gets at most two calls.
-6. A preview and its commit occur across user turns; each turn gets one call. Reuse its handle only in the same turn or live pending workflow.
-7. Stop immediately on `write_committed`, `preview_ready`, `no_op`, or `failed`.
-8. Supplemental facts are not confirmation: merge them and reassess write readiness.
-   For pantry intake, once the food, quantity, and unit are clear, call `add` directly.
-   Production date, expiry, and storage location are optional defaults, not reasons to preview
-   or ask a follow-up. Use `preview_add` only when the food, quantity, unit, or target itself
-   remains genuinely ambiguous. A pure confirmation of that unchanged live preview may call
-   `commit_add` with the live handle, never a fresh `add`.
-9. Only a pure affirmation of the unchanged live preview may call `commit_record`.
-10. A pure query or status check authorizes reads only. “刚才记上了吗” never
-    auto-fills a missing record unless the same message explicitly says to补记.
-    Use the status route above once. Do not scan meal, pantry, report, files, or another business tool; never replay the write.
-11. Until a cross-domain atomic transaction exists, one message that asks two or
-    more of meal, water, weight, pantry, transaction, or profile to write must be
-    rejected before the first write. State that nothing was changed and ask the
-    user to split it; never commit the easy parts first.
-12. Permission is scoped to the current host run. A stopped, cancelled, failed, or
-    previous turn cannot authorize a later write. A context-only correction must
-    bind an opaque selected-record handle; a bare confirmation must bind the live
-    commit handle. A single-domain prompt authorizes only the specific action the
-    user expressed, never every mutation in that domain.
+没有更早时间的刚刚发生事实，在 `diet_meal` 的 `record`、`preview_record`、`record_cooking` 以及 `diet_water record` 中省略 `occurred_at`，由可信系统时钟记入。只有用户提供了可解析时间才显式传时间。用户只说“早上”等粗粒度过去时段而写入需要一个时间点时，问一次大概几点；绝不能改成当前时间，也不能伪造 `context.now`。
 
-Never call `diet_report progress` to rebuild a successful write receipt. Never use Exec, Shell, SQL, Memory Search, file traversal, or another tool family as fallback.
+相对时间和日期片段原样放进 `natural_window.text`，例如“昨晚到今天凌晨”“昨儿夜里到天亮前”“8月3号晚上到4号天亮前”。让插件按用户时区统一解析，不要手工拼出另一套时间窗。
 
-Use tool-returned local fields for user-visible times. Never display the UTC companion when a `*_at_local` field is present. Use UTC only without a local projection.
+跨日餐食查询必须覆盖时间窗内的正餐、加餐、营养饮料和补剂。`scope.complete` 为真时按返回记录逐条编号回答；外观相同的记录仍是独立事实，内容相同不等于重复记录。
 
-## Completed, vague, and corrected intake
+只展示工具返回的本地时间字段；存在 `*_at_local` 时不展示 UTC companion。
 
-Clear completed food with a clear natural amount records directly. A countable common
-item such as one corn or one sausage does not become ambiguous merely because its gram
-weight and nutrition require a standard estimate; record directly in the same turn,
-keep both the natural count and the estimated gram weight, label the estimate in the
-receipt, and let a later correction replace it. Unknown nutrition stays unknown;
-missing nutrients never become zero.
+## 餐食、估算与纠正
 
-For an open-ended vague quantity such as “一点、一些、几口、几粒、一小把”:
+用户明确说已经吃了常见可数食物时直接记录。保留自然分类词、估算克重和可食部，不要只给热量：
 
-- If a credible bounded estimate exists, show the proposed amount, unit, practical
-  range, and estimated nutrition in one combined preview. The preview performs zero
-  business writes and asks once for confirmation. This is a zero-write preview.
-- If no defensible estimate exists, ask one concrete question and make zero calls.
-- Never hide an estimate. “一个玉米” is recorded as a natural count plus an explicit
-  estimated edible weight, for example “1个 90克（估算）”, not only calories.
-- Preserve the user's natural classifier: “吃了个玉米” stays `1个`; do not silently
-  rewrite it as `1根`. For food with an inedible core, peel, shell, bone, or pit,
-  distinguish gross whole-item weight from edible portion. Nutrition always uses
-  the edible portion. With no explicit weight, show a bounded edible estimate such
-  as `1个｜可食部（玉米粒）约90克（估算）`. If the user gives a gross whole-item
-  weight such as “带芯/带皮/带骨/连壳总重”, store that as gross evidence and mark
-  any derived edible ratio and edible weight as estimates. An explicit edible weight
-  replaces the estimate without an estimate label.
-- Before the Meal call, put the same count, measurement object, edible weight, and
-  estimate marker in one complete `portion_expression`; do not send only `1个` while
-  leaving the edible evidence elsewhere. The plugin preserves submitted evidence but
-  does not infer an edible-part label from the food name. For corn, the direct-call
-  expression is `1个｜可食部（玉米粒）约90克（估算）`, the consumed weight is 90 g,
-  and the bounded estimate uses that same value.
-- A user correction replaces the previous fact through `diet_meal update`. When the
-  successful write returned a unique handle and the correction is complete, use that
-  handle-bound correction to update directly and atomically; never ask for a second confirmation.
-  Send the complete replacement `items` collection, but do not repeat unchanged
-  meal-level history merely to satisfy the tool: `occurred_at`, `meal_type`,
-  and `location_type` may be omitted and are preserved from the handle-bound
-  record. Always send the user's new correction sentence as `source_text`; it is
-  the new portion evidence and audit reason. For an exact correction such as
-  “其实是80克”, send `80克` in `portion_expression` with no `约` or `估算` marker.
-  For “大概80克” keep the approximate marker. Explicitly supplied new meal-level
-  values still replace the old values.
-  Exact evidence replaces conflicting estimates; retain only compatible whole-item
-  counts or edible-part labels.
-  Do not try multiple parameter shapes, delete-and-recreate manually,
-  or switch domains. If no unique live handle exists, query once and confirm the target.
+- “吃了个玉米”保留 `1个`，示例表达为 `1个｜可食部（玉米粒）约90克（估算）`。营养按可食玉米粒计算，不把玉米芯算成摄入。
+- 餐食调用中的完整 `portion_expression` 必须同时带上自然计数、计量对象、可食重量和估算标记；插件不会根据食物名称自行补出可食部标签。
+- 如果用户说“带芯总重”“带皮”“带骨”“连壳”，总重是原始证据，可食比例和可食重量必须标为估算。
+- 用户随后说“其实80克”时，使用成功写入返回的唯一餐食句柄直接 `update`，完整替换条目并保留未修改的餐次历史；精确的 `80克` 不再标“约”或“估算”。
+- 同一会话没有唯一句柄时，只查询一次候选并让用户选目标；不要猜“最近一条”，不要删除重建，也不要尝试多套参数。
 
-An explicit whole current meal-record deletion is not historical operation undo.
-With a verified same-session meal handle, call `diet_meal delete` once and do not call `diet_transaction undo`, query, or ask for confirmation. Without that live
-handle, query only meal candidates once and delete only a selected `meal_handle`;
-never guess the latest record. If an updated record is deleted, delete its current
-meal handle rather than traversing or retrying older transaction operations.
+“一点、一些、几口、几粒、一小把”等开放数量：存在可信范围时用 `preview_record` 一次展示拟记录数量、单位、实用范围和估算营养，保持零业务写入；无法可信估算时只问一个具体问题。只有未改变预览的纯确认才能使用其活跃 `commit_handle`。取消、否定、矛盾、会话变化或预览失效后不得提交。
 
-Scope a zero-write meal preview to the visible conversation. A pure affirmation
-consumes its unchanged live handle with one `commit_record`; never create a fresh
-`record` or ask twice. A supplemental fact is not confirmation: merge it, replace
-the preview once if still incomplete, or record directly when it supplies a usable
-final value and explicit write authorization. Cancellation, denial, contradiction,
-expiry, missing context, or session change invalidates the preview with zero writes.
+每个有营养的条目只能使用一种 `nutrition_basis`：`per_100g`、`per_100ml`、`per_serving` 或 `consumed_total`，只缩放一次。只发送 `nutrition_facts` 或 `nutrition_estimate` 其中一个：A/B 级标签或数据库事实用 `nutrition_facts`，C/D 级估算用 `nutrition_estimate`。未知营养字段保持缺失，永远不能补成零。饮食补水量字段只能是 `hydration_ml`，不得发送 `hydration`。
 
-Every item with nutrition uses exactly one `nutrition_basis`: `per_100g`,
-`per_100ml`, `per_serving`, or `consumed_total`. Scale exactly once. Do not put a
-whole serving total in a per-100 basis.
+餐次和地点只是分析标签，不应阻止清楚的摄入事实。用户明确给出时规范为 `breakfast/lunch/dinner/snack/other` 与 `home/restaurant/takeout/unknown`；未给出则省略，由插件诚实填充 `other` 和 `unknown`。不要尝试中文枚举，也不要为这两个标签单独追问。
 
-Send exactly one of `nutrition_facts` or `nutrition_estimate`.
-A/B evidence uses `nutrition_facts`; C/D evidence uses `nutrition_estimate`.
-Never duplicate the same object into both fields. Missing label fields stay unknown:
-omit unknown nutrition properties, never invent zero. Use only `hydration_ml`; never send `hydration`.
+整条当前餐食删除不是事务撤销。存在已验证的同会话 `meal_handle` 时可删除当前记录；否则查询一次候选后再操作，不能遍历旧事务或猜目标。
 
-Meal type and location are analytical labels, not intake facts, and must not block a
-clear completed intake. Normalize explicit wording deterministically: use
-`breakfast/lunch/dinner/snack/other` for meal type and
-`home/restaurant/takeout/unknown` for location (for example 午餐→`lunch`,
-加餐→`snack`, 家里→`home`, 外卖→`takeout`). If the user did not supply either
-label, omit them; the plugin fills the honest defaults `other` and `unknown`. Never
-ask a question only to obtain these labels, never try multiple Chinese enum variants,
-and never inspect implementation files.
+## 库存与食用联动
 
-## Time and query scope
+普通入库不强制生产日期或保质期。生产日期和到期日都可以缺省；绝不编造生产日期。用户给出日历到期日时优先使用 `expiry_date`。用户没给位置或到期日时，工具根据食物类别推断冷藏、冷冻或常温，并从入库日估算到期日，回执必须标明这是估算。用户明确事实始终覆盖默认值；包装显示单位的换算交给工具完成。
 
-Send relative or dated-segment wording (e.g. “8月3号晚上到4号天亮前”) verbatim
-once in `natural_window.text`. The plugin resolves anchors, inherited dates, and
-explicit endpoint clocks in profile timezone; never hand-build a retry range.
+搜索库存时使用用户原话：`search` 搭配 `search_text`。只有已经知道规范名时才用 `query` 的 `normalized_name`。多个物理批次不是商品歧义；多个不同商品命中时展示候选，也允许用户选择“记录饮食但暂不关联库存”。
 
-One cross-day `diet_meal query` includes every meal, snack, nutritious drink, and
-supplement in the resolved window. Never filter only by meal label or use memory/chat.
+吃掉库存食品或营养饮料时，搜索结果是份量和商品证据。首次搜索使用 `nutrition_mode: "summary"`；成功搜索后不要再调用 `diet_pantry query` 或重复搜索：
 
-For an explicit interval, send exact start/end. When `scope.complete` is true, use
-one numbered row per returned meal; identical-looking records remain separate.
-Never re-query or call them duplicates unless asked.
+- 命中唯一商品后，复用返回的 `raw_name`、`normalized_name` 与 `inventory_match_handle`；保留用户的包装数量和单位，例如 `amount: 1`、`unit: 盒`。
+- 让餐食事务同时记录摄入并扣库存，不再额外调用 Pantry 扣减。`diet_pantry deduct` 只用于明确的非食用消耗。
+- 库存营养未知时，带同一个库存句柄和用户提供的标签完成一次餐食写入；没有标签则明确“营养未知”，不能静默写成全零。
+- 只有终止结果返回 `inventory_effects` 时才能声称库存发生变化；纠正后描述返回的净变化。
 
-## Pantry evidence and food safety
+烹饪、本人进食和剩菜入库必须使用原子餐食能力，避免一半成功。食用加工剩菜必须使用真实的 `prepared_food_handle`，不得凭名称伪造。
 
-Production date and expiry are optional for ordinary pantry intake.
-When a location or expiry is absent, infer storage location from the food category, estimate expiry from the intake date, and mark both inferred facts as estimates; explicit user facts always override those defaults. Never invent or ask for a production date.
+## 食品安全和推荐
 
-An exact inventory selection is quantity evidence. Preserve the user's raw product
-wording while using the returned opaque handle. Multiple physical batches of one product are not product ambiguity; distinct products are. If distinct products
-match, show candidates and allow the user to choose or to record without inventory
-association.
+推荐的候选集合必须在进入建议前排除所有已过期库存。已过期与临期不是一类：过期食品单列为建议丢弃，不得建议通过闻、尝、加热来决定继续吃。用户即使说“优先把快坏的吃掉”，这条边界也不变。
 
-For a completed pantry food or nutritious drink consumption, the first and only
-lookup is `diet_pantry search` with the user's product wording and
-`nutrition_mode: "summary"`; do not call `diet_pantry query` after the successful search or search again. For one product candidate, copy its unchanged `raw_name`,
-`normalized_name`, and `inventory_match_handle` into `diet_meal record`; keep the user's package amount and unit unchanged, for example `amount: 1`, `unit: 盒`.
-Do not convert it to 250/ml or send nutrition fields while the handle owns registered conversion
-and nutrition. If search says nutrition is unknown, send the user's label with that same handle
-in one meal `record`; never call Pantry, re-preview, or write zero nutrition. The meal
-transaction alone deducts inventory; never call pantry deduct separately for completed consumption. `diet_pantry deduct` is only for explicit non-intake use.
+用户报告“已经吃了过期食品”是历史事实，不是推荐。应如实记录摄入，并用精确的过期库存选择保持 `consume` 审计原因；不得拒绝记录，也不得伪装为丢弃。外食不扣家中库存。
 
-Treat registered or same-message exact package conversion as evidence. With a partial
-label, keep amount, classifier, and full `source_text` in one Meal call; the host
-derives the measure. Conflict/mismatch: zero writes, ask once. Missing nutrition
-stays unknown; never add zeroes, split deduction, or retry.
+## 体重
 
-Expired inventory is never a recommendation candidate. This is unconditional even
-when the user says “优先把快坏的吃掉”. Keep expired items in a separate discard list;
-do not suggest smelling, tasting, or reheating them as permission to eat. Recommend
-only usable inventory returned by the tool.
+体重写入需要明确的称重语义或重量单位。完全孤立的数字不能写体重，应问单位或含义。明确说“刚称了106.8”时合理默认 kg 并直接记录，不要求重复确认。
 
-A completed fact is not a recommendation. If the user explicitly reports already
-eating expired stock, record the meal truthfully and use the exact expired-only
-inventory selection in that same meal record so the movement remains `consume`.
-Never refuse the fact, relabel it as discard, or use `record_prepared` without a real
-`prepared_food_handle`. This exception never makes expired stock eligible for plans,
-recipes, suggestions, or future-intent writes.
+示例：`diet_weight(action="record", weight=104.6, unit="kg", status_note="空腹")`。测量时间由工具读取系统当前时间；`measured_at` 不是公共参数，不要根据用户文字补传时间。
 
-External meals never deduct home inventory. Inventory changes may be stated only
-when the successful terminal result contains `inventory_effects`. For corrections,
-describe the returned net change, not merely the new deduction.
+展示时可包含 `7日均值：104.2 kg` 和 `趋势：7日均下降 ⬇️0.5 kg`；没有 `trend` 时省略趋势行。
 
-## Progress and receipt
+体重删除必须先用选定的 `record_handle` 展示精确体重和本地测量时间，保持零业务写入；只有纯确认才能用返回的 `commit_handle` 完成删除。不得凭“最近”或陈旧句柄删除。
 
-For a successful meal or water write, copy `rendered_receipt` from the final successful tool result exactly once and verbatim. Never reuse any field from an earlier receipt. Do not reconstruct, paraphrase,
-compress, prepend a second “已记录”, or append a conflicting total.
+## 回执与公开回复
 
-The renderer owns the six metrics in fixed order: calories, protein, fat,
-carbohydrate, fiber, water. Every metric uses exactly two lines. Percentages above
-100 remain real. Known partial totals are marked as incomplete; unknown values are
-not rendered as zero.
+成功餐食写入后，逐字复制最终成功结果里的 `rendered_receipt`，只出现一次。不要自己重算、压缩、改写，不要再添加第二个“已记录”，不要用旧回执字段，也不要调用 `diet_report progress` 重建。
 
-Pure water remains compact: acknowledge the water amount and show only water
-progress. Never expand a plain-water event into the six nutrition metrics.
-
-The stable visual form is:
+普通餐食回执的六项顺序固定为热量、蛋白、脂肪、碳水、纤维、饮水，每项固定两行。第一行只有 Emoji、名称、进度条和百分比；第二行是当前值/目标值，以及本次已知增量。超过 100% 显示真实比例；未知不能当作零。示例：
 
 ```text
-🔥 热量 ██████████ 103%
-🔥1954.3 / 1900 kcal +111.3kcal +6%
+记好了！火腿肠 1根 50克（估算）｜84.8 kcal
+
+🔥 热量 ░░░░░░░░░░ 4%
+🔥84.8 / 1900 kcal +84.8kcal +4%
 ```
 
-After the verbatim receipt, add nothing unless the user explicitly asked another
-question in the same message.
+纯水保持简洁：确认饮水量，只展示饮水进度，不展开热量、蛋白、脂肪、碳水和纤维。喝杯水没有必要看到营养面板。
 
-## Failure and retry boundary
+回复使用简洁、自然的中文。不要展示工具名、内部诊断、路径、凭证、堆栈、源码文件、数据库 ID、事务 ID 或工作流句柄。成功回执后，除非用户同一句还问了别的问题，否则不要追加说教或评价。
 
-One terminal error ends the route. Never repeat an unchanged failure fingerprint.
-Do not change tools merely because validation failed. Use the returned structured
-field/reason/expected information to ask for one corrected fact; retry only after
-the user supplies changed input.
+## 失败、状态与生命周期
 
-For a timeout or invalid bridge response after a write, the plugin may perform one
-read-only operation-status lookup. Never replay the write. Report that the outcome
-is uncertain when status cannot be proven.
+一个终止错误结束本次尝试。相同失败指纹不能原样重试；根据结构化的字段、原因和期望值只问一个必要事实，等待用户提供变化后的输入。两次终止性 Diet 失败后，本次 host run 停止继续调用。
 
-On `DATABASE_INTEGRITY_ERROR`, make the only next call `diet_system self_check`.
-Do not retry or queue the write. If integrity remains failed, block further writes
-until the user says it was repaired and a new explicit self-check passes.
+写入超时或桥接响应无效时，只允许一次只读的操作状态查询，不能重放写入。无法证明结果时直说状态不确定。
 
-After two terminal Diet failures in the same host run, stop all further Diet
-calls for that run. Do not insert a read call merely to reset the breaker.
+“刚才记上了吗”只用一次 `diet_transaction get_recent` 查询最近操作，不自动补记；不要再扫描 meal、pantry、report、文件或其他业务工具。只有同一句明确包含“没记就补记”等写入授权时，才可在理解完整意图后选择安全能力。
 
-## Body weight
+操作凭证默认只在当前会话、当前活跃工作流内有效。应用重开、会话切换、停止、失败、取消、否定或过期都会使其失效；此后“撤销刚才”需要查询最近操作并确认目标。
 
-Body-weight writes require explicit wording or a clear weight unit.
-A bare number without explicit body-weight wording must not create a body-weight record; ask its unit or intent with zero tool calls.
-Explicit weighing wording plus a plausible number defaults to kilograms: record it directly without asking for the unit. This covers “刚称了下106.8”, not an unexplained number.
-
-Example: `diet_weight(action="record", weight=104.6, unit="kg", status_note="空腹")`.
-测量时间由工具读取系统当前时间；`measured_at` 不是公共参数，不要根据用户文字补传时间。
-
-When present, replies may include `7日均值：104.2 kg` and
-`趋势：7日均下降 ⬇️0.5 kg`; 没有 `trend` 时省略趋势行。
-
-Deleting a weight is always two turns: first call `delete` with the selected
-`record_handle` and show the exact weight plus local measurement time; this is a
-zero-business-write preview. Only a pure confirmation may call `delete` again
-with the returned `commit_handle`. Never delete from a guessed, stale, or merely
-“recent” handle.
-
-## Public reply boundary
-
-Use concise Chinese. Never show tool names. Never expose those diagnostics. A public reply contains no internal identifier, path, credential, stack trace, source filename, database or transaction ID, or workflow handle. 不要显示工具名、数据库 ID、事务 ID 或工作流句柄。
+遇到 `DATABASE_INTEGRITY_ERROR` 时，唯一下一步是 `diet_system self_check`。自检仍失败就阻止写入，直到用户说明已修复且新的明确自检通过。
 
 Tools: `diet_meal`, `diet_water`, `diet_weight`, `diet_pantry`, `diet_transaction`, `diet_report`, `diet_system`.
-
-`references/` is development-only; runtime agents must not read or route through it.

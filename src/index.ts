@@ -24,10 +24,6 @@ import {
   type DietDomain,
   type TurnIntent,
 } from "./turn-guard.js";
-import {
-  classifyDirectWrite,
-  directWriteInstruction,
-} from "./direct-write-policy.js";
 
 const domainTools = [
   {
@@ -2306,14 +2302,6 @@ function registerTurnGuardHooks(api: OpenClawPluginApi): void {
           "[Private diet routing] This is a pure confirmation of the unchanged live preview. Use only that visible live preview and its existing commit handle, then call the matching commit action exactly once: diet_meal commit_record or diet_pantry commit_add. Do not call record or add to create a new write, do not rebuild the preview, and do not ask for another equivalent confirmation. If no unchanged live preview and handle are visible in this conversation, make zero writes and ask for the minimum missing fact.",
       };
     }
-    const directWriteDecision = classifyDirectWrite(event.prompt);
-    const directWriteRouting = directWriteInstruction(directWriteDecision);
-    if (
-      directWriteRouting !== undefined &&
-      (intent.directWrite === true || directWriteDecision.kind === "clarify")
-    ) {
-      return { appendContext: directWriteRouting };
-    }
     if (intent.finalizedSupplementalWrite === true) {
       return {
         appendContext:
@@ -2465,8 +2453,9 @@ function registerTurnGuardHooks(api: OpenClawPluginApi): void {
     }
     if (
       state !== undefined &&
-      state.intent.mode === "single_domain_write" &&
-      state.intent.domains.length === 0 &&
+      (state.intent.mode === "agent_directed" ||
+        (state.intent.mode === "single_domain_write" &&
+          state.intent.domains.length === 0)) &&
       !isDietReadOperation(event.toolName, nextParams)
     ) {
       const lockedDomain = dietDomainForTool(event.toolName);
@@ -2475,7 +2464,9 @@ function registerTurnGuardHooks(api: OpenClawPluginApi): void {
           ...state,
           intent: {
             ...state.intent,
+            mode: "single_domain_write",
             domains: [lockedDomain],
+            allowedActions: [nextAction],
           },
         });
       }

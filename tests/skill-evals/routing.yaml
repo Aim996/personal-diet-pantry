@@ -70,7 +70,7 @@ cases:
     allowed_tools: []
     forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
     write_expectation: zero
-    reference_contains: [bare number without explicit body-weight wording, zero tool calls]
+    reference_contains: [完全孤立的数字不能写体重, 问单位或含义]
     reply_contains: [请补充单位或说明这是体重]
   - id: weight-status
     prompt: 空腹104.6
@@ -214,7 +214,7 @@ cases:
     allowed_tools: []
     forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
     write_expectation: zero
-    reference_contains: [non-occurrence, zero write calls]
+    reference_contains: [否定、没发生, 保持零写入]
     reply_contains: [知道了]
   - id: zero-plan
     prompt: 明天打算喝两升水
@@ -223,7 +223,7 @@ cases:
     allowed_tools: []
     forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
     write_expectation: zero
-    reference_contains: [Plans, zero write calls]
+    reference_contains: [未来计划, 保持零写入]
     reply_contains: [计划]
   - id: zero-number-code
     prompt: 验证码是105，帮我记一下
@@ -232,7 +232,7 @@ cases:
     allowed_tools: []
     forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
     write_expectation: zero
-    reference_contains: [bare number without explicit body-weight wording, zero tool calls]
+    reference_contains: [完全孤立的数字不能写体重, 问单位或含义]
     reply_contains: [不作为体重]
   - id: meal-ambiguous-small-milk
     prompt: 家里有川象鲜牛奶200ml和小象巴氏乳250ml；我刚喝了一瓶小瓶牛奶
@@ -250,7 +250,7 @@ cases:
     allowed_tools: []
     forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
     write_expectation: zero
-    reference_contains: [Supplemental facts are not confirmation, reassess write readiness]
+    reference_contains: [新事实，不等于确认旧预览, 重新判断]
     reply_contains: [还需要确认重量]
   - id: meal-final-quantity-supplement-direct-write
     prompt: 上一轮花生预览是约25克；我现在补充“大概10粒，就按10克记吧”
@@ -367,7 +367,7 @@ cases:
     allowed_tools: []
     forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
     write_expectation: zero
-    reference_contains: [negative, planned, hypothetical, or cancelled, before time or quantity resolution]
+    reference_contains: [否定、没发生、未来计划和他人行为优先于, 保持零写入]
     reply_contains: [没有记录, 没有扣库存]
   - id: preference-read
     prompt: 我有什么忌口

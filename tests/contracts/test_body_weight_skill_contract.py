@@ -24,8 +24,8 @@ def test_skill_routes_explicit_weight_and_free_status_to_one_direct_write() -> N
         '`diet_weight(action="record", weight=104.6, unit="kg", '
         'status_note="空腹")`'
     ) in skill
-    assert "explicit body-weight wording" in skill
-    assert "A bare number without explicit body-weight wording" in skill
+    assert "体重写入需要明确的称重语义或重量单位" in skill
+    assert "完全孤立的数字不能写体重" in skill
 
 
 def test_skill_uses_only_system_time_and_never_supplies_measurement_time() -> None:
@@ -42,4 +42,5 @@ def test_skill_shapes_optional_average_and_trend_reply() -> None:
     assert "7日均值：" in skill
     assert "趋势：7日均下降 ⬇️0.5 kg" in skill
     assert "没有 `trend` 时省略趋势行" in skill
-    assert "不要显示工具名、数据库 ID、事务 ID 或工作流句柄" in skill
+    assert "不要展示工具名" in skill
+    assert "数据库 ID、事务 ID 或工作流句柄" in skill

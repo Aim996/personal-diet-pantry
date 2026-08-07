@@ -78,7 +78,7 @@ describe("installable package contents", () => {
         "templates/zh-CN/weekly-report.md",
         "templates/zh-CN/monthly-report.md",
         "LICENSE",
-        "UPDATE-v0.7.5.zh-CN.md",
+        "UPDATE-v0.7.5.0.zh-CN.md",
       ]),
     );
     expect(files).toEqual(
@@ -102,6 +102,8 @@ describe("installable package contents", () => {
     expect(files).not.toContain("UPDATE-v0.7.4.0.zh-CN.md");
     expect(files).not.toContain("UPDATE-v0.7.4.2.zh-CN.md");
     expect(files).not.toContain("GITHUB-WORKFLOW.zh-CN.md");
+    expect(files).not.toContain("dist/direct-write-policy.js");
+    expect(files).not.toContain("dist/direct-write-policy.d.ts");
     expect(
       files.filter((path) =>
         /(?:^|\/)(?:reports?|backups?)(?:\/|$)/i.test(path)

@@ -51,7 +51,7 @@ def test_progressive_split_preserves_critical_behavior_contracts() -> None:
     )
 
     for phrase in (
-        "Non-occurrence always wins over weight",
+        "否定、没发生、未来计划和他人行为优先于",
         "`measured_at` 不是公共参数",
         "7日均值：",
         "nutrition_basis",
@@ -69,11 +69,11 @@ def test_progressive_split_preserves_critical_behavior_contracts() -> None:
         "preserve the user's raw product wording",
         "fried food with unknown oil",
         "over_by",
-        "same turn",
+        "同一轮",
         "do not preflight",
         "reuse the returned handle",
         "one aggregate report call",
-        "Preferred capability routes",
+        "## 能力地图",
         "verified equivalent capability",
         "normalized arguments",
         "diet_pantry search",
@@ -86,8 +86,8 @@ def test_progressive_split_preserves_critical_behavior_contracts() -> None:
         "validated handle and exact amount bind the meal write and pantry deduction",
         "Missing label nutrients remain unknown",
         "Never add a model estimate only to make a write pass",
-        "Production date and expiry are optional for ordinary pantry intake",
-        "explicit user facts always override those defaults",
+        "普通入库不强制生产日期或保质期",
+        "用户明确事实始终覆盖默认值",
     ):
         assert phrase in bundle
 
@@ -110,12 +110,12 @@ def test_post_commit_progress_receipt_preserves_the_legacy_renderer() -> None:
     invariants = PRODUCT_INVARIANTS.read_text(encoding="utf-8")
 
     for phrase in (
-        "the final successful tool result",
-        "six metrics in fixed order",
-        "every metric uses exactly two lines",
-        "never reuse any field from an earlier receipt",
+        "最终成功结果里的 `rendered_receipt`",
+        "六项顺序固定为热量、蛋白、脂肪、碳水、纤维、饮水",
+        "每项固定两行",
+        "不要用旧回执字段",
     ):
-        assert phrase in main.casefold()
+        assert phrase in main
 
     for phrase in (
         "Never reuse totals or a progress snapshot from an earlier turn",
@@ -146,7 +146,7 @@ def test_readiness_and_disclosure_are_capability_scoped() -> None:
 
     assert "readiness is per required capability" in main.casefold()
     assert "Runtime reference reads are exactly 0" in main
-    assert "do not open `references/`" in main
+    assert "运行时不得打开 `references/`" in main
 
 
 def test_pantry_nutrition_disclosure_requires_explicit_full_label_request() -> None:
@@ -169,14 +169,8 @@ def test_inventory_lookup_wording_matches_public_search_and_handle_contract() ->
         SKILL_ROOT / "references" / "pantry-and-expiry.md"
     ).read_text(encoding="utf-8")
 
-    assert (
-        "Use `query` with `normalized_name` only when the canonical name is already known."
-        in main
-    )
-    assert (
-        "To locate the user's original wording, use `search` with `search_text`."
-        in main
-    )
+    assert "只有已经知道规范名时才用 `query` 的 `normalized_name`" in main
+    assert "`search` 搭配 `search_text`" in main
     assert "downstream action" in pantry
     assert "downstream meal item" not in pantry
 
@@ -207,7 +201,7 @@ def test_bare_number_is_not_a_body_weight_write_contract() -> None:
 
     assert "body weight including a reasonable standalone number" not in main
     assert '`diet_weight(action="record", weight=105, unit="kg")`' not in main
-    assert "A bare number without explicit body-weight wording" in main
+    assert "完全孤立的数字不能写体重" in main
 
 
 def test_v073_details_stay_in_their_single_required_references() -> None:

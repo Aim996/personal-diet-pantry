@@ -1,10 +1,10 @@
-# 食序管家（Personal Diet Pantry）v0.7.5
+# 食序管家（Personal Diet Pantry）v0.7.5.0
 
-食序管家是一套面向单个 OpenClaw 用户、本地优先的饮食、饮水、体重与家庭食材管理 Skill。产品版本为 `0.7.5`，npm/OpenClaw/Python 技术包版本为 `0.9.0`。
+食序管家是一套面向单个 OpenClaw 用户、本地优先的饮食、饮水、体重与家庭食材管理 Skill。产品版本为 `0.7.5.0`，npm/OpenClaw/Python 技术包版本为 `0.9.1`。
 
 ## 当前状态
 
-这是本地开发候选说明，不代表 Git Tag、GitHub Release、路由器安装或真实数据验收已经完成。只有完整测试、敏感信息扫描、可复现构建和人工批准全部通过后，才可创建 `v0.7.5` Release；发布也不会自动部署到任何 OpenClaw 实例。
+这是本地开发候选说明，不代表 Git Tag、GitHub Release、路由器安装或真实数据验收已经完成。只有完整测试、敏感信息扫描、可复现构建和人工批准全部通过后，才可创建 `v0.7.5.0` Release；发布也不会自动部署到任何 OpenClaw 实例。
 
 ## 核心变化
 
@@ -23,10 +23,10 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `personal-diet-pantry-0.7.5-installable.tgz` | OpenClaw npm-pack 可安装包。 |
-| `personal-diet-pantry-0.7.5-source.tar.gz` | 干净提交的源码快照，不可交给插件安装器。 |
+| `personal-diet-pantry-0.7.5.0-installable.tgz` | OpenClaw npm-pack 可安装包。 |
+| `personal-diet-pantry-0.7.5.0-source.tar.gz` | 干净提交的源码快照，不可交给插件安装器。 |
 | `release-manifest.json` | 提交、环境、测试、可复现性和制品哈希证据。 |
-| `TEST-SUMMARY-v0.7.5.zh-CN.md` | 当次构建生成的测试总计、通过、跳过和失败数。 |
+| `TEST-SUMMARY-v0.7.5.0.zh-CN.md` | 当次构建生成的测试总计、通过、跳过和失败数。 |
 | `SHA256SUMS` | 覆盖前四个文件的 SHA-256。 |
 
 ## 数据迁移与回退
@@ -35,4 +35,4 @@
 
 从 v0.7.4.28 更新前必须停止实例并创建、校验位于 `dataDir` 外的 SQLite 冷备份。回退时必须停止实例、恢复这份升级前冷备份，再安装 v0.7.4.28；不能只换回旧代码后继续使用已应用 migration 022 的数据库。在线 `diet_system backup` 仅用于同版本恢复，不能替代升级前冷备份。
 
-完整变化见 [v0.7.5 更新说明](UPDATE-v0.7.5.zh-CN.md)，安装和升级入口分别见 [docs/INSTALL.md](docs/INSTALL.md) 与 [docs/UPGRADING.md](docs/UPGRADING.md)。
+完整变化见 [v0.7.5.0 更新说明](UPDATE-v0.7.5.0.zh-CN.md)，安装和升级入口分别见 [docs/INSTALL.md](docs/INSTALL.md) 与 [docs/UPGRADING.md](docs/UPGRADING.md)。
