@@ -1,0 +1,15 @@
+schema_version: 1
+registry: quantity-evidence
+entries:
+  - policy_key: portion.confirmed_personal_rule
+    operator: confirmed_personal_rule
+    values: {authority: user_confirmed, confirmation_required: false}
+  - policy_key: portion.package_spec
+    operator: package_spec
+    values: {authority: product_label, confirmation_required: false}
+  - policy_key: portion.standard_count_weight
+    operator: bounded_quantity
+    values: {authority: standard_portion, confirmation_required: false, require_bounds: true}
+  - policy_key: portion.generic.small_amount
+    operator: bounded_quantity
+    values: {authority: household_range, confirmation_required: true, require_bounds: true}

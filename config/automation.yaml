@@ -1,0 +1,8 @@
+enabled: false
+suggested_schedules:
+  expiry_check: "0 9 * * *"
+  daily_report: "0 21 * * *"
+  daily_report_retry: "10 21 * * *"
+  weekly_report: "30 21 * * 0"
+  monthly_report: "0 22 28-31 * *"
+  backup: "0 3 * * *"

@@ -1,0 +1,389 @@
+version: 1
+cases:
+  - id: meal-completed
+    prompt: 早餐吃了两个小红薯，喝了500毫升豆浆
+    expected_domain: meal
+    expected_reference: meal-and-nutrition.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_water, diet_pantry]
+    write_expectation: write
+    reference_contains: [completed food, nutritious drinks, Scale exactly once, do not preflight]
+    reply_contains: [已记录, 营养]
+  - id: meal-external
+    prompt: 中午在公司吃了两个煎蛋和一盒牛奶
+    expected_domain: meal
+    expected_reference: meal-and-nutrition.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_pantry]
+    write_expectation: write
+    reference_contains: [External meals never deduct home inventory]
+    reply_contains: [已记录, 不扣家里库存]
+  - id: meal-inventory-exact-targeted
+    prompt: 吃了库存里的一个鸡蛋
+    expected_domain: meal
+    expected_reference: meal-and-nutrition.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_pantry]
+    write_expectation: write
+    reference_contains: [internal targeted inventory resolution, no separate pantry preflight]
+    reply_contains: [已记录, 库存]
+  - id: meal-cooking
+    prompt: 煎了6个鸡蛋吃2个，剩4个放冰箱
+    expected_domain: meal
+    expected_reference: cooking-and-leftovers.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_pantry]
+    write_expectation: write
+    reference_contains: [record_cooking, atomically, one atomic diet_meal action]
+    reply_contains: [吃了2个, 剩4个]
+  - id: water-record
+    prompt: 刚喝了500毫升水
+    expected_domain: water
+    expected_reference: water-and-progress.md
+    allowed_tools: [diet_water]
+    forbidden_tools: [diet_meal]
+    write_expectation: write
+    reference_contains: [plain water, writes directly]
+    reply_contains: [已记录, "500"]
+  - id: water-cup
+    prompt: 刚喝了一杯白水
+    expected_domain: water
+    expected_reference: water-and-progress.md
+    allowed_tools: [diet_water]
+    forbidden_tools: [diet_meal]
+    write_expectation: write
+    reference_contains: [ordinary cups, estimated]
+    reply_contains: [已记录, 估算]
+  - id: water-progress
+    prompt: 今天水喝够了吗
+    expected_domain: water
+    expected_reference: water-and-progress.md
+    allowed_tools: [diet_water, diet_report]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [Daily progress, configured goals]
+    reply_contains: [饮水, 进度]
+  - id: zero-bare-number
+    prompt: "105"
+    expected_domain: zero-write
+    expected_reference: SKILL.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [bare number without explicit body-weight wording, zero tool calls]
+    reply_contains: [请补充单位或说明这是体重]
+  - id: weight-status
+    prompt: 空腹104.6
+    expected_domain: weight
+    expected_reference: weight-tracking.md
+    allowed_tools: [diet_weight]
+    forbidden_tools: [diet_meal]
+    write_expectation: write
+    reference_contains: [free-form status, measured_at]
+    reply_contains: [空腹, 7日均值]
+  - id: weight-trend
+    prompt: 最近体重趋势怎么样
+    expected_domain: weight
+    expected_reference: weight-tracking.md
+    allowed_tools: [diet_weight]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [rolling windows, Trend compares]
+    reply_contains: [趋势, kg]
+  - id: pantry-add
+    prompt: 买了两盒鸡蛋放进冰箱了
+    expected_domain: pantry
+    expected_reference: pantry-and-expiry.md
+    allowed_tools: [diet_pantry]
+    forbidden_tools: [diet_meal]
+    write_expectation: write
+    reference_contains: [clear completed purchase, package count]
+    reply_contains: [已入库, 两盒]
+  - id: pantry-discard
+    prompt: 苹果坏了一个，刚扔了
+    expected_domain: pantry
+    expected_reference: pantry-and-expiry.md
+    allowed_tools: [diet_pantry]
+    forbidden_tools: [diet_meal]
+    write_expectation: write
+    reference_contains: [waste, not consumption]
+    reply_contains: [已扣减, 坏了]
+  - id: pantry-expiry
+    prompt: 看看有哪些东西快过期
+    expected_domain: pantry
+    expected_reference: pantry-and-expiry.md
+    allowed_tools: [diet_pantry, diet_report]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [Expiry reporting is read-only]
+    reply_contains: [临期]
+  - id: pantry-nutrition-summary
+    prompt: 看看库存里这瓶牛奶的主要营养
+    expected_domain: pantry
+    expected_reference: pantry-and-expiry.md
+    allowed_tools: [diet_pantry]
+    forbidden_tools: [diet_meal, diet_report]
+    write_expectation: read
+    reference_contains: [diet_pantry search, nutrition_mode summary]
+    reply_contains: [营养]
+  - id: transaction-undo
+    prompt: 撤销刚才那条早餐
+    expected_domain: transaction
+    expected_reference: transactions-and-maintenance.md
+    allowed_tools: [diet_transaction]
+    forbidden_tools: []
+    write_expectation: write
+    reference_contains: [recent operations, Undo and redo are writes]
+    reply_contains: [已撤销]
+  - id: transaction-redo
+    prompt: 把刚才撤销的再恢复回来
+    expected_domain: transaction
+    expected_reference: transactions-and-maintenance.md
+    allowed_tools: [diet_transaction]
+    forbidden_tools: []
+    write_expectation: write
+    reference_contains: [redo, tool result as truth]
+    reply_contains: [已重做]
+  - id: transaction-recent
+    prompt: 我刚才都操作了什么
+    expected_domain: transaction
+    expected_reference: transactions-and-maintenance.md
+    allowed_tools: [diet_transaction]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [recent operations, Never ask the user]
+    reply_contains: [最近操作]
+  - id: report-daily
+    prompt: 给我看今天的饮食进度
+    expected_domain: report
+    expected_reference: water-and-progress.md
+    allowed_tools: [diet_report]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [Daily progress, six metrics, exactly two lines, one aggregate report call]
+    reply_contains: [今日, 进度]
+  - id: report-weekly
+    prompt: 这周的饮食周报
+    expected_domain: report
+    expected_reference: goals-preferences-learning.md
+    allowed_tools: [diet_report]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [confirmed nutrition goals, historical meal facts]
+    reply_contains: [周报]
+  - id: report-waste
+    prompt: 最近浪费了多少食物
+    expected_domain: report
+    expected_reference: recipes-shopping-and-cost.md
+    allowed_tools: [diet_report]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [Waste cost, missing cost]
+    reply_contains: [浪费]
+  - id: system-self-check
+    prompt: 检查一下食序管家是否正常
+    expected_domain: system
+    expected_reference: transactions-and-maintenance.md
+    allowed_tools: [diet_system]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [self-check, diet_system, session warm-up]
+    reply_contains: [自检]
+  - id: system-backup
+    prompt: 现在备份一次
+    expected_domain: system
+    expected_reference: transactions-and-maintenance.md
+    allowed_tools: [diet_system]
+    forbidden_tools: []
+    write_expectation: write
+    reference_contains: [operation_key, verified]
+    reply_contains: [备份]
+  - id: system-export
+    prompt: 导出我的全部饮食数据
+    expected_domain: system
+    expected_reference: exports-deletion-and-privacy.md
+    allowed_tools: [diet_system]
+    forbidden_tools: []
+    write_expectation: preview
+    reference_contains: [Exports have a manifest, safe external handle]
+    reply_contains: [导出]
+  - id: zero-denial
+    prompt: 我今天没吃早餐
+    expected_domain: zero-write
+    expected_reference: SKILL.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [non-occurrence, zero write calls]
+    reply_contains: [知道了]
+  - id: zero-plan
+    prompt: 明天打算喝两升水
+    expected_domain: zero-write
+    expected_reference: SKILL.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [Plans, zero write calls]
+    reply_contains: [计划]
+  - id: zero-number-code
+    prompt: 验证码是105，帮我记一下
+    expected_domain: zero-write
+    expected_reference: SKILL.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [bare number without explicit body-weight wording, zero tool calls]
+    reply_contains: [不作为体重]
+  - id: meal-ambiguous-small-milk
+    prompt: 家里有川象鲜牛奶200ml和小象巴氏乳250ml；我刚喝了一瓶小瓶牛奶
+    expected_domain: pantry
+    expected_reference: pantry-and-expiry.md
+    allowed_tools: [diet_pantry]
+    forbidden_tools: [diet_meal, diet_water]
+    write_expectation: read
+    reference_contains: [preserve the user's raw product wording, distinct products require one choice, reuse the returned handle]
+    reply_contains: [喝的是哪一款]
+  - id: meal-source-supplement-not-confirmation
+    prompt: 上一轮预览按200g鸭腿；我补充说“鸭腿是库存里面”
+    expected_domain: meal
+    expected_reference: SKILL.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [Supplemental facts are not confirmation, reassess write readiness]
+    reply_contains: [还需要确认重量]
+  - id: meal-final-quantity-supplement-direct-write
+    prompt: 上一轮花生预览是约25克；我现在补充“大概10粒，就按10克记吧”
+    expected_domain: meal
+    expected_reference: estimation-and-confirmation.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: write
+    reference_contains: [Supplemental facts with explicit final write authorization, do not create a replacement preview]
+    reply_contains: [10克]
+  - id: inventory-meal-label-supplement-direct-write
+    prompt: 上一轮已找到我刚喝的库存豆奶，但库存营养未知；标签每100克70千卡、蛋白3克、脂肪2克、碳水10克，就按整盒180克记，直接记录
+    expected_domain: meal
+    expected_reference: estimation-and-confirmation.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: write
+    reference_contains: [reuse the visible inventory_match_handle with the supplied nutrition facts]
+    reply_contains: [已记录]
+  - id: meal-bone-in-weight-unknown
+    prompt: 吃了库存里的一个带骨鸭腿，库存没有单只重量
+    expected_domain: meal
+    expected_reference: meal-and-nutrition.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [never default an unknown bone-in item to a precise weight]
+    reply_contains: [大约多重]
+  - id: meal-fat-trim-supplement
+    prompt: 鸭腿120g带骨，可食78g，另外剔除了3到5g脂肪
+    expected_domain: meal
+    expected_reference: cooking-and-leftovers.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [explicit fat loss changes fat and calories, ask for one usable value]
+    reply_contains: [按多少克脂肪计算]
+  - id: meal-fried-eggs-oil-unknown
+    prompt: 中午吃了四个煎蛋
+    expected_domain: meal
+    expected_reference: cooking-and-leftovers.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [fried food with unknown oil is not a complete cooked result]
+    reply_contains: [用了多少油]
+  - id: meal-two-liquids-one-request
+    prompt: 早餐喝了250ml牛奶和300ml黑咖啡
+    expected_domain: meal
+    expected_reference: meal-and-nutrition.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_water, diet_pantry]
+    write_expectation: write
+    reference_contains: [each liquid keeps its own volume and nutrition basis]
+    reply_contains: [已记录]
+  - id: report-fat-over-target
+    prompt: 脂肪77.25g，目标55g，今天超了多少
+    expected_domain: report
+    expected_reference: reply-style-and-error-boundaries.md
+    allowed_tools: [diet_report]
+    forbidden_tools: []
+    write_expectation: read
+    reference_contains: [over_by, 22.25g, 140%]
+    reply_contains: [超出22.25g, 140%]
+  - id: meal-cooking-transparent-result
+    prompt: 牛肉末炒洋葱分三份，吃一份，冻两份
+    expected_domain: meal
+    expected_reference: cooking-and-leftovers.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_pantry]
+    write_expectation: write
+    reference_contains: [whole recipe, consumed fraction, stored leftovers]
+    reply_contains: [整锅, 三分之一, 冷冻两份]
+  - id: pantry-product-discard-fefo
+    prompt: 有三盒豆花闷坏了，刚扔掉
+    expected_domain: pantry
+    expected_reference: pantry-and-expiry.md
+    allowed_tools: [diet_pantry]
+    forbidden_tools: [diet_meal]
+    write_expectation: write
+    reference_contains: [inventory_match_handle, discard, quantity, unit, product identity]
+    reply_contains: [已丢弃, 三盒]
+  - id: meal-prepared-leftover-direct
+    prompt: 刚把冰箱那盒猫耳朵吃了
+    expected_domain: meal
+    expected_reference: cooking-and-leftovers.md
+    allowed_tools: [diet_pantry, diet_meal]
+    forbidden_tools: [diet_water]
+    write_expectation: write
+    reference_contains: [prepared_food_handle, record_prepared, never recalculate]
+    reply_contains: [已记录, 剩菜]
+  - id: cross-day-all-intake
+    prompt: 昨天晚上到今天凌晨都吃喝了什么
+    expected_domain: meal
+    expected_reference: time-and-query-scopes.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_pantry, diet_system]
+    write_expectation: read
+    reference_contains: [all intake domains carried by `diet_meal` in that interval, Asia/Shanghai, explicit interval]
+    reply_contains: [时间范围, 晚餐, 加餐]
+  - id: vague-home-intake
+    prompt: 刚吃了一点库存里的花生
+    expected_domain: meal
+    expected_reference: estimation-and-confirmation.md
+    allowed_tools: [diet_meal]
+    forbidden_tools: [diet_report, diet_system]
+    write_expectation: preview
+    reference_contains: [one combined preview, zero business writes, suggested value and range]
+    reply_contains: [估算, 确认]
+  - id: negated-vague-intake
+    prompt: 昨天本来想吃一些花生但最后没吃
+    expected_domain: zero-write
+    expected_reference: SKILL.md
+    allowed_tools: []
+    forbidden_tools: [diet_meal, diet_water, diet_weight, diet_pantry, diet_transaction, diet_report, diet_system]
+    write_expectation: zero
+    reference_contains: [negative, planned, hypothetical, or cancelled, before time or quantity resolution]
+    reply_contains: [没有记录, 没有扣库存]
+  - id: preference-read
+    prompt: 我有什么忌口
+    expected_domain: system
+    expected_reference: goals-preferences-learning.md
+    allowed_tools: [diet_system]
+    forbidden_tools: [diet_meal, diet_pantry, diet_report]
+    write_expectation: read
+    reference_contains: [formal fact store, stops without Exec or file search]
+    reply_contains: [忌口]
+  - id: processed-stock-relationship
+    prompt: 这3个水煮蛋算不算在22个生鸡蛋里面
+    expected_domain: pantry
+    expected_reference: pantry-and-expiry.md
+    allowed_tools: [diet_pantry]
+    forbidden_tools: [diet_meal, diet_transaction]
+    write_expectation: read
+    reference_contains: [returned relation, prepared, raw ingredient]
+    reply_contains: [库存关系, 是否包含]

@@ -1,0 +1,118 @@
+name: Verified Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out exact ref
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Validate release event and version
+        run: >-
+          python scripts/check_release_ref.py
+          --project-root .
+          --event-name "${{ github.event_name }}"
+          --ref-name "${{ github.ref_name }}"
+
+      - name: Install locked source dependencies
+        run: |
+          npm ci
+          python -m pip install --disable-pip-version-check -r requirements.lock pytest
+
+      - name: Build verified immutable candidate
+        shell: pwsh
+        run: |
+          $releaseRoot = Join-Path $env:RUNNER_TEMP 'personal-diet-pantry-v0.7.4.27'
+          if (Test-Path -LiteralPath $releaseRoot) {
+            throw "Refusing existing release directory: $releaseRoot"
+          }
+          python scripts/build_release.py --project-root . --release-root $releaseRoot
+
+      - name: Upload verified candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: personal-diet-pantry-v0.7.4.27-candidate
+          path: ${{ runner.temp }}/personal-diet-pantry-v0.7.4.27
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+    needs: verify-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Download verified candidate
+        uses: actions/download-artifact@v8
+        with:
+          name: personal-diet-pantry-v0.7.4.27-candidate
+          path: ${{ runner.temp }}/verified-release
+
+      - name: Verify tag belongs to main and Release is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "$GITHUB_REF" != refs/tags/* ]]; then
+            echo "Release publishing requires a tag ref" >&2
+            exit 1
+          fi
+          git fetch origin main --no-tags
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Refusing to overwrite existing GitHub Release: $GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+
+      - name: Create GitHub Release once
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ROOT: ${{ runner.temp }}/verified-release
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "$RELEASE_ROOT/personal-diet-pantry-0.7.4.27-installable.tgz" \
+            "$RELEASE_ROOT/personal-diet-pantry-0.7.4.27-source.tar.gz" \
+            "$RELEASE_ROOT/release-manifest.json" \
+            "$RELEASE_ROOT/TEST-SUMMARY-v0.7.4.27.zh-CN.md" \
+            "$RELEASE_ROOT/SHA256SUMS" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Personal Diet Pantry v0.7.4.27" \
+            --notes-file "$RELEASE_ROOT/GitHub文档/RELEASE.zh-CN.md"

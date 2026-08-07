@@ -1,0 +1,552 @@
+schema_version: 1
+default_actions:
+  meal:
+  - record
+  - preview_record
+  - commit_record
+  - query
+  - update
+  - delete
+  - record_cooking
+  - record_prepared
+  water:
+  - record
+  - query
+  - update
+  - delete
+  weight:
+  - record
+  - query
+  - update
+  - delete
+  pantry:
+  - add
+  - preview_add
+  - commit_add
+  - query
+  - search
+  - adjust
+  - deduct
+  - discard
+  - open
+  - freeze
+  - thaw
+  - preview_update_metadata
+  - commit_update_metadata
+  - preview_link_nutrition
+  - commit_link_nutrition
+  transaction:
+  - get_recent
+  - undo
+  - redo
+  report:
+  - progress
+  - expiring_inventory
+  - insights
+  system:
+  - query_goals
+  - update_goals
+  - query_preferences
+  - update_preferences
+  - forget_preference
+domains:
+  meal:
+    commit_record:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_meal_water_contracts.py::test_meal_preview_commit_requires_real_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+    delete:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_meal_water_contracts.py::test_meal_update_and_delete_use_issued_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+    nutrition_estimate:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_meal_water_contracts.py::test_meal_nutrition_estimate_is_read_only
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_record:
+      mode: read
+      confirmation: conditional
+      retry: safe_read
+      python_test: tests/contracts/test_meal_water_contracts.py::test_meal_preview_commit_requires_real_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+    query:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_meal_water_contracts.py::test_meal_query_empty_and_after_record
+      typescript_test: src-tests/all-actions-schema.test.ts
+    record:
+      mode: mutation
+      confirmation: conditional
+      retry: operation_receipt
+      python_test: tests/contracts/test_live_intake_regressions.py::test_semantically_equivalent_intake_retry_replays_existing_meal
+      typescript_test: src-tests/all-actions-schema.test.ts
+    record_cooking:
+      mode: mutation
+      confirmation: conditional
+      retry: operation_receipt
+      python_test: tests/contracts/test_live_intake_regressions.py::test_cook_six_eggs_eat_two_store_four_is_conservative
+      typescript_test: src-tests/all-actions-schema.test.ts
+    record_prepared:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_prepared_food_direct_contracts.py::test_record_prepared_reuses_snapshot_and_only_deducts_leftover
+      typescript_test: src-tests/prepared-food-schema.test.ts
+    save_recipe:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_recipe_shopping_contracts.py::test_save_recipe_then_suggest_uses_current_pantry_without_writing
+      typescript_test: src-tests/all-actions-schema.test.ts
+    suggest_recipes:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_recipe_shopping_contracts.py::test_save_recipe_then_suggest_uses_current_pantry_without_writing
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_meal_plan:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_recipe_shopping_contracts.py::test_preview_meal_plan_is_bounded_and_read_only
+      typescript_test: src-tests/all-actions-schema.test.ts
+    update:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_meal_water_contracts.py::test_meal_update_and_delete_use_issued_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+  water:
+    delete:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_meal_water_contracts.py::test_water_update_and_delete_use_issued_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+    query:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_meal_water_contracts.py::test_water_query_empty_and_after_record
+      typescript_test: src-tests/all-actions-schema.test.ts
+    record:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_meal_water_contracts.py::test_water_record_is_semantically_idempotent
+      typescript_test: src-tests/all-actions-schema.test.ts
+    update:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_meal_water_contracts.py::test_water_update_and_delete_use_issued_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+  weight:
+    delete:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_body_weight_contracts.py::test_query_update_and_delete_use_opaque_record_handle
+      typescript_test: src-tests/body-weight-schema.test.ts
+    query:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_body_weight_contracts.py::test_record_uses_system_time_default_kg_and_returns_summary
+      typescript_test: src-tests/body-weight-schema.test.ts
+    record:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_body_weight_contracts.py::test_record_uses_system_time_default_kg_and_returns_summary
+      typescript_test: src-tests/body-weight-schema.test.ts
+    update:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_body_weight_contracts.py::test_query_update_and_delete_use_opaque_record_handle
+      typescript_test: src-tests/body-weight-schema.test.ts
+  pantry:
+    cancel_shopping_list:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_recipe_shopping_contracts.py::test_shopping_preview_commit_query_cancel_never_creates_inventory
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_shopping_list:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_recipe_shopping_contracts.py::test_shopping_preview_commit_query_cancel_never_creates_inventory
+      typescript_test: src-tests/all-actions-schema.test.ts
+    add:
+      mode: mutation
+      confirmation: conditional
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_pantry_add_is_semantically_idempotent
+      typescript_test: src-tests/all-actions-schema.test.ts
+    adjust:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_adjust_discard_open_freeze_thaw_transitions
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_add:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_preview_add_commit_add_requires_matching_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_deduct:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_preview_deduct_commit_deduct_preserves_nonnegative_stock
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_link_nutrition:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_nutrition_link_preview_commit_preserves_quantity
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_update_metadata:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_metadata_preview_commit_changes_only_metadata
+      typescript_test: src-tests/all-actions-schema.test.ts
+    discard:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_three_boxes_discard_uses_product_handle_and_fefo
+      typescript_test: src-tests/pantry-search-schema.test.ts
+    deduct:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_inventory_search_contracts.py::test_product_handle_direct_deduct_uses_selected_sku_without_requery
+      typescript_test: src-tests/pantry-search-schema.test.ts
+    freeze:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_adjust_discard_open_freeze_thaw_transitions
+      typescript_test: src-tests/all-actions-schema.test.ts
+    open:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_adjust_discard_open_freeze_thaw_transitions
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_add:
+      mode: read
+      confirmation: conditional
+      retry: safe_read
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_preview_add_commit_add_requires_matching_handle
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_deduct:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_preview_deduct_commit_deduct_preserves_nonnegative_stock
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_link_nutrition:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_nutrition_link_preview_commit_preserves_quantity
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_shopping_list:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_recipe_shopping_contracts.py::test_shopping_preview_commit_query_cancel_never_creates_inventory
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_update_metadata:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_metadata_preview_commit_changes_only_metadata
+      typescript_test: src-tests/all-actions-schema.test.ts
+    query:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_pantry_query_empty_and_after_add
+      typescript_test: src-tests/all-actions-schema.test.ts
+    query_shopping_list:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_recipe_shopping_contracts.py::test_shopping_preview_commit_query_cancel_never_creates_inventory
+      typescript_test: src-tests/all-actions-schema.test.ts
+    search:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_inventory_search_contracts.py::test_public_search_returns_bounded_candidates_and_handles
+      typescript_test: src-tests/pantry-search-schema.test.ts
+    thaw:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_adjust_discard_open_freeze_thaw_transitions
+      typescript_test: src-tests/all-actions-schema.test.ts
+  transaction:
+    get_recent:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_transaction_get_recent_returns_opaque_operation_handles
+      typescript_test: src-tests/all-actions-schema.test.ts
+    redo:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_transaction_undo_redo_restores_exact_pantry_state
+      typescript_test: src-tests/all-actions-schema.test.ts
+    undo:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_pantry_transaction_contracts.py::test_transaction_undo_redo_restores_exact_pantry_state
+      typescript_test: src-tests/all-actions-schema.test.ts
+  report:
+    cost_summary:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_cost_report_contracts.py::test_cost_summary_never_sums_different_currencies
+      typescript_test: src-tests/all-actions-schema.test.ts
+    daily:
+      mode: derived_file
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_today_daily_weekly_monthly_generate_only_derived_files
+      typescript_test: src-tests/all-actions-schema.test.ts
+    expiring_inventory:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_expiring_inventory_is_read_only_and_calendar_correct
+      typescript_test: src-tests/all-actions-schema.test.ts
+    insights:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_insights_is_read_only_bounded_and_goal_gated
+      typescript_test: src-tests/all-actions-schema.test.ts
+    monthly:
+      mode: derived_file
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_today_daily_weekly_monthly_generate_only_derived_files
+      typescript_test: src-tests/all-actions-schema.test.ts
+    progress:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_progress_is_read_only_and_goal_gated
+      typescript_test: src-tests/all-actions-schema.test.ts
+    today:
+      mode: derived_file
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_today_daily_weekly_monthly_generate_only_derived_files
+      typescript_test: src-tests/all-actions-schema.test.ts
+    trend_summary:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_cost_report_contracts.py::test_trend_summary_is_bounded_for_two_year_personal_window
+      typescript_test: src-tests/all-actions-schema.test.ts
+    waste_summary:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_cost_report_contracts.py::test_waste_defaults_unspecified_and_adjustment_is_not_waste
+      typescript_test: src-tests/all-actions-schema.test.ts
+    weekly:
+      mode: derived_file
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_today_daily_weekly_monthly_generate_only_derived_files
+      typescript_test: src-tests/all-actions-schema.test.ts
+  system:
+    backup:
+      mode: maintenance
+      confirmation: none
+      retry: no_blind_retry
+      python_test: tests/contracts/test_report_system_contracts.py::test_backup_is_verified_and_does_not_change_business_rows
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_delete_data:
+      mode: maintenance
+      confirmation: required_true
+      retry: no_blind_retry
+      python_test: tests/contracts/test_data_erasure_contracts.py::test_all_business_erasure_keeps_backups_and_replay_is_idempotent
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_nutrition_backfill:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_report_system_contracts.py::test_nutrition_backfill_commit_is_atomic_and_undoable
+      typescript_test: src-tests/all-actions-schema.test.ts
+    export_data:
+      mode: maintenance
+      confirmation: none
+      retry: no_blind_retry
+      python_test: tests/contracts/test_data_portability_contracts.py::test_json_export_is_versioned_atomic_private_and_handle_stable
+      typescript_test: src-tests/all-actions-schema.test.ts
+    forget_preference:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_report_system_contracts.py::test_query_update_and_forget_preferences
+      typescript_test: src-tests/all-actions-schema.test.ts
+    import_data:
+      mode: maintenance
+      confirmation: required_true
+      retry: no_blind_retry
+      python_test: tests/contracts/test_data_portability_contracts.py::test_validate_then_import_round_trip_is_atomic_and_retry_safe
+      typescript_test: src-tests/all-actions-schema.test.ts
+    initialize:
+      mode: maintenance
+      confirmation: none
+      retry: no_blind_retry
+      python_test: tests/contracts/test_report_system_contracts.py::test_initialize_and_self_check_on_clean_database
+      typescript_test: src-tests/all-actions-schema.test.ts
+    maintenance_history:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_maintenance_contracts.py::test_maintenance_status_and_history_are_bounded_and_path_free
+      typescript_test: src-tests/maintenance-schema.test.ts
+    maintenance_status:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_maintenance_contracts.py::test_maintenance_status_and_history_are_bounded_and_path_free
+      typescript_test: src-tests/maintenance-schema.test.ts
+    migrate:
+      mode: maintenance
+      confirmation: none
+      retry: no_blind_retry
+      python_test: tests/contracts/test_report_system_contracts.py::test_migrate_is_idempotent_at_latest_schema
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_delete_data:
+      mode: read
+      confirmation: workflow_handle
+      retry: safe_read
+      python_test: tests/contracts/test_data_erasure_contracts.py::test_delete_scopes_are_distinct_and_intake_range_requires_dates
+      typescript_test: src-tests/all-actions-schema.test.ts
+    query_goals:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_query_update_undo_redo_goals
+      typescript_test: src-tests/all-actions-schema.test.ts
+    query_nutrition_backfill:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_nutrition_backfill_query_is_bounded
+      typescript_test: src-tests/all-actions-schema.test.ts
+    query_preferences:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_query_update_and_forget_preferences
+      typescript_test: src-tests/all-actions-schema.test.ts
+    repair:
+      mode: maintenance
+      confirmation: none
+      retry: no_blind_retry
+      python_test: tests/contracts/test_report_system_contracts.py::test_repair_requires_isolated_corruption_fixture
+      typescript_test: src-tests/all-actions-schema.test.ts
+    restore:
+      mode: maintenance
+      confirmation: required_true
+      retry: no_blind_retry
+      python_test: tests/contracts/test_report_system_contracts.py::test_restore_round_trip_recovers_exact_business_state
+      typescript_test: src-tests/all-actions-schema.test.ts
+    self_check:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_initialize_and_self_check_on_clean_database
+      typescript_test: src-tests/all-actions-schema.test.ts
+    update_goals:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_report_system_contracts.py::test_query_update_undo_redo_goals
+      typescript_test: src-tests/all-actions-schema.test.ts
+    update_preferences:
+      mode: mutation
+      confirmation: none
+      retry: operation_receipt
+      python_test: tests/contracts/test_report_system_contracts.py::test_query_update_and_forget_preferences
+      typescript_test: src-tests/all-actions-schema.test.ts
+    validate_import:
+      mode: read
+      confirmation: workflow_handle
+      retry: safe_read
+      python_test: tests/contracts/test_data_portability_contracts.py::test_validate_import_rejects_corruption_without_writes
+      typescript_test: src-tests/all-actions-schema.test.ts
+    validate_database:
+      mode: read
+      confirmation: none
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_validate_database_reports_integrity_and_foreign_keys
+      typescript_test: src-tests/all-actions-schema.test.ts
+skill_routes:
+  meal_record:
+    domain: meal
+    action: record
+  prepared_meal_record:
+    domain: meal
+    action: record_prepared
+  cooking_record:
+    domain: meal
+    action: record_cooking
+  water_record:
+    domain: water
+    action: record
+  weight_record:
+    domain: weight
+    action: record
+  pantry_search:
+    domain: pantry
+    action: search
+  pantry_add:
+    domain: pantry
+    action: add
+  pantry_deduct:
+    domain: pantry
+    action: deduct
+  pantry_discard:
+    domain: pantry
+    action: discard
+  recent_operations:
+    domain: transaction
+    action: get_recent
+  undo:
+    domain: transaction
+    action: undo
+  redo:
+    domain: transaction
+    action: redo
+  daily_progress:
+    domain: report
+    action: progress
+  self_check:
+    domain: system
+    action: self_check

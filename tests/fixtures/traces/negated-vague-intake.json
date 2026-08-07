@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "scenario_id": "negated-vague-intake",
+  "user_input": "昨天本来想吃一些花生但最后没吃",
+  "event_status": "not_occurred",
+  "resolutions": [],
+  "tool_calls": [],
+  "database_assertions": {
+    "before": {"active_meals": 4, "pantry_peanut_g": "350"},
+    "after": {"active_meals": 4, "pantry_peanut_g": "350"}
+  },
+  "final_replies": [
+    "知道了，最后没有吃，所以没有记录，也没有扣库存。"
+  ]
+}

@@ -1,0 +1,12 @@
+schema_version: 1
+registry: report-taxonomy
+entries:
+  - policy_key: expiry.expired
+    operator: expiry_state
+    values: {public_name: expired, include_past_without_lower_bound: true}
+  - policy_key: expiry.expiring_soon
+    operator: expiry_state
+    values: {public_name: expiring_soon, apply_future_cutoff: true}
+  - policy_key: expiry.usable
+    operator: expiry_state
+    values: {public_name: usable, apply_future_cutoff: true}

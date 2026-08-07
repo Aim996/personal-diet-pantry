@@ -1,0 +1,13 @@
+portions:
+  bowl cooked rice:
+    weight_g: "150"
+    source_grade: C
+    uncertainty: bowl size varies
+  palm chicken breast:
+    weight_g: "100"
+    source_grade: C
+    uncertainty: hand size varies
+  medium shrimp:
+    weight_g: "8"
+    source_grade: C
+    uncertainty: shrimp size varies

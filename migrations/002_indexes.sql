@@ -1,0 +1,12 @@
+CREATE INDEX idx_meals_occurred_at ON meals (occurred_at, id);
+CREATE INDEX idx_meal_items_meal_id ON meal_items (meal_id, id);
+CREATE INDEX idx_water_logs_occurred_at ON water_logs (occurred_at, id);
+CREATE INDEX idx_pantry_batches_selection ON pantry_batches (status, opened_at, expires_at, added_at, id);
+CREATE INDEX idx_pantry_movements_batch_id ON pantry_movements (pantry_batch_id, created_at, id);
+CREATE INDEX idx_pantry_movements_meal_id ON pantry_movements (linked_meal_id, created_at, id);
+CREATE INDEX idx_transactions_created_at ON transactions (created_at, id);
+CREATE INDEX idx_nutrition_cache_expiry ON nutrition_cache (expires_at, id);
+CREATE INDEX idx_personal_rules_subject ON personal_rules (rule_type, subject, active, id);
+CREATE INDEX idx_learning_events_rule_id ON learning_events (rule_id, created_at, id);
+CREATE INDEX idx_pending_inventory_links_status ON pending_inventory_links (status, created_at, id);
+CREATE INDEX idx_operation_previews_expiry ON operation_previews (expires_at, consumed_at);

@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "scenario_id": "packaged-soy-one-box",
+  "user_input": "早上喝了库存里的一盒原味豆奶",
+  "elapsed_ms": 842,
+  "tool_calls": [
+    {
+      "tool": "diet_pantry",
+      "action": "search",
+      "arguments": {
+        "search_text": "原味豆奶",
+        "unit": "盒",
+        "nutrition_mode": "none"
+      },
+      "result": {
+        "ok": true,
+        "candidates": [
+          {
+            "normalized_name": "原味豆奶",
+            "remaining_quantity": "500",
+            "unit": "ml",
+            "remaining_display_quantity": "2",
+            "display_unit": "盒",
+            "base_quantity_per_display_unit": "250",
+            "workflow": {
+              "inventory_match_handle": "0123456789abcdef0123456789abcdef0123456789abcdef"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "tool": "diet_meal",
+      "action": "record",
+      "arguments": {
+        "items": [
+          {
+            "raw_name": "库存里的一盒原味豆奶",
+            "normalized_name": "原味豆奶",
+            "amount": "1",
+            "unit": "盒",
+            "inventory_match_handle": "0123456789abcdef0123456789abcdef0123456789abcdef"
+          }
+        ]
+      },
+      "result": {
+        "ok": true,
+        "data": {
+          "meal": {
+            "items": [
+              {
+                "normalized_name": "原味豆奶",
+                "amount": "250",
+                "unit": "ml",
+                "nutrition_status": "partial",
+                "fiber_g": null,
+                "sodium_mg": null
+              }
+            ]
+          },
+          "inventory_effects": [
+            {
+              "normalized_name": "原味豆奶",
+              "quantity_delta": "-250",
+              "unit": "ml"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "final_replies": [
+    "已记录：原味豆奶 1盒（250ml）。库存剩余 1盒；标签未提供的膳食纤维和钠保持未知。"
+  ],
+  "database_assertions": {
+    "before": {
+      "pantry_remaining_ml": "500",
+      "active_meals": 0,
+      "nutrition_evidence_rows": 0
+    },
+    "after": {
+      "pantry_remaining_ml": "250",
+      "active_meals": 1,
+      "meal_item_amount": "250",
+      "meal_item_unit": "ml",
+      "fiber_g": null,
+      "sodium_mg": null,
+      "nutrition_evidence_rows": 1
+    },
+    "after_undo": {
+      "pantry_remaining_ml": "500",
+      "active_meals": 0,
+      "nutrition_evidence_rows": 0
+    }
+  }
+}

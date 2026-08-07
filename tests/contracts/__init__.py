@@ -1,0 +1,1 @@
+"""Public behavior contract tests."""

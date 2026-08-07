@@ -1,0 +1,59 @@
+{
+  "name": "personal-diet-pantry",
+  "version": "0.8.27",
+  "productVersion": "0.7.4.27",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.22.3"
+  },
+  "files": [
+    "config/*.yaml",
+    "control-migrations/*.sql",
+    "dist/*.d.ts",
+    "dist/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.js",
+    "migrations/*.sql",
+    "LICENSE",
+    "openclaw.plugin.json",
+    "pyproject.toml",
+    "python/personal_diet_pantry/*.py",
+    "README.md",
+    "UPDATE-v0.7.4.27.zh-CN.md",
+    "requirements.lock",
+    "rules/*.yaml",
+    "skills/personal-diet-pantry",
+    "templates/**/*.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "plugin:build": "npm run build && openclaw plugins build --root . --entry ./dist/index.js",
+    "plugin:validate": "npm run build && openclaw plugins build --check --root . --entry ./dist/index.js && openclaw plugins validate --root . --entry ./dist/index.js"
+  },
+  "dependencies": {
+    "typebox": "^1.1.38"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.5.17"
+  },
+  "devDependencies": {
+    "@openclaw/ai": "2026.7.1-2",
+    "@types/node": "^24.0.0",
+    "@types/ws": "^8.18.1",
+    "openclaw": "2026.7.1-2",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  },
+  "overrides": {
+    "postcss": "8.5.23",
+    "protobufjs": "7.6.5"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+*
+!personal-diet-pantry-0.8.5.tgz
+!docker/
+!docker/first-user/
+!docker/first-user/Dockerfile
+!docker/first-user/verify.sh
+!scripts/
+!scripts/bridge_probe.mjs

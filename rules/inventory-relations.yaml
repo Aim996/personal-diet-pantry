@@ -1,0 +1,12 @@
+schema_version: 1
+registry: inventory-relations
+entries:
+  - policy_key: kind.raw_food
+    operator: inventory_kind
+    values: {public_name: raw_food}
+  - policy_key: kind.prepared_food
+    operator: inventory_kind
+    values: {public_name: prepared_food}
+  - policy_key: relation.prepared_from_cooking
+    operator: provenance_relation
+    values: {direction: source_to_result, evidence_type: committed_transaction, public_summary: 由已提交的烹饪事务生成}

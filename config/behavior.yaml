@@ -1,0 +1,29 @@
+inventory:
+  auto_deduct: true
+  ask_below_confidence: 0.65
+  allow_negative_stock: false
+  deduction_strategy:
+    - opened_first
+    - earliest_expiry
+    - earliest_added
+  preview_expiration_minutes: 15
+  auto_deduct_confidence: 0.80
+  pending_link_confidence: 0.55
+  confidence_weights:
+    source_confidence: 1
+    name_match_confidence: 1
+    quantity_confidence: 1
+    batch_uniqueness: 1
+    context_consistency: 1
+    personal_rule_confidence: 1
+learning:
+  enabled: true
+  promotion_evidence_count: 3
+  allow_automatic_promotion: true
+meal_logging:
+  infer_meal_type: true
+  infer_portion: true
+  record_planned_meals: false
+  restaurant_food_deduct_inventory: false
+water:
+  max_single_entry_ml: 5000

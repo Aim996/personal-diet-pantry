@@ -1,0 +1,31 @@
+name: 功能建议
+description: 从普通 OpenClaw 用户的真实场景描述期望改进
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 用户场景
+      description: 说明什么时候、想完成什么，不要只写实现方式。
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: 用户价值
+      description: 改进后会减少什么误记、中断或额外操作？
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 当前替代方案
+      description: 现在如何完成，哪一步不可信或不顺手？
+  - type: textarea
+    id: invariant-impact
+    attributes:
+      label: 受保护行为影响
+      description: 是否会改变六项回执、确认前零写入、过期硬边界、撤销或其他受保护行为？
+    validations:
+      required: true

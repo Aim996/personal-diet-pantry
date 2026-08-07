@@ -1,0 +1,47 @@
+foods:
+  玉米:
+    calories: "100"
+    protein: "3.4"
+    fat: "1.5"
+    carbohydrate: "20.5"
+    fiber: "2.4"
+    sodium: "3"
+    source: 中国食物成分表常见估算，煮甜玉米可食部
+    source_grade: C
+    uncertainty: 不同品种、成熟度和烹饪方式会导致营养波动
+  chicken breast:
+    calories: "165"
+    protein: "31"
+    fat: "3.6"
+    carbohydrate: "0"
+    fiber: "0"
+    sodium: "74"
+    source: USDA FoodData Central, cooked skinless breast
+    source_grade: A
+  shrimp:
+    calories: "99"
+    protein: "24"
+    fat: "0.3"
+    carbohydrate: "0.2"
+    fiber: "0"
+    sodium: "111"
+    source: USDA FoodData Central, cooked shrimp
+    source_grade: A
+  pork ribs:
+    calories: "361"
+    protein: "19"
+    fat: "30"
+    carbohydrate: "0"
+    fiber: "0"
+    sodium: "84"
+    source: USDA FoodData Central, cooked pork ribs
+    source_grade: A
+  whole fish:
+    calories: "128"
+    protein: "26"
+    fat: "2.7"
+    carbohydrate: "0"
+    fiber: "0"
+    sodium: "59"
+    source: USDA FoodData Central, cooked fish
+    source_grade: A

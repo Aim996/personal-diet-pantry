@@ -1,0 +1,67 @@
+schema_version: 1
+registry: temporal-scopes
+entries:
+  - policy_key: calendar.day
+    operator: calendar_unit
+    values: {unit: day, anchor: day_start}
+  - policy_key: calendar.week
+    operator: calendar_unit
+    values: {unit: week, anchor: week_start, week_start: 1}
+    overridable: [week_start]
+  - policy_key: calendar.month
+    operator: calendar_unit
+    values: {unit: month, anchor: month_start}
+  - policy_key: anchor.today
+    operator: calendar_anchor
+    values: {unit: day, offset: 0, aliases: [今天, 今日, 今儿, 今晚, 今夜]}
+  - policy_key: anchor.yesterday
+    operator: calendar_anchor
+    values: {unit: day, offset: -1, aliases: [昨天, 昨日, 昨儿, 昨晚, 昨夜]}
+  - policy_key: anchor.current_week
+    operator: calendar_anchor
+    values: {unit: week, offset: 0, aliases: [本周, 这周, 这个星期]}
+  - policy_key: anchor.previous_week
+    operator: calendar_anchor
+    values: {unit: week, offset: -1, aliases: [上周, 上星期, 上个星期]}
+  - policy_key: anchor.current_month
+    operator: calendar_anchor
+    values: {unit: month, offset: 0, aliases: [本月, 这个月]}
+  - policy_key: anchor.previous_month
+    operator: calendar_anchor
+    values: {unit: month, offset: -1, aliases: [上月, 上个月]}
+  - policy_key: duration.minute
+    operator: rolling_duration
+    values: {unit: minute, seconds: 60}
+  - policy_key: duration.hour
+    operator: rolling_duration
+    values: {unit: hour, seconds: 3600}
+  - policy_key: duration.day
+    operator: rolling_duration
+    values: {unit: day, seconds: 86400}
+  - policy_key: duration.week
+    operator: rolling_duration
+    values: {unit: week, seconds: 604800}
+  - policy_key: segment.full
+    operator: local_segment
+    values: {start: "00:00", end: "00:00", cross_day: true, aliases: [全天, 整天]}
+    overridable: [aliases]
+  - policy_key: segment.morning
+    operator: local_segment
+    values: {start: "05:00", end: "12:00", cross_day: false, aliases: [早上, 上午]}
+    overridable: [start, end, aliases]
+  - policy_key: segment.afternoon
+    operator: local_segment
+    values: {start: "12:00", end: "18:00", cross_day: false, aliases: [下午]}
+    overridable: [start, end, aliases]
+  - policy_key: segment.evening
+    operator: local_segment
+    values: {start: "18:00", end: "23:00", cross_day: false, aliases: [傍晚, 晚上]}
+    overridable: [start, end, aliases]
+  - policy_key: segment.night
+    operator: local_segment
+    values: {start: "18:00", end: "02:00", cross_day: true, aliases: [昨晚, 昨夜, 夜间, 夜里, 夜晚, 夜宵时段]}
+    overridable: [start, end, aliases]
+  - policy_key: segment.overnight
+    operator: local_segment
+    values: {start: "18:00", end: "06:00", cross_day: true, aliases: [到今天凌晨, 到凌晨, 到天亮前, 天亮前]}
+    overridable: [start, end, aliases]

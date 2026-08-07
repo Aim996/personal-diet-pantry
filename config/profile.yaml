@@ -1,0 +1,11 @@
+name: owner
+timezone: Asia/Shanghai
+language: zh-CN
+default_meal_times:
+  breakfast: "08:00"
+  lunch: "12:30"
+  dinner: "19:00"
+default_water_units:
+  cup_ml: 300
+  glass_ml: 250
+  bottle_ml: 550

@@ -1,0 +1,56 @@
+name: Bug 报告
+description: 报告可复现的功能、安装或数据一致性问题
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请只提供脱敏的最小复现。不要上传数据库、备份、导出、令牌、地址或个人饮食数据。
+  - type: input
+    id: product-version
+    attributes:
+      label: 产品版本
+      placeholder: 0.7.4.19
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: 技术包版本
+      placeholder: 0.8.17
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 请列出 OpenClaw、Node.js、Python 和操作系统版本。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 最小复现步骤
+      description: 使用虚构食物和隔离 dataDir，说明自然语言输入、确认步骤和工具结果。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 隐私确认
+      options:
+        - label: 我已确认附件和文本不含数据库、备份、令牌、地址、主机信息或个人饮食数据。
+          required: true

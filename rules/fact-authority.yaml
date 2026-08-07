@@ -1,0 +1,18 @@
+schema_version: 1
+registry: fact-authority
+entries:
+  - policy_key: authority.goals
+    operator: formal_source
+    values: {source: goal_profile, allow_unconfirmed_suggestion: false}
+  - policy_key: authority.timezone
+    operator: formal_source
+    values: {source: goal_profile, allow_unconfirmed_suggestion: false}
+  - policy_key: authority.allergy
+    operator: formal_source
+    values: {source: learned_rules, allow_unconfirmed_suggestion: false}
+  - policy_key: authority.preference
+    operator: formal_source
+    values: {source: learned_rules, allow_unconfirmed_suggestion: true}
+  - policy_key: authority.personal_portion
+    operator: formal_source
+    values: {source: learned_rules, allow_unconfirmed_suggestion: true}

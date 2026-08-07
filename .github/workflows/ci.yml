@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install locked source dependencies
+        run: |
+          npm ci
+          python -m pip install --disable-pip-version-check -r requirements.lock pytest
+
+      - name: Scan source for sensitive content
+        run: python scripts/scan_sensitive_content.py .
+
+      - name: Verify generated contracts and Skill
+        env:
+          PYTHONPATH: python
+        run: |
+          python scripts/generate_tool_contracts.py --root . --check
+          python scripts/lint_skill.py --skill skills/personal-diet-pantry --cases tests/skill-evals/routing.yaml
+          python scripts/validate_skill.py
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Run TypeScript tests
+        run: node node_modules/vitest/vitest.mjs run
+
+      - name: Run Python tests
+        env:
+          PYTHONPATH: python
+        run: python -m pytest -p no:cacheprovider -q
+
+      - name: Audit release inputs
+        run: python scripts/release_audit.py .
+
+      - name: Verify installable allowlist
+        run: npm pack --dry-run --json

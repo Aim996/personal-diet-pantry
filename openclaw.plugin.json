@@ -1,0 +1,41 @@
+{
+  "id": "personal-diet-pantry",
+  "name": "Personal Diet Pantry",
+  "description": "Local meal, hydration, body-weight, pantry, reporting, and recovery tools.",
+  "version": "0.8.27",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "dataDir": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16384,
+        "description": "Isolated directory for the diet database and generated files."
+      },
+      "testRunId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+      }
+    },
+    "additionalProperties": false
+  },
+  "activation": {
+    "onStartup": true
+  },
+  "skills": [
+    "skills"
+  ],
+  "contracts": {
+    "tools": [
+      "diet_meal",
+      "diet_water",
+      "diet_weight",
+      "diet_pantry",
+      "diet_transaction",
+      "diet_report",
+      "diet_system"
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+# Node and TypeScript build output
+node_modules/
+dist/
+coverage/
+.tools/
+pnpm-lock.yaml
+
+# Python environments and caches
+.venv/
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-tmp/
+.coverage
+htmlcov/
+
+# Local configuration and credentials
+.env
+.env.*
+*.credential*
+*.secret*
+*.api-key*
+
+# Runtime data is never source
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+backups/
+cache/
+exports/
+imports/
+reports/
+health-report.md
+
+# Generated release and verification artifacts
+dist-package/
+*.tgz
+*.tar.gz
+release-manifest.json
+SHA256SUMS
+TEST-SUMMARY-*.md
+verification-summary.json
+
+# Editor and operating-system noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

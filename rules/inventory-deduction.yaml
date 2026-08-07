@@ -1,0 +1,4 @@
+deduction_strategy:
+  - opened_first
+  - earliest_expiry
+  - earliest_added

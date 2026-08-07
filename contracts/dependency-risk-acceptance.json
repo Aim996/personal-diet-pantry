@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "accepted": [
+    {
+      "advisory_id": "GHSA-frvp-7c67-39w9",
+      "package": "@hono/node-server",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/@hono/node-server",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-mh99-v99m-4gvg",
+      "package": "brace-expansion",
+      "severity": "high",
+      "dependency_path": "node_modules/openclaw/node_modules/brace-expansion",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-rgw5-rvv9-x895",
+      "package": "brace-expansion",
+      "severity": "high",
+      "dependency_path": "node_modules/openclaw/node_modules/brace-expansion",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-4c8g-83qw-93j6",
+      "package": "fast-uri",
+      "severity": "high",
+      "dependency_path": "node_modules/openclaw/node_modules/fast-uri",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-v2hh-gcrm-f6hx",
+      "package": "fast-uri",
+      "severity": "high",
+      "dependency_path": "node_modules/openclaw/node_modules/fast-uri",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-7p8r-x3mc-p8w7",
+      "package": "fast-uri",
+      "severity": "high",
+      "dependency_path": "node_modules/openclaw/node_modules/fast-uri",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-xgm2-5f3f-mvvc",
+      "package": "hono",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/hono",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-hvrm-45r6-mjfj",
+      "package": "hono",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/hono",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-w62v-xxxg-mg59",
+      "package": "hono",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/hono",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-8j4g-w8fx-2239",
+      "package": "hono",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/hono",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-22jq-vg5j-6vgg",
+      "package": "ip-address",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/ip-address",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-4xrf-jv44-h6hh",
+      "package": "ip-address",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/ip-address",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-mwp4-54f8-5fhr",
+      "package": "ip-address",
+      "severity": "high",
+      "dependency_path": "node_modules/openclaw/node_modules/ip-address",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-r292-9mhp-454m",
+      "package": "tar",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/tar",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-4cwx-7wf7-3272",
+      "package": "undici",
+      "severity": "high",
+      "dependency_path": "node_modules/openclaw/node_modules/undici",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-8xcm-r25x-g524",
+      "package": "undici",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/undici",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-jr45-8vmc-qm54",
+      "package": "undici",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/undici",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-m8rv-5g2x-5cg5",
+      "package": "undici",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/undici",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-v3r7-h72x-cjcm",
+      "package": "undici",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/undici",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-04",
+      "review_deadline": "2026-09-03"
+    }
+  ]
+}

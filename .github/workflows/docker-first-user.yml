@@ -1,0 +1,84 @@
+name: Docker first-user installation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-first-user-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-first-user:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install source dependencies
+        run: |
+          npm ci
+          python -m pip install --disable-pip-version-check -r requirements.lock pytest
+
+      - name: Run source gates
+        env:
+          PYTHONPATH: python
+        run: |
+          python scripts/scan_sensitive_content.py .
+          npm test
+          npm run build
+          python -m pytest tests -q
+
+      - name: Build the installable npm-pack
+        run: |
+          npm pack --pack-destination .
+          test -f personal-diet-pantry-0.8.17.tgz
+
+      - name: Build fresh-user image
+        run: |
+          docker build \
+            --no-cache \
+            --build-arg PLUGIN_ARCHIVE=personal-diet-pantry-0.8.17.tgz \
+            --tag personal-diet-pantry:first-user \
+            --file docker/first-user/Dockerfile \
+            .
+
+      - name: Run fresh-user installation
+        run: |
+          set +e
+          container_name="personal-diet-pantry-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          docker run --name "${container_name}" personal-diet-pantry:first-user
+          container_status=$?
+          mkdir -p verification-artifacts
+          docker cp \
+            "${container_name}:/home/newcomer/verification-summary.json" \
+            verification-artifacts/verification-summary.json 2>/dev/null
+          docker rm "${container_name}" >/dev/null
+          exit "${container_status}"
+
+      - name: Upload bounded verification summary
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-first-user-summary
+          path: verification-artifacts/verification-summary.json
+          if-no-files-found: ignore
+          retention-days: 14

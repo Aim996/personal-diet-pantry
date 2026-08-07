@@ -1,0 +1,24 @@
+schema_version: 1
+registry: intent-routes
+entries:
+  - policy_key: route.simple_read
+    operator: capability_route
+    values: {budget: 1, steps: [read], stop_on_success: true, repeated_failure_allowed: false}
+  - policy_key: route.simple_write
+    operator: capability_route
+    values: {budget: 1, steps: [write], stop_on_success: true, repeated_failure_allowed: false}
+  - policy_key: route.targeted_inventory
+    operator: capability_route
+    values: {budget: 2, steps: [targeted_search, operation], stop_on_success: true, repeated_failure_allowed: false}
+  - policy_key: route.correction
+    operator: capability_route
+    values: {budget: 2, steps: [target_read, correction], stop_on_success: true, repeated_failure_allowed: false}
+  - policy_key: route.estimate_preview
+    operator: capability_route
+    values: {budget: 2, steps: [evidence_read, preview], stop_on_success: true, repeated_failure_allowed: false}
+  - policy_key: route.estimate_commit
+    operator: capability_route
+    values: {budget: 1, steps: [commit_handle], stop_on_success: true, repeated_failure_allowed: false}
+  - policy_key: route.complete_pagination
+    operator: capability_route
+    values: {budget: 10, steps: [read_page], stop_on_success: false, repeated_failure_allowed: false, cursor_progress_required: true}

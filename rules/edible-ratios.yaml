@@ -1,0 +1,13 @@
+foods:
+  shrimp:
+    edible_ratio: "0.65"
+    source_grade: B
+    uncertainty: shell weight varies by size
+  pork ribs:
+    edible_ratio: "0.50"
+    source_grade: B
+    uncertainty: bone proportion varies by cut
+  whole fish:
+    edible_ratio: "0.55"
+    source_grade: B
+    uncertainty: head and bone proportion varies by species

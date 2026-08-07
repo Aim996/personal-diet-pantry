@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "scenario_id": "repeated-diet-failure",
+  "user_input": "昨晚吃了什么",
+  "tool_calls": [
+    {
+      "tool": "diet_meal",
+      "action": "query",
+      "arguments": {
+        "calendar_window": {
+          "unit": "day",
+          "offset": -1,
+          "segment": "night"
+        }
+      },
+      "result": {
+        "ok": false,
+        "outcome": "failed",
+        "error": {
+          "code": "QUERY_FAILED",
+          "retryable": false
+        }
+      }
+    }
+  ],
+  "terminal": true,
+  "fallback_attempts": [],
+  "final_replies": [
+    "这次没能读取到昨晚的饮食记录，现有记录没有被修改。"
+  ]
+}

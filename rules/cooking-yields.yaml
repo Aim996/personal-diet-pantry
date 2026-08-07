@@ -1,0 +1,13 @@
+methods:
+  steamed:
+    cooking_yield: "0.90"
+    source_grade: B
+  grilled:
+    cooking_yield: "0.85"
+    source_grade: B
+  roasted:
+    cooking_yield: "0.75"
+    source_grade: B
+  boiled:
+    cooking_yield: "1.00"
+    source_grade: B

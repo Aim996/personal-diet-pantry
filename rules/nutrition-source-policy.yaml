@@ -1,0 +1,12 @@
+grades:
+  A: manufacturer label or authoritative nutrient database
+  B: verified personal brand cache or measured recipe
+  C: stable personal portion or generic household estimate
+  D: caller-supplied restaurant or unknown-food estimate
+policy:
+  cache_precedence:
+    - active personal brand-specific cache
+    - active personal generic cache
+    - shipped canonical food data
+    - caller-supplied C/D estimate
+  external_apis: forbidden
