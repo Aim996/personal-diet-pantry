@@ -93,3 +93,25 @@ def test_compact_query_exposes_location_and_estimate_provenance(
     assert batch["storage_location"] == "冷冻"
     assert batch["storage_location_source"] == "inferred"
     assert batch["expiry_source"] == "estimated"
+
+
+def test_explicitly_expired_food_can_be_recorded_as_a_truthful_inventory_fact(
+    service: DietService,
+) -> None:
+    result = _add(
+        service,
+        {
+            "food_name": "北豆腐",
+            "normalized_name": "北豆腐",
+            "quantity": "300",
+            "unit": "g",
+            "added_at": "2026-08-08T09:00:00+08:00",
+            "expiry_date": "2026-08-07",
+            "source_text": "这盒北豆腐300克，昨天就过期了，记进库存",
+        },
+    )
+
+    assert result["ok"] is True, result
+    batch = result["data"]["batch"]
+    assert batch["expiry_source"] == "user"
+    assert batch["expires_at"] < batch["added_at"]

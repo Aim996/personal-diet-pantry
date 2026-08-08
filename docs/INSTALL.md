@@ -1,6 +1,6 @@
-# 安装食序管家 v0.7.5.2
+# 安装食序管家 v0.7.5.3
 
-这是给普通 OpenClaw 用户和代为执行安装的智能体使用的简明入口。v0.7.5.2 正式发布后，固定下载页为 [GitHub Release v0.7.5.2](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.5.2)；页面不存在时说明尚未发布，不得从不明来源替代。完整步骤见[详细安装手册](INSTALLATION.zh-CN.md)。
+这是给普通 OpenClaw 用户和代为执行安装的智能体使用的简明入口。v0.7.5.3 正式发布后，固定下载页为 [GitHub Release v0.7.5.3](https://github.com/Aim996/personal-diet-pantry/releases/tag/v0.7.5.3)；页面不存在时说明尚未发布，不得从不明来源替代。完整步骤见[详细安装手册](INSTALLATION.zh-CN.md)。
 
 ## 1. 运行要求
 
@@ -11,19 +11,19 @@
 
 ## 2. 只下载固定制品
 
-只从 `Aim996/personal-diet-pantry` 的正式 v0.7.5.2 GitHub Release 下载：
+只从 `Aim996/personal-diet-pantry` 的正式 v0.7.5.3 GitHub Release 下载：
 
-- `personal-diet-pantry-0.7.5.2-installable.tgz`
+- `personal-diet-pantry-0.7.5.3-installable.tgz`
 - `SHA256SUMS`
 
-不要安装 `personal-diet-pantry-0.7.5.2-source.tar.gz`；源码包只用于审阅和复现。不要从聊天附件、网盘或不明镜像获取安装包。
+不要安装 `personal-diet-pantry-0.7.5.3-source.tar.gz`；源码包只用于审阅和复现。不要从聊天附件、网盘或不明镜像获取安装包。
 
 ## 3. 校验 SHA-256
 
 PowerShell：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath '.\personal-diet-pantry-0.7.5.2-installable.tgz'
+Get-FileHash -Algorithm SHA256 -LiteralPath '.\personal-diet-pantry-0.7.5.3-installable.tgz'
 Get-Content -LiteralPath '.\SHA256SUMS' -Encoding UTF8
 ```
 
@@ -44,7 +44,7 @@ sha256sum -c SHA256SUMS --ignore-missing
 先确认 OpenClaw 进程使用的 Python `>=3.11,<4`，并让该解释器安装已安装插件根目录中的 `requirements.lock`；不要把依赖装到不相干的 Python。然后把下面路径和 `dataDir` 换成真实绝对路径：
 
 ```text
-openclaw plugins install npm-pack:/absolute/path/personal-diet-pantry-0.7.5.2-installable.tgz
+openclaw plugins install npm-pack:/absolute/path/personal-diet-pantry-0.7.5.3-installable.tgz
 openclaw plugins enable personal-diet-pantry
 openclaw config set plugins.entries.personal-diet-pantry.config.dataDir "/absolute/persistent/personal-diet-pantry-data"
 openclaw gateway restart
@@ -59,10 +59,10 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 2. 全新账本只有在用户明确授权初始化后，才运行 `diet_system(initialize)` 创建本地账本结构；未授权时保持未初始化并报告等待用户决定。
 3. 运行 `diet_system(self_check)`，确认迁移、SQLite、外键、schema 和配置没有失败项。
 4. 用 `query_goals`、`progress` 和定向库存查询做零业务写入验收；不要为了验收写入、修改、删除、撤销或重做真实餐食、饮水、体重、库存、目标或偏好。
-5. 记录产品版本 `0.7.5.2`、技术包版本 `0.9.2`、七类工具状态、自检结果和 `dataDir` 是否独立，不记录数据库内容。
+5. 记录产品版本 `0.7.5.3`、技术包版本 `0.9.3`、七类工具状态、自检结果和 `dataDir` 是否独立，不记录数据库内容。
 
 `self_check` 不能证明其他六类工具已经注册，因此第 1 步不可省略。任何一步失败都应明确报告“未完成”，再查阅[故障排除](TROUBLESHOOTING.zh-CN.md)。
 
 ## 7. 安全失败与回滚
 
-全新安装失败时保留 `dataDir`，不要反复初始化或删除数据库。从 v0.7.5.0 更新到本版不新增 migration，仍建议先建立经校验的冷备份；从 v0.7.4.28 直接更新会应用既有 migration 022，回退时必须先恢复升级前冷备份再安装 v0.7.4.28。任何哈希、工具注册、自检或记录数量证据缺失时，都应报告“未完成”。
+全新安装失败时保留 `dataDir`，不要反复初始化或删除数据库。从 v0.7.5.2 更新到本版会应用 migration 023，必须先建立经校验的冷备份；回退到 v0.7.5.2 时必须先恢复该备份，再安装旧包。任何哈希、工具注册、自检或记录数量证据缺失时，都应报告“未完成”。

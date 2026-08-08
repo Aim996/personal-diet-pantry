@@ -61,7 +61,10 @@ def test_022_marks_legacy_pantry_defaults_without_changing_inventory(
         )
         connection.commit()
 
-        database.apply_migrations(connection, PROJECT_ROOT / "migrations")
+        database.apply_migrations(
+            connection,
+            _migration_subset(tmp_path, through=22),
+        )
 
         row = connection.execute(
             """

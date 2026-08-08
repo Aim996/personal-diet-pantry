@@ -338,7 +338,7 @@ export const ReportParametersSchema = actionUnion([
 
 export const SystemParametersSchema = actionUnion([
   branch("query_goals", {}),
-  branch("update_goals", {
+  branch("preview_update_goals", {
     calories_kcal: Type.Integer({ minimum: 1 }),
     protein_g: Type.Integer({ minimum: 1 }),
     fat_g: Type.Integer({ minimum: 1 }),
@@ -349,6 +349,7 @@ export const SystemParametersSchema = actionUnion([
     timezone_name: text(80),
     source_text: text(1000),
   }),
+  branch("commit_update_goals", { commit_handle: handle }),
   branch("query_preferences", { include_inactive: Type.Optional(Type.Boolean()) }),
   branch("update_preferences", {
     rule_type: text(80),

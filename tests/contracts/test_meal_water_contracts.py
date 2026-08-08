@@ -51,6 +51,158 @@ def test_meal_query_empty_and_after_record(
     assert_write_envelope(result["data"])
 
 
+def test_solid_food_moisture_does_not_increase_drinking_progress(
+    service: DietService,
+) -> None:
+    result = recorded_meal(
+        service,
+        payload={
+            "occurred_at": "2026-07-29T08:00:00+08:00",
+            "meal_type": "breakfast",
+            "source_text": "刚吃了一个水煮蛋",
+            "location_type": "home",
+            "items": [
+                {
+                    "raw_name": "水煮蛋",
+                    "normalized_name": "水煮蛋",
+                    "amount": "1",
+                    "unit": "piece",
+                    "consumed_weight_g": "50",
+                    "nutrition_basis": "per_100g",
+                    "nutrition_dataset_version": "hydration-scope-1",
+                    "nutrition_facts": {
+                        "calories": "155",
+                        "protein": "12.6",
+                        "fat": "10.6",
+                        "carbohydrate": "1.1",
+                        "fiber": "0",
+                        "sodium": "124",
+                        "hydration_ml": "75",
+                        "source": "contract fixture",
+                        "source_grade": "A",
+                    },
+                }
+            ],
+        },
+    )
+
+    assert result["data"]["meal"]["total_hydration_ml"] is None
+    water = next(
+        metric
+        for metric in result["data"]["daily_progress"]
+        if metric["key"] == "water"
+    )
+    assert water["current"] == "0"
+
+
+def test_nutritious_liquid_still_increases_drinking_progress(
+    service: DietService,
+) -> None:
+    result = recorded_meal(
+        service,
+        payload={
+            "occurred_at": "2026-07-29T08:00:00+08:00",
+            "meal_type": "breakfast",
+            "source_text": "刚喝了500毫升豆浆",
+            "location_type": "home",
+            "items": [
+                {
+                    "raw_name": "豆浆",
+                    "normalized_name": "豆浆",
+                    "amount": "500",
+                    "unit": "ml",
+                    "consumed_volume_ml": "500",
+                    "nutrition_basis": "per_100ml",
+                    "nutrition_dataset_version": "hydration-scope-1",
+                    "nutrition_facts": {
+                        "calories": "31",
+                        "protein": "3",
+                        "fat": "1.6",
+                        "carbohydrate": "1.2",
+                        "fiber": "0.5",
+                        "sodium": "15",
+                        "hydration_ml": "100",
+                        "source": "contract fixture",
+                        "source_grade": "A",
+                    },
+                }
+            ],
+        },
+    )
+
+    assert result["data"]["meal"]["total_hydration_ml"] == "500"
+    water = next(
+        metric
+        for metric in result["data"]["daily_progress"]
+        if metric["key"] == "water"
+    )
+    assert water["current"] == "500"
+
+
+def test_immediate_weight_correction_reuses_stored_nutrition_basis_once(
+    service: DietService,
+) -> None:
+    recorded_meal(
+        service,
+        payload={
+            "occurred_at": "2026-07-29T08:00:00+08:00",
+            "meal_type": "breakfast",
+            "source_text": "吃了个玉米",
+            "location_type": "home",
+            "items": [
+                {
+                    "raw_name": "玉米 1个",
+                    "normalized_name": "玉米",
+                    "amount": "1",
+                    "unit": "piece",
+                    "consumed_weight_g": "90",
+                    "nutrition_basis": "per_100g",
+                    "nutrition_dataset_version": "corn-fixture-1",
+                    "nutrition_facts": {
+                        "calories": "100",
+                        "protein": "4",
+                        "fat": "1",
+                        "carbohydrate": "20",
+                        "fiber": "3",
+                        "sodium": "1",
+                        "source": "contract fixture",
+                        "source_grade": "A",
+                    },
+                }
+            ],
+        },
+    )
+    original = query_meals(service)[0]
+
+    corrected = service.dispatch(
+        {
+            "domain": "meal",
+            "action": "update",
+            "payload": {
+                "meal_handle": original["workflow"]["meal_handle"],
+                "draft": {
+                    "source_text": "其实可食部是80克",
+                    "items": [
+                        {
+                            "raw_name": "玉米 1个",
+                            "normalized_name": "玉米",
+                            "amount": "1",
+                            "unit": "piece",
+                            "consumed_weight_g": "80",
+                        }
+                    ],
+                },
+            },
+        }
+    )
+
+    assert corrected["ok"] is True, corrected
+    assert corrected["requires_confirmation"] is False
+    assert corrected["data"]["meal"]["total_calories"] == "80"
+    assert corrected["data"]["meal"]["items"][0]["consumed_weight_g"] == "80"
+    assert len(query_meals(service)) == 1
+
+
 def test_public_meal_correction_previews_then_commits_once(
     service: DietService,
 ) -> None:

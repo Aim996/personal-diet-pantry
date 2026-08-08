@@ -7,7 +7,7 @@ ACTIONS = {
     'pantry': frozenset(('cancel_shopping_list', 'commit_shopping_list', 'add', 'adjust', 'commit_add', 'commit_deduct', 'commit_link_nutrition', 'commit_update_metadata', 'discard', 'deduct', 'freeze', 'open', 'preview_add', 'preview_deduct', 'preview_link_nutrition', 'preview_shopping_list', 'preview_update_metadata', 'query', 'query_shopping_list', 'search', 'thaw',)),
     'transaction': frozenset(('get_recent', 'redo', 'undo',)),
     'report': frozenset(('cost_summary', 'daily', 'expiring_inventory', 'insights', 'monthly', 'progress', 'today', 'trend_summary', 'waste_summary', 'weekly',)),
-    'system': frozenset(('backup', 'commit_delete_data', 'commit_nutrition_backfill', 'export_data', 'forget_preference', 'import_data', 'initialize', 'maintenance_history', 'maintenance_status', 'migrate', 'preview_delete_data', 'query_goals', 'query_nutrition_backfill', 'query_preferences', 'repair', 'restore', 'self_check', 'update_goals', 'update_preferences', 'validate_import', 'validate_database',)),
+    'system': frozenset(('backup', 'commit_delete_data', 'commit_nutrition_backfill', 'export_data', 'forget_preference', 'import_data', 'initialize', 'maintenance_history', 'maintenance_status', 'migrate', 'preview_delete_data', 'query_goals', 'query_nutrition_backfill', 'query_preferences', 'repair', 'restore', 'self_check', 'commit_update_goals', 'preview_update_goals', 'update_goals', 'update_preferences', 'validate_import', 'validate_database',)),
 }
 
 DEFAULT_ACTIONS = {
@@ -17,7 +17,7 @@ DEFAULT_ACTIONS = {
     'pantry': ('add', 'preview_add', 'commit_add', 'query', 'search', 'adjust', 'deduct', 'discard', 'open', 'freeze', 'thaw', 'preview_update_metadata', 'commit_update_metadata', 'preview_link_nutrition', 'commit_link_nutrition'),
     'transaction': ('get_recent', 'undo', 'redo'),
     'report': ('progress', 'expiring_inventory', 'insights'),
-    'system': ('query_goals', 'update_goals', 'query_preferences', 'update_preferences', 'forget_preference'),
+    'system': ('query_goals', 'preview_update_goals', 'commit_update_goals', 'query_preferences', 'update_preferences', 'forget_preference'),
 }
 
 ACTION_HANDLER_NAMES = {
@@ -27,7 +27,7 @@ ACTION_HANDLER_NAMES = {
     'pantry': {'cancel_shopping_list': '_pantry_cancel_shopping_list', 'commit_shopping_list': '_pantry_commit_shopping_list', 'add': '_pantry_add', 'adjust': '_pantry_adjust', 'commit_add': '_pantry_commit_add', 'commit_deduct': '_pantry_commit_deduct', 'commit_link_nutrition': '_pantry_commit_link_nutrition', 'commit_update_metadata': '_pantry_commit_update_metadata', 'discard': '_pantry_discard', 'deduct': '_pantry_deduct', 'freeze': '_pantry_freeze', 'open': '_pantry_open', 'preview_add': '_pantry_preview_add', 'preview_deduct': '_pantry_preview_deduct', 'preview_link_nutrition': '_pantry_preview_link_nutrition', 'preview_shopping_list': '_pantry_preview_shopping_list', 'preview_update_metadata': '_pantry_preview_update_metadata', 'query': '_pantry_query', 'query_shopping_list': '_pantry_query_shopping_list', 'search': '_pantry_search', 'thaw': '_pantry_thaw'},
     'transaction': {'get_recent': '_transaction_recent', 'redo': '_transaction_redo', 'undo': '_transaction_undo'},
     'report': {'cost_summary': '_report_cost_summary', 'daily': '_report_daily', 'expiring_inventory': '_report_expiring', 'insights': '_report_insights', 'monthly': '_report_monthly', 'progress': '_report_progress', 'today': '_report_today', 'trend_summary': '_report_trend_summary', 'waste_summary': '_report_waste_summary', 'weekly': '_report_weekly'},
-    'system': {'backup': '_system_backup', 'commit_delete_data': '_system_commit_delete_data', 'commit_nutrition_backfill': '_system_commit_nutrition_backfill', 'export_data': '_system_export_data', 'forget_preference': '_system_forget_preference', 'import_data': '_system_import_data', 'initialize': '_system_initialize', 'maintenance_history': '_system_maintenance_history', 'maintenance_status': '_system_maintenance_status', 'migrate': '_system_migrate', 'preview_delete_data': '_system_preview_delete_data', 'query_goals': '_system_query_goals', 'query_nutrition_backfill': '_system_query_nutrition_backfill', 'query_preferences': '_system_query_preferences', 'repair': '_system_repair', 'restore': '_system_restore', 'self_check': '_system_self_check', 'update_goals': '_system_update_goals', 'update_preferences': '_system_update_preferences', 'validate_import': '_system_validate_import', 'validate_database': '_system_validate_database'},
+    'system': {'backup': '_system_backup', 'commit_delete_data': '_system_commit_delete_data', 'commit_nutrition_backfill': '_system_commit_nutrition_backfill', 'export_data': '_system_export_data', 'forget_preference': '_system_forget_preference', 'import_data': '_system_import_data', 'initialize': '_system_initialize', 'maintenance_history': '_system_maintenance_history', 'maintenance_status': '_system_maintenance_status', 'migrate': '_system_migrate', 'preview_delete_data': '_system_preview_delete_data', 'query_goals': '_system_query_goals', 'query_nutrition_backfill': '_system_query_nutrition_backfill', 'query_preferences': '_system_query_preferences', 'repair': '_system_repair', 'restore': '_system_restore', 'self_check': '_system_self_check', 'commit_update_goals': '_system_commit_update_goals', 'preview_update_goals': '_system_preview_update_goals', 'update_goals': '_system_update_goals', 'update_preferences': '_system_update_preferences', 'validate_import': '_system_validate_import', 'validate_database': '_system_validate_database'},
 }
 
 ACTION_POLICIES = {
@@ -102,6 +102,8 @@ ACTION_POLICIES = {
     ('system', 'repair'): ('maintenance', 'none', 'no_blind_retry'),
     ('system', 'restore'): ('maintenance', 'required_true', 'no_blind_retry'),
     ('system', 'self_check'): ('read', 'none', 'safe_read'),
+    ('system', 'commit_update_goals'): ('mutation', 'workflow_handle', 'operation_receipt'),
+    ('system', 'preview_update_goals'): ('read', 'conditional', 'safe_read'),
     ('system', 'update_goals'): ('mutation', 'none', 'operation_receipt'),
     ('system', 'update_preferences'): ('mutation', 'none', 'operation_receipt'),
     ('system', 'validate_import'): ('read', 'workflow_handle', 'safe_read'),
@@ -140,6 +142,7 @@ FORMAL_MUTATION_ACTIONS = frozenset(
         ('transaction', 'undo'),
         ('system', 'commit_nutrition_backfill'),
         ('system', 'forget_preference'),
+        ('system', 'commit_update_goals'),
         ('system', 'update_goals'),
         ('system', 'update_preferences'),
     }

@@ -232,7 +232,7 @@ function allowedActionsFor(text: string, domain: DietDomain): string[] {
         ? ["forget_preference"]
         : ["update_preferences"];
     }
-    return ["update_goals"];
+    return ["preview_update_goals"];
   }
   return [];
 }

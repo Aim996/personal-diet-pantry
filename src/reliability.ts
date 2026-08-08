@@ -42,6 +42,7 @@ type FailureCacheEntry = {
   result: PythonCallResult;
 };
 const failureCache = new Map<string, FailureCacheEntry>();
+const formalMutationQueues = new Map<string, Promise<unknown>>();
 
 export async function callPythonReliably(
   request: JsonObject,
@@ -66,59 +67,75 @@ export async function callPythonReliably(
     return result;
   }
 
-  const operationId =
-    dependencies.operationIdFactory?.() ?? `op_${randomUUID()}`;
-  const requestFingerprint = createHash("sha256")
-    .update(canonicalJson(request), "utf8")
-    .digest("hex");
-  const { source_session_key: _untrustedSession, source_model: _untrustedModel, test_run_id: _untrustedTestRun, ...publicRequest } = request;
-  const identity = dependencies.runtimeIdentity ?? {};
-  const sourceSessionKey = identity.sessionKey ?? identity.sessionId;
-  const mutationRequest: JsonObject = {
-    ...publicRequest,
-    _internal: {
-      operation_id: operationId,
-      request_fingerprint: requestFingerprint,
-      semantic_fingerprint: semanticFingerprint(
-        publicRequest,
-        identity,
-        now,
-      ),
-      ...(sourceSessionKey === undefined ? {} : { source_session_key: sourceSessionKey }),
-      ...(identity.modelRef === undefined ? {} : { source_model: identity.modelRef }),
-      ...(identity.testRunId === undefined ? {} : { test_run_id: identity.testRunId }),
-    },
-  };
-  try {
-    const result = sanitizeResult(
-      await runner(mutationRequest, options),
-      operationId,
-      requestFingerprint,
-    );
-    rememberFailure(failureKey, result, now.getTime());
-    return result;
-  } catch (error) {
-    if (!isOutcomeUncertainBridgeError(error)) {
-      throw sanitizeError(error, operationId, requestFingerprint);
-    }
-    const status = await lookupStatus(
-      runner,
-      options,
-      operationId,
-      requestFingerprint,
-    );
-    if (status.result !== undefined) {
-      return sanitizeResult(
-        status.result,
+  return serializeFormalMutation(options.dataDir ?? "__default__", async () => {
+    const operationId =
+      dependencies.operationIdFactory?.() ?? `op_${randomUUID()}`;
+    const requestFingerprint = createHash("sha256")
+      .update(canonicalJson(request), "utf8")
+      .digest("hex");
+    const { source_session_key: _untrustedSession, source_model: _untrustedModel, test_run_id: _untrustedTestRun, ...publicRequest } = request;
+    const identity = dependencies.runtimeIdentity ?? {};
+    const sourceSessionKey = identity.sessionKey ?? identity.sessionId;
+    const mutationRequest: JsonObject = {
+      ...publicRequest,
+      _internal: {
+        operation_id: operationId,
+        request_fingerprint: requestFingerprint,
+        semantic_fingerprint: semanticFingerprint(
+          publicRequest,
+          identity,
+          now,
+        ),
+        ...(sourceSessionKey === undefined ? {} : { source_session_key: sourceSessionKey }),
+        ...(identity.modelRef === undefined ? {} : { source_model: identity.modelRef }),
+        ...(identity.testRunId === undefined ? {} : { test_run_id: identity.testRunId }),
+      },
+    };
+    try {
+      const result = sanitizeResult(
+        await runner(mutationRequest, options),
         operationId,
         requestFingerprint,
       );
+      rememberFailure(failureKey, result, now.getTime());
+      return result;
+    } catch (error) {
+      if (!isOutcomeUncertainBridgeError(error)) {
+        throw sanitizeError(error, operationId, requestFingerprint);
+      }
+      const status = await lookupStatus(
+        runner,
+        options,
+        operationId,
+        requestFingerprint,
+      );
+      if (status.result !== undefined) {
+        return sanitizeResult(
+          status.result,
+          operationId,
+          requestFingerprint,
+        );
+      }
+      if (options.signal?.aborted) {
+        throw new BridgeError("ABORTED", "Python request was aborted");
+      }
+      throw uncertainOutcome(error, operationId, requestFingerprint);
     }
-    if (options.signal?.aborted) {
-      throw new BridgeError("ABORTED", "Python request was aborted");
+  });
+}
+
+function serializeFormalMutation<T>(
+  dataDir: string,
+  work: () => Promise<T>,
+): Promise<T> {
+  const previous = formalMutationQueues.get(dataDir) ?? Promise.resolve();
+  const current = previous.catch(() => undefined).then(work);
+  formalMutationQueues.set(dataDir, current);
+  return current.finally(() => {
+    if (formalMutationQueues.get(dataDir) === current) {
+      formalMutationQueues.delete(dataDir);
     }
-    throw uncertainOutcome(error, operationId, requestFingerprint);
-  }
+  });
 }
 
 function failureCacheKey(

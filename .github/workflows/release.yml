@@ -51,7 +51,7 @@ jobs:
       - name: Build verified immutable candidate
         shell: pwsh
         run: |
-          $releaseRoot = Join-Path $env:RUNNER_TEMP 'personal-diet-pantry-v0.7.5.2'
+          $releaseRoot = Join-Path $env:RUNNER_TEMP 'personal-diet-pantry-v0.7.5.3'
           if (Test-Path -LiteralPath $releaseRoot) {
             throw "Refusing existing release directory: $releaseRoot"
           }
@@ -60,8 +60,8 @@ jobs:
       - name: Upload verified candidate
         uses: actions/upload-artifact@v7
         with:
-          name: personal-diet-pantry-v0.7.5.2-candidate
-          path: ${{ runner.temp }}/personal-diet-pantry-v0.7.5.2
+          name: personal-diet-pantry-v0.7.5.3-candidate
+          path: ${{ runner.temp }}/personal-diet-pantry-v0.7.5.3
           if-no-files-found: error
           retention-days: 7
 
@@ -83,7 +83,7 @@ jobs:
       - name: Download verified candidate
         uses: actions/download-artifact@v8
         with:
-          name: personal-diet-pantry-v0.7.5.2-candidate
+          name: personal-diet-pantry-v0.7.5.3-candidate
           path: ${{ runner.temp }}/verified-release
 
       - name: Verify tag belongs to main and Release is new
@@ -107,12 +107,12 @@ jobs:
           RELEASE_ROOT: ${{ runner.temp }}/verified-release
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            "$RELEASE_ROOT/personal-diet-pantry-0.7.5.2-installable.tgz" \
-            "$RELEASE_ROOT/personal-diet-pantry-0.7.5.2-source.tar.gz" \
+            "$RELEASE_ROOT/personal-diet-pantry-0.7.5.3-installable.tgz" \
+            "$RELEASE_ROOT/personal-diet-pantry-0.7.5.3-source.tar.gz" \
             "$RELEASE_ROOT/release-manifest.json" \
-            "$RELEASE_ROOT/TEST-SUMMARY-v0.7.5.2.zh-CN.md" \
+            "$RELEASE_ROOT/TEST-SUMMARY-v0.7.5.3.zh-CN.md" \
             "$RELEASE_ROOT/SHA256SUMS" \
             --repo "$GITHUB_REPOSITORY" \
             --verify-tag \
-            --title "Personal Diet Pantry v0.7.5.2" \
+            --title "Personal Diet Pantry v0.7.5.3" \
             --notes-file "$RELEASE_ROOT/GitHub文档/RELEASE.zh-CN.md"

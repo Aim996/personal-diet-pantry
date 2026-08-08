@@ -43,7 +43,7 @@ def test_tools_contract_is_the_complete_seven_domain_action_source() -> None:
         "report",
         "system",
     )
-    assert sum(len(domain.actions) for domain in contract.values()) == 75
+    assert sum(len(domain.actions) for domain in contract.values()) == 77
     assert contract["system"].actions["restore"].confirmation == "required_true"
     assert contract["meal"].actions["record"].handler == "_meal_record"
     assert contract["pantry"].actions["search"].handler == "_pantry_search"
@@ -55,7 +55,7 @@ def test_daily_surface_includes_the_pantry_add_preview_commit_seam() -> None:
     contract = load_tool_contract(contract_path)
     actions = load_default_actions(contract_path, contract)
 
-    assert sum(len(values) for values in actions.values()) == 42
+    assert sum(len(values) for values in actions.values()) == 43
     assert "preview_add" in actions["pantry"]
     assert "commit_add" in actions["pantry"]
 

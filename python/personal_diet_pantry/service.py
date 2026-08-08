@@ -93,6 +93,7 @@ from .timezones import (
     local_datetime,
     local_day_utc_bounds,
     local_expiry_end,
+    resolve_timezone,
 )
 from .trusted_workflows import (
     Confirmation,
@@ -2515,6 +2516,7 @@ def _pantry_preview_update_metadata(
         pantry._validated_expiry_timestamp(
             expires_at,
             _datetime_value(row["added_at"], "stored added_at"),
+            expiry_source="user",
         )
         request["expires_at"] = expires_at
     handle = _issue_workflow(
@@ -2573,7 +2575,9 @@ def _pantry_commit_update_metadata(
             updates["expires_at"] = pantry._validated_expiry_timestamp(
                 _datetime_value(request["expires_at"], "stored expires_at"),
                 _datetime_value(row["added_at"], "stored added_at"),
+                expiry_source="user",
             )
+            updates["expiry_source"] = "user"
         updated = mutation_context.update("pantry_batches", batch_id, updates)
         public_result = {"batch": _public_value(pantry._batch(updated))}
         changed = service.connection.execute(
@@ -4379,17 +4383,26 @@ def _system_query_goals(
     return {"goal_profile": _public_goal_profile(profile)}
 
 
-def _system_update_goals(
-    service: DietService, payload: Mapping[str, Any], context: Mapping[str, Any]
-) -> Mapping[str, Any]:
-    fields = ("calories_kcal", "protein_g", "fat_g", "carbohydrate_g", "fiber_g", "sodium_mg", "water_ml")
-    draft = NutritionGoals(*(_positive_integer(payload.get(field), field) for field in fields))
+_GOAL_UPDATE_FIELDS = (
+    "calories_kcal",
+    "protein_g",
+    "fat_g",
+    "carbohydrate_g",
+    "fiber_g",
+    "sodium_mg",
+    "water_ml",
+)
+
+
+def _validated_goal_update(
+    payload: Mapping[str, Any],
+) -> tuple[NutritionGoals, str, str]:
+    draft = NutritionGoals(
+        *(_positive_integer(payload.get(field), field) for field in _GOAL_UPDATE_FIELDS)
+    )
+    timezone_name = _required_text(payload, "timezone_name")
     try:
-        profile = goal_profiles.update_goal_profile(
-            service.connection, TransactionManager(service.connection), draft,
-            _required_text(payload, "source_text"), _operation_now(payload, context),
-            timezone_name=_required_text(payload, "timezone_name"),
-        )
+        resolve_timezone(timezone_name)
     except TimezoneConfigurationError as error:
         raise _ServiceError(
             "INVALID_INPUT",
@@ -4399,7 +4412,134 @@ def _system_update_goals(
             expected="an available IANA timezone name",
             retryable=True,
         ) from error
+    return draft, timezone_name, _required_text(payload, "source_text")
+
+
+def _goal_update_payload(
+    draft: NutritionGoals,
+    *,
+    timezone_name: str,
+    source_text: str,
+) -> dict[str, object]:
+    return {
+        **{field: int(getattr(draft, field)) for field in _GOAL_UPDATE_FIELDS},
+        "timezone_name": timezone_name,
+        "source_text": source_text,
+    }
+
+
+def _apply_goal_update(
+    service: DietService,
+    payload: Mapping[str, Any],
+    *,
+    now: datetime,
+) -> Mapping[str, Any]:
+    draft, timezone_name, source_text = _validated_goal_update(payload)
+    profile = goal_profiles.update_goal_profile(
+        service.connection,
+        TransactionManager(service.connection),
+        draft,
+        source_text,
+        now,
+        timezone_name=timezone_name,
+    )
     return {"goal_profile": _public_goal_profile(profile)}
+
+
+def _system_preview_update_goals(
+    service: DietService, payload: Mapping[str, Any], context: Mapping[str, Any]
+) -> _HandlerResult:
+    now = _operation_now(payload, context)
+    draft, timezone_name, source_text = _validated_goal_update(payload)
+    current = goal_profiles.load_goal_profile(service.connection)
+    request = _goal_update_payload(
+        draft,
+        timezone_name=timezone_name,
+        source_text=source_text,
+    )
+    preview = {
+        "current_goal_profile": _public_value(_public_goal_profile(current)),
+        "proposed_goal_profile": {
+            "goals": {
+                field: int(getattr(draft, field))
+                for field in _GOAL_UPDATE_FIELDS
+            },
+            "timezone_name": timezone_name,
+        },
+        "source_text": source_text,
+    }
+    handle = _issue_workflow(
+        service,
+        "goal_update_preview",
+        request=request,
+        result={"preview": preview},
+        resource_versions={"updated_at": _public_value(current.updated_at)},
+        now=now,
+    )
+    return _HandlerResult(
+        {"preview": preview | {"workflow": {"commit_handle": handle}}},
+        warnings=("No goal value has changed until this preview is confirmed.",),
+        requires_confirmation=True,
+        confirmation_options=(
+            {"label": "Confirm these nutrition goals", "needs_confirmation": True},
+        ),
+    )
+
+
+def _system_commit_update_goals(
+    service: DietService, payload: Mapping[str, Any], context: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    now = _operation_now(payload, context)
+    handle = _workflow_handle_text(payload, "commit_handle")
+    row = _workflow_row(
+        service.connection,
+        handle,
+        "goal_update_preview",
+        now=now,
+        allow_consumed=True,
+    )
+    if row["consumed_at"] is not None:
+        stored = _stored_object(row["result_json"], "stored goal update")
+        return _stored_object(
+            _canonical_json(stored.get("committed_payload")),
+            "stored goal update payload",
+        )
+
+    expected = _stored_object(
+        row["resource_versions_json"], "stored goal update resource"
+    )
+    current = goal_profiles.load_goal_profile(service.connection)
+    if expected.get("updated_at") != _public_value(current.updated_at):
+        raise _ServiceError("STALE_PREVIEW", "Goal update reference is stale")
+    request = _stored_object(row["request_json"], "stored goal update request")
+    public = _apply_goal_update(service, request, now=now)
+    changed = service.connection.execute(
+        """
+        UPDATE operation_previews
+        SET result_json = ?, consumed_at = ?
+        WHERE token_hash = ? AND consumed_at IS NULL
+        """,
+        (
+            _canonical_json({"committed_payload": _public_value(public)}),
+            _workflow_timestamp(now),
+            row["token_hash"],
+        ),
+    ).rowcount
+    if changed != 1:
+        service.connection.rollback()
+        raise _ServiceError("STALE_PREVIEW", "Goal update reference is stale")
+    service.connection.commit()
+    return public
+
+
+def _system_update_goals(
+    service: DietService, payload: Mapping[str, Any], context: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    return _apply_goal_update(
+        service,
+        payload,
+        now=_operation_now(payload, context),
+    )
 
 
 def _public_goal_profile(
@@ -5292,6 +5432,8 @@ _SYSTEM_ACTIONS = {
     "commit_delete_data": _system_commit_delete_data,
     "query_preferences": _system_query_preferences,
     "query_goals": _system_query_goals,
+    "preview_update_goals": _system_preview_update_goals,
+    "commit_update_goals": _system_commit_update_goals,
     "update_goals": _system_update_goals,
     "update_preferences": _system_update_preferences,
     "forget_preference": _system_forget_preference,

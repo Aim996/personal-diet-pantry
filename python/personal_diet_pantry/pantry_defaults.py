@@ -134,7 +134,7 @@ def resolve_pantry_defaults(
             days=_shelf_life_days(food_name, location)
         )
         expiry_source = "estimated"
-    if resolved_expiry <= added_at:
+    if expiry_source != "user" and resolved_expiry <= added_at:
         raise ValueError("expires_at must be later than added_at")
     return PantryDefaults(
         storage_location=location,

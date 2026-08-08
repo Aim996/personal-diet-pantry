@@ -77,11 +77,27 @@ describe("full plugin turn guard wiring", () => {
     );
 
     expect(result).toMatchObject({
-      appendContext: expect.stringMatching(/live preview.*commit_record.*commit_add/i),
+      appendContext: expect.stringMatching(/live preview.*commit_record.*commit_add.*commit_update_goals/i),
     });
     expect(result).toMatchObject({
       appendContext: expect.stringMatching(/do not.*(?:record|add).*new write/i),
     });
+  });
+
+  it("treats a just-finished corn meal as current-time capable without fixing a tool route", async () => {
+    const host = fakePluginApi();
+    plugin.register(host.api as never);
+    const beforeRun = host.hooks.get("before_prompt_build")!;
+
+    const result = await beforeRun(
+      { prompt: "吃了个玉米", messages: [] },
+      { runId: "run-current-corn", sessionKey: "session:current-corn" },
+    );
+
+    expect(result).toMatchObject({
+      appendContext: expect.stringMatching(/trusted current time.*do not ask.*clock time/i),
+    });
+    expect(result?.appendContext).not.toMatch(/diet_meal|record|preview_record/i);
   });
 
   it.each([
@@ -123,7 +139,9 @@ describe("full plugin turn guard wiring", () => {
       { runId: `run-agent-directed-${prompt}`, sessionKey: `session-agent-directed-${prompt}` },
     );
 
-    expect(result).toBeUndefined();
+    expect(result?.appendContext ?? "").not.toMatch(
+      /diet_(?:meal|water|weight|pantry)|record|preview_record/i,
+    );
   });
 
   it("allows the agent to choose record or preview for an ordinary meal fact", async () => {
@@ -1443,7 +1461,9 @@ describe("full plugin turn guard wiring", () => {
       { prompt: "刚喝了一盒库存里的UAT18原味燕麦奶。" },
       { runId: "run-inventory-meal", sessionKey: "session:inventory-meal" },
     );
-    expect(route).toBeUndefined();
+    expect(route).toMatchObject({
+      appendContext: expect.stringMatching(/trusted current time/i),
+    });
     expect(await before(
       {
         toolName: "diet_pantry",

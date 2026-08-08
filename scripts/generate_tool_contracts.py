@@ -182,8 +182,8 @@ def load_default_actions(
                 f"default_actions.{domain} contains unknown action {sorted(unknown)[0]}"
             )
         result[domain] = actions
-    if sum(len(actions) for actions in result.values()) != 42:
-        raise ValueError("default_actions must contain exactly 42 actions")
+    if sum(len(actions) for actions in result.values()) != 43:
+        raise ValueError("default_actions must contain exactly 43 actions")
     return result
 
 

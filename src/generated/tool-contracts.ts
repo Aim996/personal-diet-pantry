@@ -16,7 +16,7 @@ export const TOOL_ACTIONS = {
   'pantry': ['cancel_shopping_list', 'commit_shopping_list', 'add', 'adjust', 'commit_add', 'commit_deduct', 'commit_link_nutrition', 'commit_update_metadata', 'discard', 'deduct', 'freeze', 'open', 'preview_add', 'preview_deduct', 'preview_link_nutrition', 'preview_shopping_list', 'preview_update_metadata', 'query', 'query_shopping_list', 'search', 'thaw'],
   'transaction': ['get_recent', 'redo', 'undo'],
   'report': ['cost_summary', 'daily', 'expiring_inventory', 'insights', 'monthly', 'progress', 'today', 'trend_summary', 'waste_summary', 'weekly'],
-  'system': ['backup', 'commit_delete_data', 'commit_nutrition_backfill', 'export_data', 'forget_preference', 'import_data', 'initialize', 'maintenance_history', 'maintenance_status', 'migrate', 'preview_delete_data', 'query_goals', 'query_nutrition_backfill', 'query_preferences', 'repair', 'restore', 'self_check', 'update_goals', 'update_preferences', 'validate_import', 'validate_database']
+  'system': ['backup', 'commit_delete_data', 'commit_nutrition_backfill', 'export_data', 'forget_preference', 'import_data', 'initialize', 'maintenance_history', 'maintenance_status', 'migrate', 'preview_delete_data', 'query_goals', 'query_nutrition_backfill', 'query_preferences', 'repair', 'restore', 'self_check', 'commit_update_goals', 'preview_update_goals', 'update_goals', 'update_preferences', 'validate_import', 'validate_database']
 } as const;
 
 export const DEFAULT_TOOL_ACTIONS = {
@@ -26,7 +26,7 @@ export const DEFAULT_TOOL_ACTIONS = {
   'pantry': ['add', 'preview_add', 'commit_add', 'query', 'search', 'adjust', 'deduct', 'discard', 'open', 'freeze', 'thaw', 'preview_update_metadata', 'commit_update_metadata', 'preview_link_nutrition', 'commit_link_nutrition'],
   'transaction': ['get_recent', 'undo', 'redo'],
   'report': ['progress', 'expiring_inventory', 'insights'],
-  'system': ['query_goals', 'update_goals', 'query_preferences', 'update_preferences', 'forget_preference']
+  'system': ['query_goals', 'preview_update_goals', 'commit_update_goals', 'query_preferences', 'update_preferences', 'forget_preference']
 } as const;
 
 export const FORMAL_MUTATION_ACTIONS = [
@@ -60,6 +60,7 @@ export const FORMAL_MUTATION_ACTIONS = [
   'transaction.undo',
   'system.commit_nutrition_backfill',
   'system.forget_preference',
+  'system.commit_update_goals',
   'system.update_goals',
   'system.update_preferences'
 ] as const;

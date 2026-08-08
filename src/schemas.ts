@@ -1175,6 +1175,18 @@ export const ReportParametersSchema = boundedActionUnion([
   }),
 ]);
 
+const GoalUpdateFields = {
+  calories_kcal: Type.Integer({ minimum: 1 }),
+  protein_g: Type.Integer({ minimum: 1 }),
+  fat_g: Type.Integer({ minimum: 1 }),
+  carbohydrate_g: Type.Integer({ minimum: 1 }),
+  fiber_g: Type.Integer({ minimum: 1 }),
+  sodium_mg: Type.Integer({ minimum: 1 }),
+  water_ml: Type.Integer({ minimum: 1 }),
+  timezone_name: Type.String({ minLength: 1 }),
+  source_text: Type.String({ minLength: 1 }),
+};
+
 export const SystemParametersSchema = Object.assign(boundedActionUnion([
   actionBranch("initialize", MaintenanceOperationFields),
   actionBranch("self_check", {}),
@@ -1240,11 +1252,9 @@ export const SystemParametersSchema = Object.assign(boundedActionUnion([
     { include_inactive: Type.Optional(Type.Boolean()) },
   ),
   actionBranch("query_goals", {}),
-  actionBranch("update_goals", {
-    calories_kcal: Type.Integer({ minimum: 1 }), protein_g: Type.Integer({ minimum: 1 }), fat_g: Type.Integer({ minimum: 1 }),
-    carbohydrate_g: Type.Integer({ minimum: 1 }), fiber_g: Type.Integer({ minimum: 1 }), sodium_mg: Type.Integer({ minimum: 1 }), water_ml: Type.Integer({ minimum: 1 }),
-    timezone_name: Type.String({ minLength: 1 }), source_text: Type.String({ minLength: 1 }),
-  }),
+  actionBranch("preview_update_goals", GoalUpdateFields),
+  actionBranch("commit_update_goals", { commit_handle: HandleSchema }),
+  actionBranch("update_goals", GoalUpdateFields),
   actionBranch(
     "update_preferences",
     {

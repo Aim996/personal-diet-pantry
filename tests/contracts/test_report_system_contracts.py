@@ -8,6 +8,9 @@ from personal_diet_pantry import backup as backup_module
 from personal_diet_pantry import self_check as self_check_module
 from personal_diet_pantry.service import DietService
 from scripts.behavior_contract import load_behavior_contract
+from tests.test_goal_confirmation import (
+    test_goal_preview_then_one_confirmation_commits_without_a_second_prompt as _goal_preview_contract,
+)
 
 from tests.contracts.helpers import (
     complete_meal_payload,
@@ -20,6 +23,12 @@ from tests.contracts.helpers import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_goal_preview_then_one_confirmation_commits_without_a_second_prompt(
+    service: DietService,
+) -> None:
+    _goal_preview_contract(service)
 
 
 def _dispatch(

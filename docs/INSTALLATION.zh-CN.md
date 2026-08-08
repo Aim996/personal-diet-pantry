@@ -1,8 +1,8 @@
 # 安装、初始化与升级手册
 
-适用产品版本：Personal Diet Pantry（食序管家）v0.7.5.2。
+适用产品版本：Personal Diet Pantry（食序管家）v0.7.5.3。
 
-包管理器、Python 包和 OpenClaw 插件元数据使用合法 SemVer 技术版本 `0.9.2`；发布文件名、导出 manifest 和用户文档使用产品版本 `0.7.5.2`。
+包管理器、Python 包和 OpenClaw 插件元数据使用合法 SemVer 技术版本 `0.9.3`；发布文件名、导出 manifest 和用户文档使用产品版本 `0.7.5.3`。
 
 本手册只说明当前源码和发布构件已经支持的本地安装流程；它不会部署、重启或配置任何既有 OpenClaw 实例。食序管家的正式事实来源是 SQLite，Markdown 报告、导出和健康报告均可由 SQLite 重新生成。
 
@@ -40,12 +40,12 @@ python -c "import yaml, tzdata; print('Python runtime dependencies available')"
 
 | 归档 | 用途 | 能否交给插件安装器 |
 | --- | --- | --- |
-| `personal-diet-pantry-0.7.5.2-installable.tgz` | 含编译后的插件、Python 运行包、锁定依赖、配置、迁移（含 022）、模板和 Skill 的 npm-compatible 安装包 | 可以，且只能使用它安装 |
-| `personal-diet-pantry-0.7.5.2-source.tar.gz` | 与发布输入对应的源码快照，用于审阅、留档和源码复现 | 不可以 |
+| `personal-diet-pantry-0.7.5.3-installable.tgz` | 含编译后的插件、Python 运行包、锁定依赖、配置、迁移（含 023）、模板和 Skill 的 npm-compatible 安装包 | 可以，且只能使用它安装 |
+| `personal-diet-pantry-0.7.5.3-source.tar.gz` | 与发布输入对应的源码快照，用于审阅、留档和源码复现 | 不可以 |
 
 `source.tar.gz` 不含编译后的 `dist/`，不能替代安装包。两种归档均不应包含 SQLite、报告、缓存、`.env`、密钥或个人数据；若发现这些内容，应停止使用该归档并重新从受控源码构建或取得发布包。
 
-正式发布目录顶层恰好包含 `personal-diet-pantry-0.7.5.2-source.tar.gz`、`personal-diet-pantry-0.7.5.2-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.5.2.zh-CN.md`、覆盖这四个文件的 `SHA256SUMS`，以及 `GitHub文档/` 文档树。该目录必须位于 Git 工作树和项目根目录之外；不要使用旧名校验文件，也不要把其他文件混入顶层。
+正式发布目录顶层恰好包含 `personal-diet-pantry-0.7.5.3-source.tar.gz`、`personal-diet-pantry-0.7.5.3-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.5.3.zh-CN.md`、覆盖这四个文件的 `SHA256SUMS`，以及 `GitHub文档/` 文档树。该目录必须位于 Git 工作树和项目根目录之外；不要使用旧名校验文件，也不要把其他文件混入顶层。
 
 从干净 Git 提交生成正式制品时，发布脚本先执行完整门禁，再各生成两次源码包和可安装包并比较哈希与成员清单。它不会安装、启用、配置或重启生产 OpenClaw：
 
@@ -81,10 +81,10 @@ openclaw config set plugins.entries.personal-diet-pantry.config.dataDir "/absolu
 
 ## 4. 安装、初始化与首次验证
 
-1. 取得 `personal-diet-pantry-0.7.5.2-installable.tgz`，并将命令中的绝对路径替换为该文件的真实位置。
+1. 取得 `personal-diet-pantry-0.7.5.3-installable.tgz`，并将命令中的绝对路径替换为该文件的真实位置。
 
    ```bash
-   openclaw plugins install npm-pack:/absolute/path/personal-diet-pantry-0.7.5.2-installable.tgz
+   openclaw plugins install npm-pack:/absolute/path/personal-diet-pantry-0.7.5.3-installable.tgz
    openclaw plugins enable personal-diet-pantry
    ```
 
@@ -102,16 +102,16 @@ openclaw config set plugins.entries.personal-diet-pantry.config.dataDir "/absolu
 
 ## 5. 备份用途与降级冷备份
 
-v0.7.5.2 不新增 migration，继续使用 v0.7.5.0 已引入的 migration 022。从 v0.7.5.0 更新时保留原外部 `dataDir`，仍建议在实例停止时取得一致 SQLite 冷备份；从 v0.7.4.28 直接更新或回退时，必须遵守 migration 022 的成套备份恢复要求。在线 `diet_system backup` 仅用于同版本恢复，不能替代升级前冷备份。
+v0.7.5.3 新增 migration 023，只扩展目标更新预览句柄，不改写既有业务事实。从 v0.7.5.2 更新时保留原外部 `dataDir`，并在实例停止时取得一致 SQLite 冷备份；回退到 v0.7.5.2 时必须先恢复该备份。在线 `diet_system backup` 仅用于同版本恢复，不能替代升级前冷备份。
 
-先停止目标实例并确认没有进程继续写入。使用受信 v0.7.5.2 源码中的 `scripts/cold_backup.py`，把 `diet.sqlite` 备份到 `dataDir` 外、权限受控且尚不存在的路径。helper 使用 Python 标准库 `sqlite3` backup API，会包含尚未 checkpoint 的已提交 WAL 数据，拒绝覆盖目标，并在成功前执行完整性检查。若操作系统阻止清理，错误会明确提示“未完成目标可能保留”，此时必须换新路径，不得覆盖重试。
+先停止目标实例并确认没有进程继续写入。使用受信 v0.7.5.3 源码中的 `scripts/cold_backup.py`，把 `diet.sqlite` 备份到 `dataDir` 外、权限受控且尚不存在的路径。helper 使用 Python 标准库 `sqlite3` backup API，会包含尚未 checkpoint 的已提交 WAL 数据，拒绝覆盖目标，并在成功前执行完整性检查。若操作系统阻止清理，错误会明确提示“未完成目标可能保留”，此时必须换新路径，不得覆盖重试。
 
 ```powershell
-& 'C:\actual\python.exe' 'C:\trusted-v0.7.5.2-source\scripts\cold_backup.py' backup --source 'C:\actual\personal-diet-pantry-data\diet.sqlite' --destination 'D:\controlled-backups\diet.sqlite.pre-v0.7.5.2'
+& 'C:\actual\python.exe' 'C:\trusted-v0.7.5.3-source\scripts\cold_backup.py' backup --source 'C:\actual\personal-diet-pantry-data\diet.sqlite' --destination 'D:\controlled-backups\diet.sqlite.pre-v0.7.5.3'
 ```
 
 ```bash
-/actual/python3 /trusted-v0.7.5.2-source/scripts/cold_backup.py backup --source /actual/personal-diet-pantry-data/diet.sqlite --destination /controlled-backups/diet.sqlite.pre-v0.7.5.2
+/actual/python3 /trusted-v0.7.5.3-source/scripts/cold_backup.py backup --source /actual/personal-diet-pantry-data/diet.sqlite --destination /controlled-backups/diet.sqlite.pre-v0.7.5.3
 ```
 
 只有 helper 输出已验证 SHA-256 才算完成校验冷备份。记录路径和哈希，但不要把它们或数据内容公开到 issue、日志或文档中。
@@ -119,26 +119,26 @@ v0.7.5.2 不新增 migration，继续使用 v0.7.5.0 已引入的 migration 022�
 ## 6. 升级到目标版本
 
 1. 停止实例，创建并校验升级前冷备份。
-2. 保留原外部 `dataDir`，通过 npm-pack 安装 `personal-diet-pantry-0.7.5.2-installable.tgz`。
-3. 启动或重新加载插件；服务应应用并记录 migration 022。
+2. 保留原外部 `dataDir`，通过 npm-pack 安装 `personal-diet-pantry-0.7.5.3-installable.tgz`。
+3. 启动或重新加载插件；服务应在既有 migration 022 之后应用并记录 migration 023。
 4. 独立核验七类工具，运行 `self_check`，再做目标、进度和定向库存的只读核对。
 5. 确认旧记录数量不变，旧库存已有位置和到期时间不变，新增来源字段为 `legacy_unknown`。
 
-Migration 022 只增加 `storage_location_source` 和 `expiry_source`。新记录可标记用户事实或系统默认，升级不会自动创建库存、重算到期日、补录营养或改写旧值。
+Migration 023 只给内部预览表增加 `goal_update_preview` 操作类型。升级不会自动修改目标，也不会创建库存、重算到期日、补录营养或改写旧值；migration 022 的来源留痕规则继续保留。
 
 ## 7. 成套回滚
 
-v0.7.4.28 不认识 migration 022，禁止仅替换程序包后继续使用已升级数据库。
+v0.7.5.2 不认识 migration 023，禁止仅替换程序包后继续使用已升级数据库。
 
-回退到 v0.7.4.28 时必须先恢复该备份。
+回退到 v0.7.5.2 时必须先恢复该备份。
 
 1. 停止实例并隔离当前已迁移的 `dataDir`。
 2. 使用同一 helper 执行 `scripts/cold_backup.py restore`，验证并恢复升级前冷备份；恢复命令不会检测进程状态，必须由操作者确认实例已停止。它会成套隔离 `diet.sqlite`、`diet.sqlite-wal`、`diet.sqlite-shm` 和 `diet.sqlite-journal`，并拒绝覆盖隔离目标。
-3. 安装已校验的 `personal-diet-pantry-0.7.4.28-installable.tgz`。
-4. 启动后核对七类工具、`self_check`、migration 最大版本 021 和关键记录数量。
+3. 安装已校验的 `personal-diet-pantry-0.7.5.2-installable.tgz`。
+4. 启动后核对七类工具、`self_check`、migration 最大版本 022 和关键记录数量。
 
 ```powershell
-& 'C:\actual\python.exe' 'C:\trusted-v0.7.5.2-source\scripts\cold_backup.py' restore --backup 'D:\controlled-backups\diet.sqlite.pre-v0.7.5.2' --active 'C:\actual\personal-diet-pantry-data\diet.sqlite' --quarantine 'C:\actual\personal-diet-pantry-data\diet.sqlite.v0.7.5.2-quarantine'
+& 'C:\actual\python.exe' 'C:\trusted-v0.7.5.3-source\scripts\cold_backup.py' restore --backup 'D:\controlled-backups\diet.sqlite.pre-v0.7.5.3' --active 'C:\actual\personal-diet-pantry-data\diet.sqlite' --quarantine 'C:\actual\personal-diet-pantry-data\diet.sqlite.v0.7.5.3-quarantine'
 ```
 
 没有可验证的升级前冷备份时，不得宣称已安全回退。绝不能通过删除 migration、修改 SQL、直接编辑 SQLite 或手改 `schema_migrations` 来“降级”。

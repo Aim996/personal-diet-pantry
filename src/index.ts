@@ -2299,7 +2299,7 @@ function registerTurnGuardHooks(api: OpenClawPluginApi): void {
     if (intent.mode === "workflow_confirmation") {
       return {
         appendContext:
-          "[Private diet routing] This is a pure confirmation of the unchanged live preview. Use only that visible live preview and its existing commit handle, then call the matching commit action exactly once: diet_meal commit_record or diet_pantry commit_add. Do not call record or add to create a new write, do not rebuild the preview, and do not ask for another equivalent confirmation. If no unchanged live preview and handle are visible in this conversation, make zero writes and ask for the minimum missing fact.",
+          "[Private diet routing] This is a pure confirmation of the unchanged live preview. Use only that visible live preview and its existing commit handle, then call the matching commit action exactly once: diet_meal commit_record, diet_pantry commit_add, or diet_system commit_update_goals. Do not call record, add, or update_goals to create a new write, do not rebuild the preview, and do not ask for another equivalent confirmation. If no unchanged live preview and handle are visible in this conversation, make zero writes and ask for the minimum missing fact.",
       };
     }
     if (intent.finalizedSupplementalWrite === true) {
@@ -2330,6 +2330,15 @@ function registerTurnGuardHooks(api: OpenClawPluginApi): void {
       return {
         appendContext:
           "[Private diet routing] This contextual correction or deletion has no verified same-session meal target. You may make at most one narrow read to show the smallest matching candidate set, but you must not update or delete any queried candidate in this turn. Ask the user to identify the target; do not guess the newest record.",
+      };
+    }
+    if (
+      intent.completedConsumption === true &&
+      intent.requiresExplicitOccurredAt !== true
+    ) {
+      return {
+        appendContext:
+          "[Private diet time evidence] This wording describes a just-finished intake. The trusted current time is sufficient: omit occurred_at and let the business core stamp now. Do not ask the user for a clock time and do not fabricate one. Choose the appropriate capability from the public schema and full conversation context.",
       };
     }
   });
