@@ -41,3 +41,11 @@ def test_unique_same_session_meal_correction_does_not_reenter_preview() -> None:
     assert "成功写入返回的唯一餐食句柄直接 `update`" in skill
     assert "同一会话没有唯一句柄时，只查询一次候选" in skill
     assert "later `commit_record` after preview confirmation" not in skill
+
+
+def test_stated_existing_expired_inventory_is_still_an_inventory_fact() -> None:
+    skill = _skill()
+
+    assert "陈述家中当前实际存在的食品，本身就是库存事实" in skill
+    assert "不要求用户额外说“入库”或“帮我记”" in skill
+    assert "已过期只改变安全状态和后续推荐资格，不取消库存事实" in skill

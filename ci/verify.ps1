@@ -41,13 +41,13 @@ $CoreTests = @(
 $CorePythonTests = @($CoreTests | Where-Object { $_ -like "tests/*" })
 $CoreTypeScriptTests = @($CoreTests | Where-Object { $_ -like "src-tests/*" })
 & $Python -m pytest -p no:cacheprovider @CorePythonTests -q
-Assert-LastExitCode "v0.7.5.3 core behavior gate"
+Assert-LastExitCode "v0.7.5.4 core behavior gate"
 
 & npm run build
 Assert-LastExitCode "TypeScript build"
 
 & node $Vitest run @CoreTypeScriptTests
-Assert-LastExitCode "v0.7.5.3 core behavior gate"
+Assert-LastExitCode "v0.7.5.4 core behavior gate"
 
 & $Python -m pytest -q "--junitxml=$PytestReport"
 Assert-LastExitCode "Python tests"

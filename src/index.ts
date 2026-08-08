@@ -2527,7 +2527,10 @@ function registerTurnGuardHooks(api: OpenClawPluginApi): void {
         action !== "query" && action !== "delete"
       ? committedMealHandle(event.result)
       : undefined;
-    const identity = sessionIdentity(context) ?? state.sessionIdentity;
+    // The prompt-build hook owns the stable conversation identity. Some
+    // OpenClaw hosts expose only a transient run-scoped sessionId to the tool
+    // hook, which must not replace the sessionKey captured for this run.
+    const identity = state.sessionIdentity ?? sessionIdentity(context);
     const now = Date.now();
     pruneSessionState(now);
     if (

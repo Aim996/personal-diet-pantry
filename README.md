@@ -1,6 +1,6 @@
 # 食序管家
 
-**Personal Diet Pantry v0.7.5.3**
+**Personal Diet Pantry v0.7.5.4**
 
 **简体中文** | [English](README.en.md)
 
@@ -8,11 +8,11 @@
 
 ## 当前版本与状态
 
-- 产品版本 `0.7.5.3`；技术包版本 `0.9.3`。
+- 产品版本 `0.7.5.4`；技术包版本 `0.9.4`。
 - 当前是**本地开发候选**，尚未创建 Git Tag、GitHub Release，也未安装到任何 OpenClaw 实例。
-- 本版新增 migration 023，只扩展“修改营养目标”的预览句柄类型；migration 022 的库存位置、到期来源留痕和旧值保留规则不变。
+- 本版不新增 migration，继续使用 migrations 001–023；只修复会话纠正、未知营养、过期库存陈述和容器重启验证。
 - 候选通过完整门禁后才可生成可安装包、源码快照、manifest、测试摘要和 SHA-256 清单；构建不会自动部署。
-- 上一候选版 `v0.7.5.2` 保留为只读历史基线；v0.7.5.3 必须重新生成自己的门禁与资产证据，不得沿用旧结论。更早正式版证据仍保留在 [v0.7.4.28 公开发布实录](docs/releases/v0.7.4.28.zh-CN.md)。
+- 上一正式版 `v0.7.5.3` 保留为只读回退基线；v0.7.5.4 必须重新生成自己的门禁与资产证据，不得沿用旧结论。更早正式版证据仍保留在 [v0.7.4.28 公开发布实录](docs/releases/v0.7.4.28.zh-CN.md)。
 
 ## 它适合谁
 
@@ -58,16 +58,18 @@
 
 ## 最快开始
 
-v0.7.5.3 正式发布后，从对应 GitHub Release 下载固定版本资产，再按[简明安装入口](docs/INSTALL.md)完成 SHA-256 校验、外部 `dataDir`、npm-pack 安装和只读验收；当前本地候选不得冒充已发布资产。
+v0.7.5.4 正式发布后，从对应 GitHub Release 下载固定版本资产，再按[简明安装入口](docs/INSTALL.md)完成 SHA-256 校验、外部 `dataDir`、npm-pack 安装和只读验收；当前本地候选不得冒充已发布资产。
 
-正式安装只使用 `personal-diet-pantry-0.7.5.3-installable.tgz`，不要把 `source.tar.gz` 交给插件安装器：
+正式安装只使用 `personal-diet-pantry-0.7.5.4-installable.tgz`，不要把 `source.tar.gz` 交给插件安装器：
 
 ```text
-openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.5.3-installable.tgz
+openclaw plugins install npm-pack:/path/to/personal-diet-pantry-0.7.5.4-installable.tgz
 openclaw plugins enable personal-diet-pantry
 openclaw gateway restart
 openclaw plugins inspect personal-diet-pantry --runtime --json
 ```
+
+Docker 中的 Gateway 若以前台主进程运行，容器内 `openclaw gateway restart` 可能只打印提示而没有真正重启。此时必须使用该实例既有的容器管理方式重建 Gateway 进程，并确认 PID 或启动时间确实改变；只看到安装命令 `exit 0` 不能证明新运行时已加载。
 
 安装后先确认 `diet_meal`、`diet_water`、`diet_weight`、`diet_pantry`、`diet_transaction`、`diet_report`、`diet_system` 七类工具均已注册。只有全新账本且用户明确授权时才运行 `initialize`；随后运行 `self_check`。`self_check` 只证明数据库和配置健康，不能代替七类工具注册检查。验收保持零业务写入。
 
@@ -82,7 +84,7 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 
 仓库、安装包和测试不应包含真实数据库、备份、导出、报告、凭据、地址或个人饮食数据。测试只能使用新建的一次性目录；不要把测试指向现有 OpenClaw 状态或个人 `dataDir`。
 
-从 v0.7.5.2 更新到 v0.7.5.3 会应用 migration 023，原外部 `dataDir` 保持不变；更新前必须创建并校验冷备份。回退到 v0.7.5.2 时必须先恢复这份升级前备份，不能只换回旧安装包并复用已迁移数据库。在线 `diet_system backup` 不能替代升级前冷备份。详见[更新与回滚入口](docs/UPGRADING.md)。
+从 v0.7.5.3 更新到 v0.7.5.4 不新增 migration，原外部 `dataDir` 和 migrations 001–023 保持不变；更新前仍应创建并校验冷备份，在线 `diet_system backup` 不能替代升级前冷备份。普通代码回退可重新安装 v0.7.5.3 并复用同一 schema；若发现数据完整性异常，先停止实例并恢复升级前冷备份。详见[更新与回滚入口](docs/UPGRADING.md)。
 
 ## 常见问题
 
@@ -92,7 +94,7 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 
 ### 可以直接安装源码包吗？
 
-不可以。`personal-diet-pantry-0.7.5.3-source.tar.gz` 只用于审阅和复现；OpenClaw 插件安装器只接收 `personal-diet-pantry-0.7.5.3-installable.tgz`。
+不可以。`personal-diet-pantry-0.7.5.4-source.tar.gz` 只用于审阅和复现；OpenClaw 插件安装器只接收 `personal-diet-pantry-0.7.5.4-installable.tgz`。
 
 ### 报告和数据库不一致时以哪个为准？
 
@@ -109,7 +111,7 @@ openclaw plugins inspect personal-diet-pantry --runtime --json
 - [用户指南](docs/USER-GUIDE.zh-CN.md) / [完整安装手册](docs/INSTALLATION.zh-CN.md) / [故障排除](docs/TROUBLESHOOTING.zh-CN.md)
 - [工具参考](docs/TOOLS-REFERENCE.zh-CN.md) / [数据模型](docs/DATA-MODEL.zh-CN.md) / [架构](docs/ARCHITECTURE.zh-CN.md)
 - [AI 安装、更新与验收提示词](docs/AI-PROMPTS.zh-CN.md)
-- [v0.7.5.3 更新说明](UPDATE-v0.7.5.3.zh-CN.md) / [变更记录](CHANGELOG.md)
+- [v0.7.5.4 更新说明](UPDATE-v0.7.5.4.zh-CN.md) / [变更记录](CHANGELOG.md)
 - [v0.7.4.28 公开发布实录](docs/releases/v0.7.4.28.zh-CN.md)
 - [跨版本产品行为约束](docs/PRODUCT-BEHAVIOR-INVARIANTS.zh-CN.md)
 
@@ -126,7 +128,7 @@ python scripts/scan_sensitive_content.py .
 
 先阅读根目录 [GitHub 更新与发布工作流](GITHUB-WORKFLOW.zh-CN.md)，再按 [docs/RELEASING.md](docs/RELEASING.md) 执行正式发布门禁。历史版本细节留在各 `UPDATE-*.zh-CN.md`，首页不再重复堆叠。
 
-本地候选目录顶层恰好是 `personal-diet-pantry-0.7.5.3-source.tar.gz`、`personal-diet-pantry-0.7.5.3-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.5.3.zh-CN.md`、`SHA256SUMS` 和审阅用 `GitHub文档/`；正式 Release 只上传前五个文件。
+本地候选目录顶层恰好是 `personal-diet-pantry-0.7.5.4-source.tar.gz`、`personal-diet-pantry-0.7.5.4-installable.tgz`、`release-manifest.json`、`TEST-SUMMARY-v0.7.5.4.zh-CN.md`、`SHA256SUMS` 和审阅用 `GitHub文档/`；正式 Release 只上传前五个文件。
 
 ## 许可证
 

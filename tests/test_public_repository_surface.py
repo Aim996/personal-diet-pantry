@@ -61,8 +61,8 @@ def test_readme_is_user_first_and_keeps_the_protected_receipt() -> None:
     ]
     positions = [readme.index(item) for item in headings]
     assert positions == sorted(positions)
-    assert "Personal Diet Pantry v0.7.5.3" in readme
-    assert "技术包版本 `0.9.3`" in readme
+    assert "Personal Diet Pantry v0.7.5.4" in readme
+    assert "技术包版本 `0.9.4`" in readme
     assert "本地开发候选" in readme
     assert "尚未创建 Git Tag、GitHub Release" in readme
     assert "发布准备中" not in readme
@@ -73,27 +73,27 @@ def test_readme_is_user_first_and_keeps_the_protected_receipt() -> None:
     assert "本仓库当前没有 `LICENSE`" not in readme
 
 
-def test_current_release_documents_state_migration_and_candidate_boundary() -> None:
-    update = text("UPDATE-v0.7.5.3.zh-CN.md")
+def test_current_release_documents_state_no_migration_and_candidate_boundary() -> None:
+    update = text("UPDATE-v0.7.5.4.zh-CN.md")
     release = text("RELEASE.zh-CN.md")
     for phrase in (
-        "migration 023",
-        "0.7.5.2",
-        "preview_update_goals",
-        "commit_update_goals",
-        "不改餐食、饮水、体重和库存业务数据",
+        "没有新 migration",
+        "0.7.5.3",
+        "临时 `sessionId`",
+        "未知字段",
+        "已过期项",
     ):
         assert phrase in update
-    assert release.startswith("# 食序管家（Personal Diet Pantry）v0.7.5.3\n")
-    assert "personal-diet-pantry-0.7.5.3-installable.tgz" in release
+    assert release.startswith("# 食序管家（Personal Diet Pantry）v0.7.5.4\n")
+    assert "personal-diet-pantry-0.7.5.4-installable.tgz" in release
     assert "本地开发候选" in release
 
 
 def test_changelog_uses_product_versions_and_migration_labels() -> None:
     changelog = text("CHANGELOG.md")
-    assert "## [0.7.5.3]" in changelog
-    assert "023_goal_update_preview.sql" in changelog
-    assert "纯水短回执" in changelog
+    assert "## [0.7.5.4]" in changelog
+    assert "无新 migration" in changelog
+    assert "二次确认" in changelog
 
 
 def test_install_upgrade_and_release_entries_are_exact() -> None:
@@ -101,7 +101,7 @@ def test_install_upgrade_and_release_entries_are_exact() -> None:
     upgrade = text("docs/UPGRADING.md")
     releasing = text("docs/RELEASING.md")
     assert ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0" in install
-    assert "personal-diet-pantry-0.7.5.3-installable.tgz" in install
+    assert "personal-diet-pantry-0.7.5.4-installable.tgz" in install
     assert "SHA256SUMS" in install
     assert "openclaw plugins install npm-pack:" in install
     assert "openclaw plugins enable personal-diet-pantry" in install
@@ -113,9 +113,10 @@ def test_install_upgrade_and_release_entries_are_exact() -> None:
     assert "self_check" in install
     assert "零业务写入" in install
     assert "升级前冷备份" in upgrade
-    assert "0.7.5.2" in upgrade
+    assert "0.7.5.3" in upgrade
+    assert "PID 或启动时间" in upgrade
     assert "记录数量" in upgrade
-    assert "git ls-remote --tags origin refs/tags/v0.7.5.3" in releasing
+    assert "git ls-remote --tags origin refs/tags/v0.7.5.4" in releasing
     assert "不得覆盖" in releasing
     assert "GitHub Release" in releasing
 
@@ -130,7 +131,7 @@ def test_ai_prompts_are_complete_and_have_no_placeholders() -> None:
         assert heading in prompts
     assert prompts.count("```text") == 3
     assert "Aim996/personal-diet-pantry" in prompts
-    assert "personal-diet-pantry-0.7.5.3-installable.tgz" in prompts
+    assert "personal-diet-pantry-0.7.5.4-installable.tgz" in prompts
     assert "openclaw plugins inspect personal-diet-pantry --runtime --json" in prompts
     assert "openclaw plugins enable personal-diet-pantry" in prompts
     assert "用户明确授权" in prompts

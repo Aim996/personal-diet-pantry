@@ -1,6 +1,6 @@
 # 开发依赖风险接受记录
 
-本记录覆盖 v0.7.5.3 构建环境中的精确开发依赖
+本记录覆盖 v0.7.5.4 构建环境中的精确开发依赖
 `openclaw@2026.7.1-2`。安装包只声明 `openclaw >=2026.5.17` 为 peer
 dependency，不携带这个开发依赖、它的传递依赖或 `node_modules`。
 `npm audit --omit=dev --audit-level=high` 的生产依赖结果必须为 0 项漏洞。

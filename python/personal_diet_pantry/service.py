@@ -5797,7 +5797,10 @@ def _meal_item(
         else None
     )
     resolved_nutrition_estimate = (
-        _nutrition_facts(_required_mapping(value, "nutrition_estimate"))
+        _nutrition_facts(
+            _required_mapping(value, "nutrition_estimate"),
+            allow_partial=True,
+        )
         if value.get("nutrition_estimate") is not None
         else None
     )

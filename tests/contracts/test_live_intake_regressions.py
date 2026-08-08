@@ -1908,6 +1908,63 @@ def test_direct_nutrition_estimate_keeps_missing_sodium_unknown(
     assert stored["sodium"] is None
 
 
+def test_solid_food_estimate_accepts_unknown_fiber_and_hydration(
+    service: DietService,
+) -> None:
+    egg_estimate = {
+        "calories": "155",
+        "protein": "12.6",
+        "fat": "10.6",
+        "carbohydrate": "1.1",
+        "sodium": "124",
+        "source": "常见水煮蛋可食部估算",
+        "source_grade": "C",
+        "uncertainty": "纤维和食物含水量未知",
+    }
+
+    recorded = service.dispatch(
+        {
+            "domain": "meal",
+            "action": "record",
+            "payload": {
+                "occurred_at": "2026-08-08T12:00:00+08:00",
+                "meal_type": "snack",
+                "source_text": "刚吃了一个水煮蛋",
+                "location_type": "unknown",
+                "items": [
+                    {
+                        "raw_name": "水煮蛋",
+                        "normalized_name": "水煮蛋",
+                        "amount": "1",
+                        "unit": "个",
+                        "portion_expression": "1个｜可食部约50克（估算）",
+                        "consumed_weight_g": "50",
+                        "nutrition_basis": "per_100g",
+                        "nutrition_estimate": egg_estimate,
+                    }
+                ],
+            },
+        }
+    )
+
+    assert recorded["ok"] is True, recorded
+    assert recorded["outcome"] == "write_committed"
+    meal = recorded["data"]["meal"]
+    assert meal["total_fiber"] is None
+    assert meal["total_hydration_ml"] is None
+    stored = service.connection.execute(
+        """
+        SELECT total_fiber, total_hydration_ml, nutrition_status,
+               nutrition_missing_fields_json
+        FROM meals WHERE deleted_at IS NULL
+        """
+    ).fetchone()
+    assert stored["total_fiber"] is None
+    assert stored["total_hydration_ml"] is None
+    assert stored["nutrition_status"] == "partial"
+    assert "fiber" in json.loads(stored["nutrition_missing_fields_json"])
+
+
 def test_external_meal_low_inventory_signals_do_not_block_recording(
     service: DietService,
 ) -> None:

@@ -2,7 +2,7 @@
   "id": "personal-diet-pantry",
   "name": "Personal Diet Pantry",
   "description": "Local meal, hydration, body-weight, pantry, reporting, and recovery tools.",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "configSchema": {
     "type": "object",
     "properties": {

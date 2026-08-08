@@ -809,6 +809,75 @@ describe("full plugin turn guard wiring", () => {
     });
   });
 
+  it("keeps the prompt session identity when the tool hook only reports a session id", async () => {
+    const host = fakePluginApi();
+    plugin.register(host.api as never);
+    const beforeRun = host.hooks.get("before_prompt_build")!;
+    const beforeTool = host.hooks.get("before_tool_call")!;
+    const afterTool = host.hooks.get("after_tool_call")!;
+    const sessionKey = "agent:main:dashboard:stable-correction";
+    const realHandle = "wfh_stable_session_meal_1234567890";
+
+    await beforeRun(
+      { prompt: "吃了个玉米。", messages: [] },
+      { runId: "run-stable-record", sessionKey, sessionId: "host-run-a" },
+    );
+    await afterTool(
+      {
+        toolName: "diet_meal",
+        params: { action: "record" },
+        result: {
+          details: {
+            ok: true,
+            outcome: "write_committed",
+            data: {
+              meal: { workflow: { meal_handle: realHandle } },
+              rendered_receipt: "正式新增回执",
+            },
+          },
+        },
+        runId: "run-stable-record",
+      },
+      {
+        toolName: "diet_meal",
+        runId: "run-stable-record",
+        sessionId: "host-run-a",
+      },
+    );
+
+    const correctionContext = await beforeRun(
+      { prompt: "其实可食部是80克。", messages: [] },
+      { runId: "run-stable-correction", sessionKey, sessionId: "host-run-b" },
+    );
+    expect(correctionContext).toMatchObject({
+      appendContext: expect.stringMatching(/directly call diet_meal update/i),
+    });
+    expect(await beforeTool(
+      {
+        toolName: "diet_meal",
+        params: {
+          action: "update",
+          source_text: "其实可食部是80克",
+          items: [{ raw_name: "玉米", normalized_name: "玉米" }],
+        },
+        runId: "run-stable-correction",
+      },
+      {
+        toolName: "diet_meal",
+        runId: "run-stable-correction",
+        sessionKey,
+        sessionId: "host-run-b",
+      },
+    )).toEqual({
+      params: {
+        action: "update",
+        meal_handle: realHandle,
+        source_text: "其实可食部是80克",
+        items: [{ raw_name: "玉米", normalized_name: "玉米" }],
+      },
+    });
+  });
+
   it("binds an explicit same-session whole-meal deletion but never crosses sessions", async () => {
     const host = fakePluginApi();
     plugin.register(host.api as never);

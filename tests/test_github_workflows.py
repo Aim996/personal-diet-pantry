@@ -44,10 +44,10 @@ def test_release_workflow_separates_build_from_publish() -> None:
     ):
         assert phrase in workflow
     for asset in (
-        "personal-diet-pantry-0.7.5.3-installable.tgz",
-        "personal-diet-pantry-0.7.5.3-source.tar.gz",
+        "personal-diet-pantry-0.7.5.4-installable.tgz",
+        "personal-diet-pantry-0.7.5.4-source.tar.gz",
         "release-manifest.json",
-        "TEST-SUMMARY-v0.7.5.3.zh-CN.md",
+        "TEST-SUMMARY-v0.7.5.4.zh-CN.md",
         "SHA256SUMS",
     ):
         assert asset in workflow

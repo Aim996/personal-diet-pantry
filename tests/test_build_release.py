@@ -74,8 +74,8 @@ def release_project(tmp_path: Path) -> tuple[Path, Path]:
         json.dumps(
             {
                 "name": "personal-diet-pantry",
-                "version": "0.9.3",
-                "productVersion": "0.7.5.3",
+                "version": "0.9.4",
+                "productVersion": "0.7.5.4",
             }
         ),
         encoding="utf-8",
@@ -104,6 +104,7 @@ def release_project(tmp_path: Path) -> tuple[Path, Path]:
         "UPDATE-v0.7.5.0.zh-CN.md",
         "UPDATE-v0.7.5.2.zh-CN.md",
         "UPDATE-v0.7.5.3.zh-CN.md",
+        "UPDATE-v0.7.5.4.zh-CN.md",
         "CONTEXT.md",
         "migrations/021_package_semantics_and_product_operations.sql",
         "migrations/022_pantry_default_provenance.sql",
@@ -151,6 +152,7 @@ def release_project(tmp_path: Path) -> tuple[Path, Path]:
         "docs/版本回望档案/0.7.5.0.md",
         "docs/版本回望档案/0.7.5.2.md",
         "docs/版本回望档案/0.7.5.3.md",
+        "docs/版本回望档案/0.7.5.4.md",
     ):
         path = project / relative_path
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -219,7 +221,7 @@ class FakeRunner:
             "package/templates/zh-CN/daily-report.md",
             "package/skills/personal-diet-pantry/SKILL.md",
             "package/LICENSE",
-            "package/UPDATE-v0.7.5.3.zh-CN.md",
+            "package/UPDATE-v0.7.5.4.zh-CN.md",
         )
 
 
@@ -261,7 +263,7 @@ def test_installable_validator_requires_generated_tool_contracts() -> None:
         "package/templates/zh-CN/daily-report.md",
         "package/skills/personal-diet-pantry/SKILL.md",
         "package/LICENSE",
-        "package/UPDATE-v0.7.5.3.zh-CN.md",
+        "package/UPDATE-v0.7.5.4.zh-CN.md",
     )
 
     with pytest.raises(
@@ -312,13 +314,13 @@ def test_release_builder_records_actual_counts_and_hashes(
     assert manifest.typescript_failed == 0
     assert manifest.source_sha256
     assert manifest.installable_sha256
-    assert manifest.product_version == "0.7.5.3"
-    assert manifest.version == "0.9.3"
+    assert manifest.product_version == "0.7.5.4"
+    assert manifest.version == "0.9.4"
     assert (
         release_root / "release-manifest.json"
     ).is_file()
     assert (
-        release_root / "TEST-SUMMARY-v0.7.5.3.zh-CN.md"
+        release_root / "TEST-SUMMARY-v0.7.5.4.zh-CN.md"
     ).is_file()
     assert (release_root / "SHA256SUMS").is_file()
     assert not (release_root / "MANIFEST-SHA256.txt").exists()
@@ -364,7 +366,7 @@ def test_release_builder_accepts_skips_and_reports_all_test_outcomes(
     assert persisted["typescript_skipped"] == 2
     assert persisted["typescript_failed"] == 0
     summary = (
-        release_root / "TEST-SUMMARY-v0.7.5.3.zh-CN.md"
+        release_root / "TEST-SUMMARY-v0.7.5.4.zh-CN.md"
     ).read_text(encoding="utf-8")
     assert "Python：总计 387；通过 385；跳过 2；失败 0" in summary
     assert "TypeScript：总计 41；通过 39；跳过 2；失败 0" in summary
@@ -448,10 +450,10 @@ def test_release_builder_publishes_exact_top_level_contract(
     )
 
     assert {path.name for path in release_root.iterdir()} == {
-        "personal-diet-pantry-0.7.5.3-source.tar.gz",
-        "personal-diet-pantry-0.7.5.3-installable.tgz",
+        "personal-diet-pantry-0.7.5.4-source.tar.gz",
+        "personal-diet-pantry-0.7.5.4-installable.tgz",
         "release-manifest.json",
-        "TEST-SUMMARY-v0.7.5.3.zh-CN.md",
+        "TEST-SUMMARY-v0.7.5.4.zh-CN.md",
         "SHA256SUMS",
         "GitHub文档",
     }
@@ -481,10 +483,10 @@ def test_sha256sums_parses_and_verifies_all_four_release_files(
         parsed[filename] = digest
 
     assert set(parsed) == {
-        "personal-diet-pantry-0.7.5.3-source.tar.gz",
-        "personal-diet-pantry-0.7.5.3-installable.tgz",
+        "personal-diet-pantry-0.7.5.4-source.tar.gz",
+        "personal-diet-pantry-0.7.5.4-installable.tgz",
         "release-manifest.json",
-        "TEST-SUMMARY-v0.7.5.3.zh-CN.md",
+        "TEST-SUMMARY-v0.7.5.4.zh-CN.md",
     }
     for filename, expected_digest in parsed.items():
         actual_digest = hashlib.sha256(
@@ -534,10 +536,10 @@ def test_release_builder_rejects_destination_inside_source_tree_before_writes(
     if release_root not in (project, worktree):
         assert not release_root.exists()
     for artifact_name in (
-        "personal-diet-pantry-0.7.5.3-source.tar.gz",
-        "personal-diet-pantry-0.7.5.3-installable.tgz",
+        "personal-diet-pantry-0.7.5.4-source.tar.gz",
+        "personal-diet-pantry-0.7.5.4-installable.tgz",
         "release-manifest.json",
-        "TEST-SUMMARY-v0.7.5.3.zh-CN.md",
+        "TEST-SUMMARY-v0.7.5.4.zh-CN.md",
         "SHA256SUMS",
         "MANIFEST-SHA256.txt",
         "GitHub文档",
@@ -1043,6 +1045,7 @@ def test_v075_public_release_inputs_are_complete() -> None:
         "UPDATE-v0.7.5.0.zh-CN.md",
         "UPDATE-v0.7.5.2.zh-CN.md",
         "UPDATE-v0.7.5.3.zh-CN.md",
+        "UPDATE-v0.7.5.4.zh-CN.md",
         "GITHUB-WORKFLOW.zh-CN.md",
         "LICENSE",
         "CHANGELOG.md",
@@ -1101,6 +1104,7 @@ def test_v075_public_release_inputs_are_complete() -> None:
         "docs/版本回望档案/0.7.5.0.md",
         "docs/版本回望档案/0.7.5.2.md",
         "docs/版本回望档案/0.7.5.3.md",
+        "docs/版本回望档案/0.7.5.4.md",
         "CONTEXT.md",
         "migrations/021_package_semantics_and_product_operations.sql",
         "migrations/022_pantry_default_provenance.sql",
@@ -1111,10 +1115,10 @@ def test_v075_public_release_inputs_are_complete() -> None:
 
 def test_release_documentation_uses_the_complete_top_level_contract() -> None:
     required_names = {
-        "personal-diet-pantry-0.7.5.3-source.tar.gz",
-        "personal-diet-pantry-0.7.5.3-installable.tgz",
+        "personal-diet-pantry-0.7.5.4-source.tar.gz",
+        "personal-diet-pantry-0.7.5.4-installable.tgz",
         "release-manifest.json",
-        "TEST-SUMMARY-v0.7.5.3.zh-CN.md",
+        "TEST-SUMMARY-v0.7.5.4.zh-CN.md",
         "SHA256SUMS",
         "GitHub文档",
     }
@@ -1122,7 +1126,7 @@ def test_release_documentation_uses_the_complete_top_level_contract() -> None:
         "README.md",
         "README.en.md",
         "RELEASE.zh-CN.md",
-        "UPDATE-v0.7.5.3.zh-CN.md",
+        "UPDATE-v0.7.5.4.zh-CN.md",
         "docs/INSTALLATION.zh-CN.md",
     ):
         text = (PROJECT_ROOT / relative_path).read_text(encoding="utf-8")
