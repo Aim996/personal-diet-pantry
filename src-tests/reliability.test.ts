@@ -6,6 +6,41 @@ import { callPythonReliably } from "../src/reliability.js";
 
 
 describe("formal mutation reliability", () => {
+  it("serializes concurrent formal writes that share one data directory", async () => {
+    let active = 0;
+    let maxActive = 0;
+    const runner = async () => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 15));
+      active -= 1;
+      return {
+        response: { ok: true, data: { status: "committed" } },
+        diagnostics: { exitCode: 0, stderr: "" },
+      };
+    };
+
+    await Promise.all([
+      callPythonReliably(
+        { domain: "pantry", action: "add", payload: { source_text: "苹果" } },
+        { dataDir: "same-diet-data" },
+        { operationIdFactory: () => "op_serial_1", runner },
+      ),
+      callPythonReliably(
+        { domain: "pantry", action: "add", payload: { source_text: "酸奶" } },
+        { dataDir: "same-diet-data" },
+        { operationIdFactory: () => "op_serial_2", runner },
+      ),
+      callPythonReliably(
+        { domain: "meal", action: "record", payload: { source_text: "玉米" } },
+        { dataDir: "same-diet-data" },
+        { operationIdFactory: () => "op_serial_3", runner },
+      ),
+    ]);
+
+    expect(maxActive).toBe(1);
+  });
+
   it("does not call Python twice for one identical session failure", async () => {
     const runner = vi.fn().mockResolvedValue({
       response: {

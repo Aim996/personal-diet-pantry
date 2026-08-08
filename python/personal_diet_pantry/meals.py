@@ -2072,7 +2072,14 @@ def _prepare_item(
         carbohydrate=nutrition.carbohydrate if nutrition is not None else None,
         fiber=nutrition.fiber if nutrition is not None else None,
         sodium=nutrition.sodium if nutrition is not None else None,
-        hydration_ml=nutrition.hydration_ml if nutrition is not None else None,
+        # Food moisture is nutrition composition, not drinking behavior.  Only
+        # an item with an explicit consumed liquid volume may advance the
+        # hydration ledger (for example soy milk or another nutritious drink).
+        hydration_ml=(
+            nutrition.hydration_ml
+            if nutrition is not None and consumed_volume is not None
+            else None
+        ),
         source_grade=nutrition.source_grade if nutrition is not None else "unknown",
         nutrition_source=nutrition.source if nutrition is not None else None,
         uncertainty=nutrition.uncertainty if nutrition is not None else None,

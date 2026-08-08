@@ -171,6 +171,33 @@
       "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
       "reviewed_on": "2026-08-04",
       "review_deadline": "2026-09-03"
+    },
+    {
+      "advisory_id": "GHSA-54fx-42gc-7vw4",
+      "package": "hono",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/hono",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-08",
+      "review_deadline": "2026-09-07"
+    },
+    {
+      "advisory_id": "GHSA-79qm-7rj5-m7r9",
+      "package": "hono",
+      "severity": "low",
+      "dependency_path": "node_modules/openclaw/node_modules/hono",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-08",
+      "review_deadline": "2026-09-07"
+    },
+    {
+      "advisory_id": "GHSA-f23p-vx2j-j53r",
+      "package": "hono",
+      "severity": "moderate",
+      "dependency_path": "node_modules/openclaw/node_modules/hono",
+      "isolation_basis": "Pinned openclaw@2026.7.1-2 development host ships this path in npm-shrinkwrap.json; npm pack excludes development dependencies and npm audit --omit=dev reports zero vulnerabilities.",
+      "reviewed_on": "2026-08-08",
+      "review_deadline": "2026-09-07"
     }
   ]
 }

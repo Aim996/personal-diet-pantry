@@ -15,7 +15,7 @@ default_actions:
   pantry: [add, preview_add, commit_add, query, search, adjust, deduct, discard, open, freeze, thaw, preview_update_metadata, commit_update_metadata, preview_link_nutrition, commit_link_nutrition]
   transaction: [get_recent, undo, redo]
   report: [progress, expiring_inventory, insights]
-  system: [query_goals, update_goals, query_preferences, update_preferences, forget_preference]
+  system: [query_goals, preview_update_goals, commit_update_goals, query_preferences, update_preferences, forget_preference]
 skill_routes:
   meal_record: {domain: meal, action: record}
   prepared_meal_record: {domain: meal, action: record_prepared}
@@ -105,6 +105,8 @@ handlers:
     migrate: _system_migrate
     preview_delete_data: _system_preview_delete_data
     query_goals: _system_query_goals
+    preview_update_goals: _system_preview_update_goals
+    commit_update_goals: _system_commit_update_goals
     query_nutrition_backfill: _system_query_nutrition_backfill
     query_preferences: _system_query_preferences
     repair: _system_repair
@@ -547,6 +549,18 @@ domains:
       confirmation: none
       retry: safe_read
       python_test: tests/contracts/test_report_system_contracts.py::test_initialize_and_self_check_on_clean_database
+      typescript_test: src-tests/all-actions-schema.test.ts
+    commit_update_goals:
+      mode: mutation
+      confirmation: workflow_handle
+      retry: operation_receipt
+      python_test: tests/contracts/test_report_system_contracts.py::test_goal_preview_then_one_confirmation_commits_without_a_second_prompt
+      typescript_test: src-tests/all-actions-schema.test.ts
+    preview_update_goals:
+      mode: read
+      confirmation: conditional
+      retry: safe_read
+      python_test: tests/contracts/test_report_system_contracts.py::test_goal_preview_then_one_confirmation_commits_without_a_second_prompt
       typescript_test: src-tests/all-actions-schema.test.ts
     update_goals:
       mode: mutation

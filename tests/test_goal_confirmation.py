@@ -49,6 +49,62 @@ def test_formal_goal_update_marks_profile_confirmed(
     assert profile.confirmed is True
 
 
+def test_goal_preview_then_one_confirmation_commits_without_a_second_prompt(
+    service: DietService,
+) -> None:
+    """A goal proposal must produce a real handle that a bare confirmation can use."""
+
+    before = service.dispatch(
+        {"domain": "system", "action": "query_goals", "payload": {}}
+    )
+    preview = service.dispatch(
+        {
+            "domain": "system",
+            "action": "preview_update_goals",
+            "payload": {
+                "calories_kcal": 1900,
+                "protein_g": 170,
+                "fat_g": 55,
+                "carbohydrate_g": 150,
+                "fiber_g": 30,
+                "sodium_mg": 2000,
+                "water_ml": 3000,
+                "timezone_name": "Asia/Shanghai",
+                "source_text": "确认我的每日目标",
+            },
+        }
+    )
+
+    assert before["ok"] is True
+    assert preview["ok"] is True, preview
+    assert preview["outcome"] == "preview_ready"
+    assert preview["requires_confirmation"] is True
+    assert service.dispatch(
+        {"domain": "system", "action": "query_goals", "payload": {}}
+    )["data"] == before["data"]
+
+    commit_handle = preview["data"]["preview"]["workflow"]["commit_handle"]
+    committed = service.dispatch(
+        {
+            "domain": "system",
+            "action": "commit_update_goals",
+            "payload": {"commit_handle": commit_handle},
+        }
+    )
+    replayed = service.dispatch(
+        {
+            "domain": "system",
+            "action": "commit_update_goals",
+            "payload": {"commit_handle": commit_handle},
+        }
+    )
+
+    assert committed["ok"] is True, committed
+    assert committed["outcome"] == "write_committed"
+    assert replayed == committed
+    assert committed["data"]["goal_profile"]["goals"]["calories_kcal"] == 1900
+
+
 def test_water_commit_exposes_goal_confirmation_state(
     service: DietService,
 ) -> None:

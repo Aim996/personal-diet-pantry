@@ -251,10 +251,10 @@ describe("trusted turn write guard", () => {
   });
 
   it.each([
-    ["把目标改成1900千卡。", "system", "diet_system", "update_goals"],
+    ["把目标改成1900千卡。", "system", "diet_system", "preview_update_goals"],
     ["这盒奶开封了。", "pantry", "diet_pantry", "open"],
     ["冰箱那盒坏豆花我丢了。", "pantry", "diet_pantry", "discard"],
-    ["每日热量目标设为1900。", "system", "diet_system", "update_goals"],
+    ["每日热量目标设为1900。", "system", "diet_system", "preview_update_goals"],
   ])("keeps a protected %s write on its safety contract", (text, domain, toolName, action) => {
     const intent = classifyTurnIntent(text);
 

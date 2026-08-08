@@ -246,7 +246,11 @@ def _add_batch_record_in_context(
     if expires_at is None:
         raise PantryValidationError("expires_at is required")
     normalized_added_at = _timestamp(added_at)
-    normalized_expires_at = _validated_expiry_timestamp(expires_at, added_at)
+    normalized_expires_at = _validated_expiry_timestamp(
+        expires_at,
+        added_at,
+        expiry_source=expiry_source,
+    )
     name = _canonical_name(food_name, normalized_name, aliases)
     amount = _positive_quantity(quantity)
     _sqlite_real(amount, "quantity")
@@ -1320,8 +1324,16 @@ def _expiry_timestamp(value: datetime) -> str:
     return normalized.isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
-def _validated_expiry_timestamp(expires_at: datetime, added_at: datetime) -> str:
-    if _utc_datetime(expires_at) <= _utc_datetime(added_at):
+def _validated_expiry_timestamp(
+    expires_at: datetime,
+    added_at: datetime,
+    *,
+    expiry_source: str,
+) -> str:
+    if (
+        expiry_source != "user"
+        and _utc_datetime(expires_at) <= _utc_datetime(added_at)
+    ):
         raise PantryValidationError("expires_at must be later than added_at")
     return _expiry_timestamp(expires_at)
 

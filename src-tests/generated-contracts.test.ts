@@ -22,7 +22,7 @@ describe("generated tool contracts", () => {
         (total, actions) => total + actions.length,
         0,
       ),
-    ).toBe(75);
+    ).toBe(77);
     expect(TOOL_ACTIONS.pantry).toContain("search");
     expect(TOOL_ACTIONS.system).toContain("maintenance_status");
   });

@@ -12,7 +12,7 @@
 | `pantry` | `add`, `preview_add`, `commit_add`, `query`, `search`, `adjust`, `deduct`, `discard`, `open`, `freeze`, `thaw`, `preview_update_metadata`, `commit_update_metadata`, `preview_link_nutrition`, `commit_link_nutrition` |
 | `transaction` | `get_recent`, `undo`, `redo` |
 | `report` | `progress`, `expiring_inventory`, `insights` |
-| `system` | `query_goals`, `update_goals`, `query_preferences`, `update_preferences`, `forget_preference` |
+| `system` | `query_goals`, `preview_update_goals`, `commit_update_goals`, `query_preferences`, `update_preferences`, `forget_preference` |
 
 | 工具 | 领域 | 动作 | 模式 | 确认 | 重试 |
 | --- | --- | --- | --- | --- | --- |
@@ -87,6 +87,8 @@
 | `diet_system` | `system` | `repair` | `maintenance` | `none` | `no_blind_retry` |
 | `diet_system` | `system` | `restore` | `maintenance` | `required_true` | `no_blind_retry` |
 | `diet_system` | `system` | `self_check` | `read` | `none` | `safe_read` |
+| `diet_system` | `system` | `commit_update_goals` | `mutation` | `workflow_handle` | `operation_receipt` |
+| `diet_system` | `system` | `preview_update_goals` | `read` | `conditional` | `safe_read` |
 | `diet_system` | `system` | `update_goals` | `mutation` | `none` | `operation_receipt` |
 | `diet_system` | `system` | `update_preferences` | `mutation` | `none` | `operation_receipt` |
 | `diet_system` | `system` | `validate_import` | `read` | `workflow_handle` | `safe_read` |

@@ -67,6 +67,7 @@ describe("installable package contents", () => {
         "migrations/013_intake_data_correctness.sql",
         "migrations/021_package_semantics_and_product_operations.sql",
         "migrations/022_pantry_default_provenance.sql",
+        "migrations/023_goal_update_preview.sql",
         "python/personal_diet_pantry/package_semantics.py",
         "python/personal_diet_pantry/pantry_defaults.py",
         "python/personal_diet_pantry/service.py",
@@ -78,7 +79,7 @@ describe("installable package contents", () => {
         "templates/zh-CN/weekly-report.md",
         "templates/zh-CN/monthly-report.md",
         "LICENSE",
-        "UPDATE-v0.7.5.2.zh-CN.md",
+        "UPDATE-v0.7.5.3.zh-CN.md",
       ]),
     );
     expect(files).toEqual(

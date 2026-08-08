@@ -77,6 +77,7 @@ SUPPORTED_PRODUCT_VERSIONS = frozenset(
         "0.7.4.28",
         "0.7.5.0",
         "0.7.5.2",
+        "0.7.5.3",
     }
 )
 _IMPORT_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,159}\.(?:json|zip)$")

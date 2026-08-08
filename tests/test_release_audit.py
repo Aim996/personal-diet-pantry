@@ -157,7 +157,7 @@ def test_candidate_audits_all_seven_tool_action_contracts() -> None:
     assert all(contract["match"] is True for contract in contracts.values())
     behavior = result.checks["public_behavior_contract"]
     assert behavior["schema_version"] == 1
-    assert behavior["action_count"] == 75
+    assert behavior["action_count"] == 77
     assert behavior["matches_typescript"] is True
     assert behavior["matches_python"] is True
 

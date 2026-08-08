@@ -39,7 +39,7 @@ describe("core tool surface", () => {
     expect(schemaActions(TransactionParametersSchema)).toEqual(CORE_TOOL_ACTIONS.transaction);
     expect(schemaActions(ReportParametersSchema)).toEqual(CORE_TOOL_ACTIONS.report);
     expect(schemaActions(SystemParametersSchema)).toEqual(CORE_TOOL_ACTIONS.system);
-    expect(Object.values(CORE_TOOL_ACTIONS).flat()).toHaveLength(42);
+    expect(Object.values(CORE_TOOL_ACTIONS).flat()).toHaveLength(43);
     expect(CORE_TOOL_ACTIONS.pantry).toContain("preview_add");
     expect(CORE_TOOL_ACTIONS.pantry).toContain("commit_add");
   });
